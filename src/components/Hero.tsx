@@ -33,12 +33,11 @@ const Hero = () => {
 
     setIsLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       toast({
         title: "Success! 🎉",
-        description: "DebAI will call you within 2 minutes",
+        description: "DebtAI will call you within 2 minutes",
       });
       setPhoneNumber("");
       setEmail("");
@@ -46,41 +45,63 @@ const Hero = () => {
   };
 
   return (
-    <section id="hero-form" className="min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-20 bg-white">
-      <div className="container mx-auto max-w-6xl">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section id="hero-form" className="min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-20 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="container mx-auto max-w-7xl">
+        <div className="grid lg:grid-cols-2 gap-20 items-center">
           {/* Left Content */}
-          <div className="text-center lg:text-left space-y-8">
-            <div className="inline-flex items-center bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-sm font-medium">
-              🤖 AI-Powered Debt Collection
+          <div className="text-center lg:text-left space-y-10">
+            <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold shadow-sm">
+              🤖 AI-Powered Debt Collection Platform
             </div>
             
-            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
-              Let AI Collect Your Debts — The Smart Way
-            </h1>
-            
-            <p className="text-xl text-gray-600 leading-relaxed">
-              Collect 50% of your account receivables in 20 days. Let AI handle the conversations while you focus on growing your business.
-            </p>
+            <div className="space-y-6">
+              <h1 className="text-6xl lg:text-8xl font-bold text-gray-900 leading-tight tracking-tight">
+                Let AI Collect Your Debts — 
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  The Smart Way
+                </span>
+              </h1>
+              
+              <p className="text-2xl text-gray-600 leading-relaxed max-w-2xl">
+                Recover 65% more outstanding payments in half the time. DebtAI handles conversations naturally while you focus on growing your business.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-3 gap-8 pt-8">
+            <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">50%</div>
-                <div className="text-sm text-gray-500">Higher Collection Rate</div>
+                <div className="text-4xl font-bold text-blue-600 mb-2">65%</div>
+                <div className="text-sm text-gray-600 font-medium">Higher Recovery Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">20 Days</div>
-                <div className="text-sm text-gray-500">Average Collection Time</div>
+                <div className="text-4xl font-bold text-purple-600 mb-2">15 Days</div>
+                <div className="text-sm text-gray-600 font-medium">Average Collection Time</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-600 mb-2">99%</div>
-                <div className="text-sm text-gray-500">Customer Satisfaction</div>
+                <div className="text-4xl font-bold text-indigo-600 mb-2">24/7</div>
+                <div className="text-sm text-gray-600 font-medium">Automated Outreach</div>
               </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button 
+                onClick={() => document.querySelector('#hero-form')?.scrollIntoView({ behavior: 'smooth' })}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
+                Start Free Trial
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-semibold rounded-xl"
+              >
+                Watch Demo
+              </Button>
             </div>
           </div>
 
           {/* Right - Phone Mockup */}
-          <div className="flex justify-center">
+          <div className="flex justify-center lg:justify-end">
             <PhoneMockup 
               isLoading={isLoading} 
               phoneNumber={phoneNumber}
@@ -93,16 +114,17 @@ const Hero = () => {
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-20 text-center">
-          <p className="text-gray-500 mb-8">Trusted by 500+ businesses worldwide</p>
-          <div className="flex items-center justify-center gap-12 flex-wrap opacity-60">
-            <div className="text-lg font-semibold text-gray-700">Uber Freight</div>
-            <div className="text-lg font-semibold text-blue-600">deel.</div>
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">KM</div>
-            <div className="text-lg font-semibold text-gray-700">CLIPBOARD HEALTH</div>
-            <div className="text-lg font-semibold text-red-500 italic">Redis</div>
-            <div className="text-lg font-semibold text-gray-700">Stripe</div>
-            <div className="text-lg font-semibold text-green-600">Shopify</div>
+        <div className="mt-24 text-center">
+          <p className="text-gray-500 mb-12 text-lg">Trusted by 1,200+ businesses worldwide</p>
+          <div className="flex items-center justify-center gap-16 flex-wrap opacity-70">
+            <div className="text-2xl font-bold text-gray-700">Uber Freight</div>
+            <div className="text-2xl font-bold text-blue-600">deel.</div>
+            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-lg font-bold">KM</div>
+            <div className="text-2xl font-bold text-gray-700">CLIPBOARD HEALTH</div>
+            <div className="text-2xl font-bold text-red-500 italic">Redis</div>
+            <div className="text-2xl font-bold text-gray-700">Stripe</div>
+            <div className="text-2xl font-bold text-green-600">Shopify</div>
+            <div className="text-2xl font-bold text-purple-600">Notion</div>
           </div>
         </div>
       </div>
