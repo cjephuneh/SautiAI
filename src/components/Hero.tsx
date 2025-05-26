@@ -1,14 +1,13 @@
 
 import { useState } from "react";
-import { Phone, MessageSquare, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import PhoneMockup from "./PhoneMockup";
-import FloatingIcons from "./FloatingIcons";
 
 const Hero = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,6 +17,15 @@ const Hero = () => {
       toast({
         title: "Invalid phone number",
         description: "Please enter a valid phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid work email",
         variant: "destructive",
       });
       return;
@@ -33,67 +41,51 @@ const Hero = () => {
         description: "DebAI will call you within 2 minutes",
       });
       setPhoneNumber("");
+      setEmail("");
     }, 2000);
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
-      <FloatingIcons />
-      
-      <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
-        <div className="text-center lg:text-left animate-fade-in">
-          <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight">
-            Let AI Collect Your Debts — The Smart Way 💰🤖
+    <section className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="container mx-auto max-w-4xl text-center">
+        {/* Main Headlines */}
+        <div className="mb-12">
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
+            Respectful B2B collection
           </h1>
-          
-          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            DebAI reaches out to your debtors so you don't have to. Automated calls, messages, and follow-ups powered by intelligent AI.
+          <h2 className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6">
+            powered by AI
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Collect 50% of your account receivables in 20 days.
           </p>
-
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto lg:mx-0">
-            <Input
-              type="tel"
-              placeholder="Enter your phone number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="flex-1 h-12 text-lg border-2 border-gray-200 focus:border-blue-500 transition-colors"
-              disabled={isLoading}
-            />
-            <Button 
-              type="submit" 
-              size="lg"
-              disabled={isLoading}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 h-12 transition-all duration-300 hover:scale-105"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Calling...
-                </div>
-              ) : (
-                "Get a Callback from DebAI 📞"
-              )}
-            </Button>
-          </form>
-
-          <div className="flex items-center justify-center lg:justify-start gap-8 mt-12 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>AI-Powered</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              <span>24/7 Automated</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span>GDPR Compliant</span>
-            </div>
-          </div>
         </div>
 
-        <div className="flex justify-center lg:justify-end">
-          <PhoneMockup isLoading={isLoading} />
+        {/* Phone Mockup with Form */}
+        <div className="mb-16">
+          <PhoneMockup 
+            isLoading={isLoading} 
+            phoneNumber={phoneNumber}
+            email={email}
+            onPhoneChange={setPhoneNumber}
+            onEmailChange={setEmail}
+            onSubmit={handleSubmit}
+          />
+        </div>
+
+        {/* Company Logos */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center gap-8 lg:gap-12 flex-wrap opacity-60">
+            <div className="text-lg font-semibold text-gray-700">Uber Freight</div>
+            <div className="text-lg font-semibold text-blue-600">deel.</div>
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">KM</div>
+            <div className="text-lg font-semibold text-gray-700">CLIPBOARD HEALTH</div>
+            <div className="text-lg font-semibold text-red-500 italic">Redis</div>
+            <div className="text-lg font-semibold text-gray-700">Uber Freight</div>
+            <div className="text-lg font-semibold text-blue-600">deel.</div>
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">KM</div>
+            <div className="text-lg font-semibold text-gray-700">CLIPBOARD HEALTH</div>
+          </div>
         </div>
       </div>
     </section>

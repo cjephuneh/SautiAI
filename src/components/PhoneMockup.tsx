@@ -1,77 +1,101 @@
+
 import { Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface PhoneMockupProps {
   isLoading: boolean;
+  phoneNumber: string;
+  email: string;
+  onPhoneChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
-const PhoneMockup = ({ isLoading }: PhoneMockupProps) => {
+const PhoneMockup = ({ 
+  isLoading, 
+  phoneNumber, 
+  email, 
+  onPhoneChange, 
+  onEmailChange, 
+  onSubmit 
+}: PhoneMockupProps) => {
   return (
-    <div className="relative">
-      <div className="bg-black rounded-[2.5rem] p-2 shadow-2xl hover:scale-105 transition-transform duration-300">
-        <div className="bg-white rounded-[2rem] w-80 h-[600px] relative overflow-hidden">
+    <div className="relative max-w-sm mx-auto">
+      <div className="bg-black rounded-[2.5rem] p-2 shadow-2xl">
+        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-[2rem] w-80 h-[600px] relative overflow-hidden">
           {/* Status bar */}
-          <div className="flex justify-between items-center p-4 text-xs text-gray-800">
+          <div className="flex justify-between items-center p-4 text-xs text-white/90">
             <span>9:41</span>
             <div className="flex gap-1">
-              <div className="w-4 h-2 bg-green-500 rounded-sm"></div>
-              <div className="w-4 h-2 bg-gray-300 rounded-sm"></div>
-              <div className="w-4 h-2 bg-gray-300 rounded-sm"></div>
+              <div className="w-4 h-2 bg-white/80 rounded-sm"></div>
+              <div className="w-4 h-2 bg-white/60 rounded-sm"></div>
+              <div className="w-4 h-2 bg-white/40 rounded-sm"></div>
             </div>
           </div>
 
           {/* Screen content */}
-          <div className="px-6 py-4 h-full flex flex-col">
-            <div className="text-center mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">DebAI Assistant</h3>
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto flex items-center justify-center text-white text-2xl">
-                🤖
+          <div className="px-8 py-6 h-full flex flex-col items-center justify-center text-center">
+            {/* AI Logo */}
+            <div className="w-20 h-20 bg-white rounded-full mb-8 flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                AI
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <div className="relative">
-                  <div className="w-32 h-32 border-4 border-blue-200 rounded-full animate-pulse mb-4"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Phone className="w-8 h-8 text-blue-600 animate-bounce" />
-                  </div>
-                </div>
-                <p className="text-blue-600 font-medium animate-pulse">Initiating call...</p>
-                <div className="flex gap-1 mt-4">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-0"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-100"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-200"></div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col">
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">AI</div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-700">
-                        Hi! I'm DebAI. I help businesses collect outstanding debts professionally and efficiently. Ready to see how I work?
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-3 mb-6">
-                  <button className="w-full bg-blue-50 hover:bg-blue-100 transition-colors p-3 rounded-lg text-left">
-                    <span className="text-sm font-medium text-blue-700">📞 Start Voice Call</span>
-                  </button>
-                  <button className="w-full bg-green-50 hover:bg-green-100 transition-colors p-3 rounded-lg text-left">
-                    <span className="text-sm font-medium text-green-700">💬 Send WhatsApp</span>
-                  </button>
-                  <button className="w-full bg-purple-50 hover:bg-purple-100 transition-colors p-3 rounded-lg text-left">
-                    <span className="text-sm font-medium text-purple-700">📧 Send Email</span>
-                  </button>
-                </div>
+            {/* Main Text */}
+            <h3 className="text-white text-xl font-semibold mb-8">
+              Let AI collect $1 from you
+            </h3>
 
-                <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg p-4 text-white text-center">
-                  <p className="text-sm font-medium">Ready to collect $2,847</p>
-                  <p className="text-xs opacity-90">from 12 outstanding debts</p>
+            {/* Form */}
+            <form onSubmit={onSubmit} className="w-full space-y-4">
+              {/* Phone Input */}
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2 text-sm text-gray-600">
+                  <span className="text-lg">🇺🇸</span>
                 </div>
+                <Input
+                  type="tel"
+                  placeholder="+254709837373"
+                  value={phoneNumber}
+                  onChange={(e) => onPhoneChange(e.target.value)}
+                  className="bg-white/95 border-0 h-12 pl-16 text-gray-900 placeholder:text-gray-500"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Email Input */}
+              <Input
+                type="email"
+                placeholder="Enter your work email"
+                value={email}
+                onChange={(e) => onEmailChange(e.target.value)}
+                className="bg-white/95 border-0 h-12 text-gray-900 placeholder:text-gray-500"
+                disabled={isLoading}
+              />
+
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full bg-purple-500 hover:bg-purple-600 border-0 h-12 text-white font-medium rounded-lg"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    Calling...
+                  </div>
+                ) : (
+                  "GET A CALL"
+                )}
+              </Button>
+            </form>
+
+            {/* Validation Message */}
+            {!isLoading && (
+              <div className="mt-4 bg-red-500 text-white text-xs px-3 py-2 rounded-full">
+                Enter a valid US phone number and your work email
               </div>
             )}
           </div>
