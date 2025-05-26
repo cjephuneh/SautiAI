@@ -54,11 +54,8 @@ const Hero = () => {
             🤖 AI-Powered Debt Collection
           </div>
           <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
-            Respectful B2B collection
+            Let AI Collect Your Debts — The Smart Way
           </h1>
-          <h2 className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6">
-            powered by AI
-          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             Collect 50% of your account receivables in 20 days. Let AI handle the conversations while you focus on growing your business.
           </p>
