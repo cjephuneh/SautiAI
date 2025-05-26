@@ -60,22 +60,7 @@ const Hero = () => {
             Collect 50% of your account receivables in 20 days. Let AI handle the conversations while you focus on growing your business.
           </p>
           
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-6 text-xl rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-200"
-            >
-              Start Free Trial
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-12 py-6 text-xl rounded-xl"
-            >
-              Watch Demo Video
-            </Button>
-          </div>
+          
         </div>
 
         {/* Phone Mockup with Form */}
