@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,7 @@ export const Collections = () => {
       dueDate: "2024-01-20",
       status: "overdue",
       lastPayment: "2024-01-10",
-      paymentPlan: "Active - $200/month",
+      paymentPlan: "Active - KSh 200/month",
       priority: "high"
     },
     {
@@ -41,7 +40,7 @@ export const Collections = () => {
       dueDate: "2024-01-18",
       status: "partial",
       lastPayment: "2024-01-15",
-      paymentPlan: "Partial - $100/week",
+      paymentPlan: "Partial - KSh 100/week",
       priority: "medium"
     },
     {
@@ -90,7 +89,7 @@ export const Collections = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Outstanding</p>
-                <p className="text-2xl font-bold text-red-600">$847,392</p>
+                <p className="text-2xl font-bold text-red-600">KSh 847,392</p>
               </div>
               <DollarSign className="h-8 w-8 text-red-600" />
             </div>
@@ -106,7 +105,7 @@ export const Collections = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Collected This Month</p>
-                <p className="text-2xl font-bold text-green-600">$284,592</p>
+                <p className="text-2xl font-bold text-green-600">KSh 284,592</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
@@ -185,7 +184,7 @@ export const Collections = () => {
                       <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
                         <div className="text-right">
                           <p className="text-lg font-bold text-gray-900">
-                            ${collection.amount.toLocaleString()}
+                            KSh {collection.amount.toLocaleString()}
                           </p>
                           <p className="text-sm text-gray-500">{collection.paymentPlan}</p>
                         </div>
@@ -233,7 +232,7 @@ export const Collections = () => {
                   <p className="text-sm text-gray-600">34 active plans</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-green-600">$45,200</p>
+                  <p className="font-bold text-green-600">KSh 45,200</p>
                   <p className="text-sm text-gray-500">Expected monthly</p>
                 </div>
               </div>
@@ -244,7 +243,7 @@ export const Collections = () => {
                   <p className="text-sm text-gray-600">55 active plans</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-blue-600">$127,800</p>
+                  <p className="font-bold text-blue-600">KSh 127,800</p>
                   <p className="text-sm text-gray-500">Expected monthly</p>
                 </div>
               </div>
@@ -264,7 +263,7 @@ export const Collections = () => {
                   <p className="font-medium">This Week</p>
                   <p className="text-sm text-gray-600">23 payments due</p>
                 </div>
-                <p className="font-bold text-gray-900">$34,500</p>
+                <p className="font-bold text-gray-900">KSh 34,500</p>
               </div>
               
               <div className="flex justify-between items-center p-3 border-l-4 border-blue-500 bg-gray-50">
@@ -272,7 +271,7 @@ export const Collections = () => {
                   <p className="font-medium">Next Week</p>
                   <p className="text-sm text-gray-600">31 payments due</p>
                 </div>
-                <p className="font-bold text-gray-900">$47,200</p>
+                <p className="font-bold text-gray-900">KSh 47,200</p>
               </div>
               
               <div className="flex justify-between items-center p-3 border-l-4 border-purple-500 bg-gray-50">
@@ -280,7 +279,7 @@ export const Collections = () => {
                   <p className="font-medium">Rest of Month</p>
                   <p className="text-sm text-gray-600">67 payments due</p>
                 </div>
-                <p className="font-bold text-gray-900">$89,300</p>
+                <p className="font-bold text-gray-900">KSh 89,300</p>
               </div>
             </div>
           </CardContent>

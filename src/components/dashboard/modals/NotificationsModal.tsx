@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,7 @@ const mockNotifications: Notification[] = [
   {
     id: '1',
     title: 'Payment Received',
-    message: 'John Smith made a payment of $500 for account #12345',
+    message: 'John Smith made a payment of KSh 500 for account #12345',
     type: 'payment',
     timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
     read: false,
@@ -62,7 +61,7 @@ const mockNotifications: Notification[] = [
   {
     id: '5',
     title: 'System Update',
-    message: 'DebtAI system maintenance scheduled for tonight at 2 AM EST',
+    message: 'DebtAI system maintenance scheduled for tonight at 2 AM EAT',
     type: 'system',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8 hours ago
     read: true,

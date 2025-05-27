@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ export const Overview = () => {
   const stats = [
     {
       title: "Total Debt",
-      value: "$1,247,592",
+      value: "KSh 1,247,592",
       change: "+8.2%",
       trend: "up",
       icon: DollarSign,
@@ -34,7 +33,7 @@ export const Overview = () => {
     },
     {
       title: "Collected This Month",
-      value: "$284,592",
+      value: "KSh 284,592",
       change: "+18.3%",
       trend: "up", 
       icon: TrendingUp,
@@ -43,7 +42,7 @@ export const Overview = () => {
     },
     {
       title: "Outstanding",
-      value: "$963,000",
+      value: "KSh 963,000",
       change: "-5.1%",
       trend: "down",
       icon: CreditCard,
@@ -100,7 +99,7 @@ export const Overview = () => {
             <p className="text-blue-100">Here's what's happening with your collections today</p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold">${Math.round(Math.random() * 50000 + 10000).toLocaleString()}</p>
+            <p className="text-3xl font-bold">KSh {Math.round(Math.random() * 50000 + 10000).toLocaleString()}</p>
             <p className="text-blue-100">collected today</p>
           </div>
         </div>
@@ -152,7 +151,7 @@ export const Overview = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">${activity.amount.toLocaleString()}</p>
+                    <p className="font-semibold text-gray-900">KSh {activity.amount.toLocaleString()}</p>
                     <Badge variant={
                       activity.status === 'completed' ? 'default' :
                       activity.status === 'in-progress' ? 'secondary' : 'outline'
@@ -249,7 +248,7 @@ export const Overview = () => {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">{target.period}</span>
                       <span className="text-sm text-gray-600">
-                        ${target.current.toLocaleString()} / ${target.target.toLocaleString()}
+                        KSh {target.current.toLocaleString()} / KSh {target.target.toLocaleString()}
                       </span>
                     </div>
                     <Progress value={target.percentage} className="h-2" />

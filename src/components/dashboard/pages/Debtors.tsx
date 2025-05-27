@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,11 +34,11 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
       id: "1",
       name: "John Smith",
       email: "john.smith@email.com",
-      phone: "+1 (555) 123-4567",
+      phone: "+254 700 123 456",
       amountOwed: 2500,
       dueDate: "2024-01-15",
       status: "overdue",
-      region: "North America",
+      region: "Nairobi",
       lastContact: "2024-01-10",
       paymentPlan: true
     },
@@ -47,11 +46,11 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
       id: "2",
       name: "Sarah Johnson",
       email: "sarah.j@email.com",
-      phone: "+1 (555) 987-6543",
+      phone: "+254 701 987 654",
       amountOwed: 1200,
       dueDate: "2024-02-01",
       status: "active",
-      region: "North America",
+      region: "Mombasa",
       lastContact: "2024-01-20",
       paymentPlan: false
     },
@@ -59,11 +58,11 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
       id: "3",
       name: "Michael Brown",
       email: "m.brown@email.com",
-      phone: "+1 (555) 456-7890",
+      phone: "+254 702 456 789",
       amountOwed: 850,
       dueDate: "2024-01-25",
       status: "in-plan",
-      region: "Europe",
+      region: "Kisumu",
       lastContact: "2024-01-18",
       paymentPlan: true
     },
@@ -71,11 +70,11 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
       id: "4",
       name: "Emma Davis",
       email: "emma.davis@email.com",
-      phone: "+1 (555) 321-0987",
+      phone: "+254 703 321 098",
       amountOwed: 0,
       dueDate: "2024-01-05",
       status: "cleared",
-      region: "Asia",
+      region: "Nakuru",
       lastContact: "2024-01-05",
       paymentPlan: false
     }
@@ -117,7 +116,7 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
   const stats = [
     { label: "Total Debtors", value: debtors.length, icon: Users, color: "text-blue-600" },
     { label: "Overdue", value: debtors.filter(d => d.status === 'overdue').length, icon: AlertTriangle, color: "text-red-600" },
-    { label: "Total Outstanding", value: `$${debtors.reduce((sum, d) => sum + d.amountOwed, 0).toLocaleString()}`, icon: DollarSign, color: "text-purple-600" },
+    { label: "Total Outstanding", value: `KSh ${debtors.reduce((sum, d) => sum + d.amountOwed, 0).toLocaleString()}`, icon: DollarSign, color: "text-purple-600" },
     { label: "In Payment Plans", value: debtors.filter(d => d.paymentPlan).length, icon: Calendar, color: "text-green-600" }
   ];
 
@@ -288,7 +287,7 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
                     </TableCell>
                     <TableCell>
                       <span className={`font-semibold ${debtor.amountOwed > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        ${debtor.amountOwed.toLocaleString()}
+                        KSh {debtor.amountOwed.toLocaleString()}
                       </span>
                     </TableCell>
                     <TableCell>

@@ -117,7 +117,7 @@ export const AddDebtorModal = ({ open, onOpenChange }: AddDebtorModalProps) => {
                     className="pl-10"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+254 700 123 456"
                   />
                 </div>
               </div>
@@ -148,25 +148,25 @@ export const AddDebtorModal = ({ open, onOpenChange }: AddDebtorModalProps) => {
                   id="city"
                   value={formData.city}
                   onChange={(e) => handleInputChange("city", e.target.value)}
-                  placeholder="New York"
+                  placeholder="Nairobi"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
+                <Label htmlFor="state">County</Label>
                 <Input
                   id="state"
                   value={formData.state}
                   onChange={(e) => handleInputChange("state", e.target.value)}
-                  placeholder="NY"
+                  placeholder="Nairobi"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Label htmlFor="zipCode">Postal Code</Label>
                 <Input
                   id="zipCode"
                   value={formData.zipCode}
                   onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                  placeholder="10001"
+                  placeholder="00100"
                 />
               </div>
             </div>
@@ -177,7 +177,7 @@ export const AddDebtorModal = ({ open, onOpenChange }: AddDebtorModalProps) => {
             <h3 className="text-lg font-semibold">Debt Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount Owed *</Label>
+                <Label htmlFor="amount">Amount Owed (KSh) *</Label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
