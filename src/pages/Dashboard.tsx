@@ -16,6 +16,7 @@ import { Calls } from "@/components/dashboard/pages/Calls";
 import { AgentDashboard } from "@/components/dashboard/pages/AgentDashboard";
 import { PaymentProcessing } from "@/components/dashboard/pages/PaymentProcessing";
 import { ComplianceCenter } from "@/components/dashboard/pages/ComplianceCenter";
+import { PredictiveAnalytics } from "@/components/dashboard/pages/PredictiveAnalytics";
 
 export type DashboardPage = 
   | 'overview' 
@@ -30,6 +31,7 @@ export type DashboardPage =
   | 'agent-dashboard'
   | 'payment-processing'
   | 'compliance-center'
+  | 'predictive-analytics'
   | 'settings' 
   | 'admin';
 
@@ -67,6 +69,8 @@ const Dashboard = () => {
         return <PaymentProcessing />;
       case 'compliance-center':
         return <ComplianceCenter />;
+      case 'predictive-analytics':
+        return <PredictiveAnalytics />;
       case 'settings':
         return <Settings />;
       case 'admin':

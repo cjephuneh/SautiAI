@@ -1,4 +1,3 @@
-
 export interface Debt {
   id: string;
   debtorId: string;
@@ -83,4 +82,66 @@ export interface Communication {
   timestamp: string;
   status: 'sent' | 'delivered' | 'read' | 'failed';
   agentId?: string;
+}
+
+export interface PredictiveModel {
+  id: string;
+  name: string;
+  type: 'payment_likelihood' | 'optimal_contact_time' | 'settlement_probability' | 'churn_risk';
+  accuracy: number;
+  lastTrained: string;
+  status: 'active' | 'training' | 'deprecated';
+  predictions: number;
+  avgResponseTime: number;
+  dataPoints: number;
+}
+
+export interface PaymentPrediction {
+  debtorId: string;
+  probability: number;
+  confidence: number;
+  factors: {
+    name: string;
+    impact: number;
+    value: string;
+  }[];
+  recommendedAction: string;
+  timeframe: string;
+}
+
+export interface ContactTimePrediction {
+  debtorId: string;
+  optimalTimes: {
+    dayOfWeek: string;
+    hour: number;
+    successProbability: number;
+  }[];
+  timezone: string;
+}
+
+export interface SettlementPrediction {
+  debtorId: string;
+  recommendedDiscount: number;
+  acceptanceProbability: number;
+  reasoningFactors: string[];
+}
+
+export interface ChurnRiskPrediction {
+  debtorId: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  riskScore: number;
+  predictedChurnDate: string;
+  preventiveActions: string[];
+}
+
+export interface AnalyticsInsight {
+  id: string;
+  type: 'trend' | 'anomaly' | 'opportunity' | 'risk';
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  actionRequired: boolean;
+  recommendedActions: string[];
+  confidence: number;
+  createdAt: string;
 }
