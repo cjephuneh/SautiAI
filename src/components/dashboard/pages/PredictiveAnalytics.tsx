@@ -426,7 +426,7 @@ export const PredictiveAnalytics = () => {
                   </div>
                   <div className="p-3 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">Aged Debts (>180 days)</span>
+                      <span className="font-medium">Aged Debts ({`>180`} days)</span>
                       <span className="text-sm text-gray-500">40% discount</span>
                     </div>
                     <p className="text-sm text-gray-600">68% acceptance probability</p>
@@ -442,6 +442,26 @@ export const PredictiveAnalytics = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="trends" className="space-y-6">
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Performance Trends
+              </CardTitle>
+              <CardDescription>
+                Historical analysis and trend predictions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Trend analysis charts would be displayed here</p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
