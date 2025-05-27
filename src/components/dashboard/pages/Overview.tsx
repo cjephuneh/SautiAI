@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,8 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from "lucide-react";
 
 export const Overview = () => {
@@ -175,7 +175,7 @@ export const Overview = () => {
                       <p className="text-sm font-medium text-gray-900">{task.task}</p>
                       <p className="text-xs text-gray-500">{task.time}</p>
                     </div>
-                    <Badge size="sm" variant={
+                    <Badge variant={
                       task.priority === 'high' ? 'destructive' :
                       task.priority === 'medium' ? 'secondary' : 'outline'
                     }>
