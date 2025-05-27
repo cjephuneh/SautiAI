@@ -1,85 +1,127 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { 
-  Phone, 
-  Users, 
   DollarSign, 
+  Users, 
   TrendingUp,
   Calendar,
   Clock,
   CheckCircle,
-  AlertCircle,
-  FileText
+  AlertTriangle,
+  FileText,
+  Phone,
+  Mail,
+  MessageSquare,
+  Target,
+  Award,
+  Activity,
+  CreditCard
 } from "lucide-react";
 
 export const Overview = () => {
   const stats = [
     {
-      title: "Total Calls Today",
-      value: "143",
-      change: "+12%",
+      title: "Total Debt",
+      value: "$1,247,592",
+      change: "+8.2%",
       trend: "up",
-      icon: Phone,
-      color: "text-blue-600"
+      icon: DollarSign,
+      color: "text-red-600",
+      bgColor: "bg-red-50"
     },
     {
-      title: "Active Contacts",
-      value: "2,847",
-      change: "+5.2%", 
-      trend: "up",
-      icon: Users,
-      color: "text-green-600"
-    },
-    {
-      title: "Collections This Month",
+      title: "Collected This Month",
       value: "$284,592",
       change: "+18.3%",
       trend: "up", 
-      icon: DollarSign,
-      color: "text-purple-600"
+      icon: TrendingUp,
+      color: "text-green-600",
+      bgColor: "bg-green-50"
     },
     {
-      title: "Success Rate",
-      value: "73.2%",
-      change: "+2.1%",
+      title: "Outstanding",
+      value: "$963,000",
+      change: "-5.1%",
+      trend: "down",
+      icon: CreditCard,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50"
+    },
+    {
+      title: "Active Debtors",
+      value: "2,847",
+      change: "+12.4%",
       trend: "up",
-      icon: TrendingUp,
-      color: "text-orange-600"
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50"
     }
   ];
 
-  const recentCalls = [
-    { id: 1, contact: "John Smith", status: "completed", time: "2 mins ago", amount: "$1,250" },
-    { id: 2, contact: "Sarah Johnson", status: "in-progress", time: "5 mins ago", amount: "$890" },
-    { id: 3, contact: "Michael Brown", status: "scheduled", time: "15 mins ago", amount: "$2,100" },
-    { id: 4, contact: "Emma Davis", status: "completed", time: "23 mins ago", amount: "$750" },
+  const recentActivity = [
+    { id: 1, type: "payment", debtor: "John Smith", amount: 2500, time: "5 mins ago", status: "completed" },
+    { id: 2, type: "call", debtor: "Sarah Johnson", amount: 890, time: "12 mins ago", status: "in-progress" },
+    { id: 3, type: "email", debtor: "Michael Brown", amount: 2100, time: "18 mins ago", status: "sent" },
+    { id: 4, type: "payment", debtor: "Emma Davis", amount: 750, time: "25 mins ago", status: "completed" },
   ];
 
-  const upcomingTasks = [
-    { id: 1, task: "Follow up with high-priority contacts", time: "10:00 AM", priority: "high" },
-    { id: 2, task: "Weekly team meeting", time: "2:00 PM", priority: "medium" },
-    { id: 3, task: "Review collection reports", time: "4:30 PM", priority: "low" },
+  const urgentTasks = [
+    { id: 1, task: "Follow up with 15 overdue accounts", priority: "high", dueTime: "2:00 PM" },
+    { id: 2, task: "Review settlement proposals", priority: "medium", dueTime: "4:30 PM" },
+    { id: 3, task: "Team meeting - weekly targets", priority: "low", dueTime: "5:00 PM" },
   ];
+
+  const collectionTargets = [
+    { period: "Daily", target: 15000, current: 12500, percentage: 83 },
+    { period: "Weekly", target: 75000, current: 68200, percentage: 91 },
+    { period: "Monthly", target: 300000, current: 284592, percentage: 95 }
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'payment': return <DollarSign className="h-4 w-4 text-green-600" />;
+      case 'call': return <Phone className="h-4 w-4 text-blue-600" />;
+      case 'email': return <Mail className="h-4 w-4 text-purple-600" />;
+      case 'sms': return <MessageSquare className="h-4 w-4 text-orange-600" />;
+      default: return <Activity className="h-4 w-4 text-gray-600" />;
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Stats Grid */}
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl p-6 text-white shadow-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Good morning, John! 👋</h1>
+            <p className="text-blue-100">Here's what's happening with your collections today</p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold">${Math.round(Math.random() * 50000 + 10000).toLocaleString()}</p>
+            <p className="text-blue-100">collected today</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-              <div className="flex items-center text-sm">
-                <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                <span className="text-green-600">{stat.change}</span>
-                <span className="text-gray-500 ml-1">from last month</span>
+          <Card key={stat.title} className="border-0 shadow-lg bg-white/80 backdrop-blur hover:shadow-xl transition-all">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
+                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {stat.change}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -87,93 +129,98 @@ export const Overview = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Calls */}
-        <Card className="lg:col-span-2">
+        {/* Recent Activity */}
+        <Card className="lg:col-span-2 border-0 shadow-lg bg-white/80 backdrop-blur">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              Recent Calls
+              <Activity className="h-5 w-5" />
+              Recent Activity
             </CardTitle>
-            <CardDescription>Latest call activities and outcomes</CardDescription>
+            <CardDescription>Latest collection activities and updates</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentCalls.map((call) => (
-                <div key={call.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-medium text-sm">
-                        {call.contact.split(' ').map(n => n[0]).join('')}
-                      </span>
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                      {getActivityIcon(activity.type)}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{call.contact}</p>
-                      <p className="text-sm text-gray-500">{call.time}</p>
+                      <p className="font-medium text-gray-900">{activity.debtor}</p>
+                      <p className="text-sm text-gray-500">{activity.time}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-semibold text-gray-900">{call.amount}</span>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">${activity.amount.toLocaleString()}</p>
                     <Badge variant={
-                      call.status === 'completed' ? 'default' :
-                      call.status === 'in-progress' ? 'secondary' : 'outline'
+                      activity.status === 'completed' ? 'default' :
+                      activity.status === 'in-progress' ? 'secondary' : 'outline'
                     }>
-                      {call.status}
+                      {activity.status}
                     </Badge>
                   </div>
                 </div>
               ))}
             </div>
-            <Button className="w-full mt-4" variant="outline">
-              View All Calls
+            <Button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+              View All Activities
             </Button>
           </CardContent>
         </Card>
 
-        {/* Quick Actions & Tasks */}
+        {/* Right Sidebar */}
         <div className="space-y-6">
           {/* Quick Actions */}
-          <Card>
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Quick Actions
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white">
                 <Phone className="h-4 w-4 mr-2" />
-                Start New Call
+                Start AI Campaign
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button variant="outline" className="w-full justify-start bg-white">
                 <Users className="h-4 w-4 mr-2" />
-                Add Contact
+                Add New Debtor
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button variant="outline" className="w-full justify-start bg-white">
                 <FileText className="h-4 w-4 mr-2" />
                 Generate Report
+              </Button>
+              <Button variant="outline" className="w-full justify-start bg-white">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Bulk SMS
               </Button>
             </CardContent>
           </Card>
 
-          {/* Upcoming Tasks */}
-          <Card>
+          {/* Urgent Tasks */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Today's Tasks
+                <AlertTriangle className="h-5 w-5" />
+                Urgent Tasks
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {upcomingTasks.map((task) => (
-                  <div key={task.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50">
+                {urgentTasks.map((task) => (
+                  <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="mt-1">
                       {task.priority === 'high' ? (
-                        <AlertCircle className="h-4 w-4 text-red-500" />
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
                       ) : (
                         <Clock className="h-4 w-4 text-gray-400" />
                       )}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{task.task}</p>
-                      <p className="text-xs text-gray-500">{task.time}</p>
+                      <p className="text-xs text-gray-500">{task.dueTime}</p>
                     </div>
                     <Badge variant={
                       task.priority === 'high' ? 'destructive' :
@@ -181,6 +228,32 @@ export const Overview = () => {
                     }>
                       {task.priority}
                     </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Collection Targets */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Collection Targets
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {collectionTargets.map((target) => (
+                  <div key={target.period}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">{target.period}</span>
+                      <span className="text-sm text-gray-600">
+                        ${target.current.toLocaleString()} / ${target.target.toLocaleString()}
+                      </span>
+                    </div>
+                    <Progress value={target.percentage} className="h-2" />
+                    <p className="text-xs text-gray-500 mt-1">{target.percentage}% achieved</p>
                   </div>
                 ))}
               </div>

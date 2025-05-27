@@ -1,19 +1,21 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
-  Phone, 
   Users, 
+  Phone, 
   BarChart3, 
   DollarSign, 
   FileText, 
-  Settings, 
+  Settings,
   ChevronLeft,
-  LogOut
+  ChevronRight,
+  Bot,
+  Headphones,
+  UsersRound,
+  Shield
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { DashboardPage } from "@/pages/Dashboard";
 
 interface SidebarProps {
@@ -23,80 +25,80 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-const menuItems = [
-  { id: 'overview' as DashboardPage, label: 'Overview', icon: LayoutDashboard },
-  { id: 'calls' as DashboardPage, label: 'Call Management', icon: Phone },
-  { id: 'contacts' as DashboardPage, label: 'Contacts', icon: Users },
-  { id: 'collections' as DashboardPage, label: 'Collections', icon: DollarSign },
-  { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
-  { id: 'reports' as DashboardPage, label: 'Reports', icon: FileText },
-  { id: 'settings' as DashboardPage, label: 'Settings', icon: Settings },
-];
-
 export const Sidebar = ({ currentPage, onPageChange, collapsed, onToggleCollapse }: SidebarProps) => {
+  const menuItems = [
+    { id: 'overview' as DashboardPage, label: 'Overview', icon: LayoutDashboard },
+    { id: 'debtors' as DashboardPage, label: 'Debtors', icon: Users },
+    { id: 'ai-assistant' as DashboardPage, label: 'AI Assistant', icon: Bot },
+    { id: 'call-center' as DashboardPage, label: 'Call Center', icon: Headphones },
+    { id: 'teams' as DashboardPage, label: 'Teams', icon: UsersRound },
+    { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
+    { id: 'settings' as DashboardPage, label: 'Settings', icon: Settings },
+    { id: 'admin' as DashboardPage, label: 'Admin Panel', icon: Shield },
+  ];
+
   return (
     <div className={cn(
-      "fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-40",
+      "fixed left-0 top-0 h-full bg-white border-r border-gray-200 shadow-lg transition-all duration-300 z-40",
       collapsed ? "w-16" : "w-64"
     )}>
       {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {!collapsed && (
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">AI</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-xs">AI</span>
             </div>
-            <div className="flex flex-col">
+            <div>
               <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 DebtAI
               </span>
-              <span className="text-[10px] text-gray-500 -mt-1">Dashboard</span>
             </div>
-          </Link>
+          </div>
         )}
-        
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleCollapse}
-          className="p-1 h-8 w-8"
+          className="h-8 w-8 p-0"
         >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="mt-6 px-2">
+      <nav className="p-4 space-y-2">
         {menuItems.map((item) => (
-          <button
+          <Button
             key={item.id}
-            onClick={() => onPageChange(item.id)}
+            variant={currentPage === item.id ? "default" : "ghost"}
             className={cn(
-              "w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 mb-1",
+              "w-full justify-start h-11 transition-all",
+              collapsed ? "px-3" : "px-4",
               currentPage === item.id 
-                ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600" 
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md" 
+                : "text-gray-700 hover:bg-gray-100"
             )}
+            onClick={() => onPageChange(item.id)}
           >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
+            <item.icon className={cn("h-5 w-5", collapsed ? "" : "mr-3")} />
             {!collapsed && <span className="font-medium">{item.label}</span>}
-          </button>
+          </Button>
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-4 left-0 right-0 px-2">
-        <Link
-          to="/"
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors",
-            collapsed && "justify-center"
-          )}
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!collapsed && <span className="font-medium">Back to Home</span>}
-        </Link>
-      </div>
+      {!collapsed && (
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="text-center">
+            <p className="text-xs text-gray-600 mb-2">Smart Collections Platform</p>
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>All systems operational</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
