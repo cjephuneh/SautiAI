@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const FAQ = () => {
   const [openItem, setOpenItem] = useState<number | null>(0);
