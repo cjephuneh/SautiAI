@@ -126,9 +126,11 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 font-medium text-sm">
-              Sign In
-            </Button>
+            <Link to="/sign-in">
+              <Button variant="ghost" className="text-gray-700 hover:text-blue-600 font-medium text-sm">
+                Sign In
+              </Button>
+            </Link>
             <Link to="/book-call">
               <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all text-sm">
                 Book a Call
@@ -213,9 +215,15 @@ const Navbar = () => {
               </div>
 
               <div className="flex flex-col gap-3 pt-6 px-4">
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 justify-start">
-                  Sign In
-                </Button>
+                <Link to="/sign-in">
+                  <Button 
+                    variant="ghost" 
+                    className="text-gray-700 hover:text-blue-600 justify-start w-full"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
                 <Link to="/book-call">
                   <Button 
                     onClick={() => setIsMenuOpen(false)}
