@@ -11,15 +11,25 @@ import { Teams } from "@/components/dashboard/pages/Teams";
 import { Analytics } from "@/components/dashboard/pages/Analytics";
 import { Settings } from "@/components/dashboard/pages/Settings";
 import { AdminPanel } from "@/components/dashboard/pages/AdminPanel";
+import { Collections } from "@/components/dashboard/pages/Collections";
+import { Calls } from "@/components/dashboard/pages/Calls";
+import { AgentDashboard } from "@/components/dashboard/pages/AgentDashboard";
+import { PaymentProcessing } from "@/components/dashboard/pages/PaymentProcessing";
+import { ComplianceCenter } from "@/components/dashboard/pages/ComplianceCenter";
 
 export type DashboardPage = 
   | 'overview' 
   | 'debtors' 
   | 'debtor-profile' 
   | 'ai-assistant' 
-  | 'call-center' 
+  | 'call-center'
+  | 'calls'
+  | 'collections'
   | 'teams' 
-  | 'analytics' 
+  | 'analytics'
+  | 'agent-dashboard'
+  | 'payment-processing'
+  | 'compliance-center'
   | 'settings' 
   | 'admin';
 
@@ -43,10 +53,20 @@ const Dashboard = () => {
         return <AIAssistant />;
       case 'call-center':
         return <CallCenter />;
+      case 'calls':
+        return <Calls />;
+      case 'collections':
+        return <Collections />;
       case 'teams':
         return <Teams />;
       case 'analytics':
         return <Analytics />;
+      case 'agent-dashboard':
+        return <AgentDashboard />;
+      case 'payment-processing':
+        return <PaymentProcessing />;
+      case 'compliance-center':
+        return <ComplianceCenter />;
       case 'settings':
         return <Settings />;
       case 'admin':
