@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -28,41 +27,41 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="container mx-auto px-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100/50 shadow-sm">
+      <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">AI</span>
+            <div className="w-9 h-9 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-sm">AI</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 DebtAI
               </span>
-              <span className="text-xs text-gray-500 -mt-1">Smart Collections</span>
+              <span className="text-[10px] text-gray-500 -mt-1">Smart Collections</span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
+          {/* Desktop Navigation - Centered */}
+          <div className="hidden lg:flex items-center space-x-8">
             {/* Solutions Dropdown */}
             <div 
               className="relative"
               onMouseEnter={() => setActiveDropdown('solutions')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <button className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                Solutions <ChevronDown className="w-4 h-4" />
+              <button className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm">
+                Solutions <ChevronDown className="w-3 h-3" />
               </button>
               {activeDropdown === 'solutions' && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                <div className="absolute top-full left-0 mt-3 w-52 bg-white rounded-xl shadow-xl border border-gray-100/50 py-2 z-50 backdrop-blur-lg">
                   {solutions.map((item) => (
                     item.href.startsWith('#') ? (
                       <a
                         key={item.name}
                         href={item.href}
-                        className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
                         {item.name}
                       </a>
@@ -70,7 +69,7 @@ const Navbar = () => {
                       <Link
                         key={item.name}
                         to={item.href}
-                        className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
                         {item.name}
                       </Link>
@@ -80,18 +79,15 @@ const Navbar = () => {
               )}
             </div>
 
-            <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+            <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm">
               How it Works
             </a>
-            <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+            <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm">
               Features
             </a>
-            <Link to="/pricing" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+            <Link to="/pricing" className="text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm">
               Pricing
             </Link>
-            <a href="#testimonials" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
-              Testimonials
-            </a>
 
             {/* Resources Dropdown */}
             <div 
@@ -99,17 +95,17 @@ const Navbar = () => {
               onMouseEnter={() => setActiveDropdown('resources')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <button className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors font-medium">
-                Resources <ChevronDown className="w-4 h-4" />
+              <button className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm">
+                Resources <ChevronDown className="w-3 h-3" />
               </button>
               {activeDropdown === 'resources' && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                <div className="absolute top-full left-0 mt-3 w-52 bg-white rounded-xl shadow-xl border border-gray-100/50 py-2 z-50 backdrop-blur-lg">
                   {resources.map((item) => (
                     item.href.startsWith('#') || item.href.startsWith('/integrations#') ? (
                       <a
                         key={item.name}
                         href={item.href}
-                        className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
                         {item.name}
                       </a>
@@ -117,7 +113,7 @@ const Navbar = () => {
                       <Link
                         key={item.name}
                         to={item.href}
-                        className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
                         {item.name}
                       </Link>
@@ -130,12 +126,12 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 font-medium">
+            <Button variant="ghost" className="text-gray-700 hover:text-blue-600 font-medium text-sm">
               Sign In
             </Button>
             <Button 
               onClick={handleRequestDemo}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all text-sm"
             >
               Get Started Free
             </Button>
@@ -146,13 +142,13 @@ const Navbar = () => {
             className="lg:hidden p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden py-6 border-t border-gray-100 bg-white">
+          <div className="lg:hidden py-4 border-t border-gray-100 bg-white/95 backdrop-blur-xl">
             <div className="flex flex-col space-y-4">
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-gray-900 px-4">Solutions</p>
