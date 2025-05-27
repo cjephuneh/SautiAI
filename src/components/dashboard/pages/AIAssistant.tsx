@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AIConfigModal } from "../modals/AIConfigModal";
 import { AddDebtorModal } from "../modals/AddDebtorModal";
 import { QuickCampaignModal } from "../modals/QuickCampaignModal";
@@ -599,60 +599,66 @@ Sarah: Thank you, bye.`,
           </Card>
         </div>
       </div>
+
+      {/* Modals */}
+      <AIConfigModal open={showAIConfig} onOpenChange={setShowAIConfig} />
+      <AddDebtorModal open={showAddDebtor} onOpenChange={setShowAddDebtor} />
+      <QuickCampaignModal open={showQuickCampaign} onOpenChange={setShowQuickCampaign} />
+
+      {/* Transcription Modal */}
+      {selectedCall && (
+        <Dialog open={showTranscription} onOpenChange={setShowTranscription}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mic className="h-5 w-5" />
+                Call Transcription - {selectedCall.debtorName}
+              </DialogTitle>
+              <DialogDescription>
+                Full conversation transcript with AI analysis
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600">Call Duration</p>
+                  <p className="font-semibold">{selectedCall.duration}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Confidence Score</p>
+                  <p className="font-semibold">{Math.round(selectedCall.confidence * 100)}%</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Sentiment</p>
+                  <Badge className={`${
+                    selectedCall.sentiment === 'positive' ? 'bg-green-100 text-green-800' :
+                    selectedCall.sentiment === 'negative' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {selectedCall.sentiment}
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-white border rounded-lg">
+                <h4 className="font-semibold mb-3">Full Transcript</h4>
+                <div className="whitespace-pre-wrap text-sm">{selectedCall.transcription}</div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </Button>
+                <Button variant="outline">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Email Transcript
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
-  );
-};
-
-export const AIConfigModal = ({ open, onOpenChange }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>AI Configuration</DialogTitle>
-          <DialogDescription>
-            Customize your AI assistant settings
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-6">
-          {/* AI Configuration Content */}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export const AddDebtorModal = ({ open, onOpenChange }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add Debtor</DialogTitle>
-          <DialogDescription>
-            Add a new debtor to your collection system
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-6">
-          {/* Add Debtor Form */}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export const QuickCampaignModal = ({ open, onOpenChange }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Quick Campaign</DialogTitle>
-          <DialogDescription>
-            Create a new automated campaign
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-6">
-          {/* Quick Campaign Form */}
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 };
