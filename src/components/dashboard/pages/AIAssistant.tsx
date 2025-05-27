@@ -1,9 +1,12 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AIConfigModal } from "../modals/AIConfigModal";
+import { AddDebtorModal } from "../modals/AddDebtorModal";
+import { QuickCampaignModal } from "../modals/QuickCampaignModal";
 import { 
   Bot,
   MessageSquare,
@@ -22,13 +25,86 @@ import {
   Frown,
   Meh,
   Shield,
-  Volume2
+  Volume2,
+  FileText,
+  User,
+  Plus,
+  Download,
+  Mic,
+  Play,
+  Pause
 } from "lucide-react";
 
 export const AIAssistant = () => {
   const [selectedTone, setSelectedTone] = useState("friendly");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [message, setMessage] = useState("");
+  const [showAIConfig, setShowAIConfig] = useState(false);
+  const [showAddDebtor, setShowAddDebtor] = useState(false);
+  const [showQuickCampaign, setShowQuickCampaign] = useState(false);
+  const [showTranscription, setShowTranscription] = useState(false);
+  const [selectedCall, setSelectedCall] = useState<any>(null);
+
+  const callTranscriptions = [
+    {
+      id: 1,
+      debtorName: "John Smith",
+      callId: "call_001",
+      duration: "05:23",
+      timestamp: "2024-01-27 14:30",
+      outcome: "payment_agreed",
+      confidence: 0.98,
+      transcription: `AI: Hello, this is calling regarding your account with ABC Collections. Am I speaking with John Smith?
+
+John: Yes, this is John.
+
+AI: Thank you for confirming, John. I'm calling about your outstanding balance of $2,500 that was due on January 15th. We want to work with you to resolve this matter. Can you tell me about your current situation?
+
+John: Look, I've been having some financial difficulties since I lost my job last month. I want to pay, but I just don't have the full amount right now.
+
+AI: I understand that can be challenging, John. We appreciate your honesty and willingness to work with us. Would you be interested in setting up a payment plan that works with your current budget?
+
+John: Yes, that would be helpful. What kind of options do you have?
+
+AI: We can offer a 6-month payment plan of approximately $417 per month, or if that's still too high, we can discuss an 8-month plan for about $312 per month. Which would work better for you?
+
+John: The 8-month plan sounds more manageable. Can we set that up today?
+
+AI: Absolutely! I can set up the 8-month payment plan starting with your first payment on February 15th. Would you like to make that first payment today to get started?
+
+John: Yes, I can do that. Let me get my card.
+
+AI: Perfect! I'll transfer you to our secure payment system to process that first payment and finalize the agreement.`,
+      sentiment: "positive",
+      keywords: ["payment plan", "financial difficulties", "willing to pay", "8-month plan"]
+    },
+    {
+      id: 2,
+      debtorName: "Sarah Johnson",
+      callId: "call_002", 
+      duration: "03:45",
+      timestamp: "2024-01-27 13:15",
+      outcome: "callback_requested",
+      confidence: 0.92,
+      transcription: `AI: Hello, this is calling from XYZ Collections regarding your account. Is this Sarah Johnson?
+
+Sarah: Yes, but I'm at work right now and can't really talk.
+
+AI: I understand you're busy, Sarah. This will just take a moment. I'm calling about your outstanding balance of $1,200. When would be a good time to call you back to discuss this?
+
+Sarah: Can you call me tonight after 7 PM? I'll be home then and can talk properly.
+
+AI: Of course! I'll schedule a callback for tonight at 7:15 PM. We'll discuss payment options that work for your situation. Is this the best number to reach you at?
+
+Sarah: Yes, this number is fine. Thank you for being understanding.
+
+AI: You're welcome, Sarah. We look forward to speaking with you tonight at 7:15 PM. Have a good rest of your day at work.
+
+Sarah: Thank you, bye.`,
+      sentiment: "neutral",
+      keywords: ["work", "callback", "7 PM", "understanding"]
+    }
+  ];
 
   const templates = {
     whatsapp: [
@@ -39,7 +115,7 @@ export const AIAssistant = () => {
       },
       {
         id: "reminder_firm",
-        title: "Firm Payment Notice",
+        title: "Firm Payment Notice", 
         content: "Dear {name}, your payment of ${amount} is now overdue. Please contact us immediately to avoid further action."
       },
       {
@@ -84,7 +160,7 @@ export const AIAssistant = () => {
     },
     {
       id: "firm",
-      name: "Firm",
+      name: "Firm", 
       icon: Meh,
       description: "Professional and direct",
       color: "text-yellow-600 bg-yellow-100"
@@ -114,7 +190,7 @@ export const AIAssistant = () => {
       name: "Overdue SMS Blast",
       type: "sms",
       sent: 156,
-      responded: 23,
+      responded: 23, 
       collected: 7800,
       status: "completed",
       lastRun: "1 day ago"
@@ -138,6 +214,11 @@ export const AIAssistant = () => {
     { icon: Calendar, label: "Schedule Follow-up", count: 45, color: "text-orange-600" }
   ];
 
+  const openTranscriptionModal = (call: any) => {
+    setSelectedCall(call);
+    setShowTranscription(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -147,11 +228,26 @@ export const AIAssistant = () => {
           <p className="text-gray-600">Automate communications and manage debtor interactions</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="bg-white shadow-sm">
+          <Button 
+            variant="outline" 
+            className="bg-white shadow-sm"
+            onClick={() => setShowAIConfig(true)}
+          >
             <Settings className="h-4 w-4 mr-2" />
             AI Settings
           </Button>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+          <Button 
+            variant="outline" 
+            className="bg-white shadow-sm"
+            onClick={() => setShowAddDebtor(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Debtor
+          </Button>
+          <Button 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+            onClick={() => setShowQuickCampaign(true)}
+          >
             <Zap className="h-4 w-4 mr-2" />
             Quick Campaign
           </Button>
@@ -277,6 +373,83 @@ export const AIAssistant = () => {
                   <Target className="h-4 w-4 mr-2" />
                   Test Message
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Call Transcriptions */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mic className="h-5 w-5" />
+                Recent Call Transcriptions
+              </CardTitle>
+              <CardDescription>
+                AI-generated transcriptions of recent debt collection calls
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {callTranscriptions.map((call) => (
+                  <div key={call.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                          <Mic className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{call.debtorName}</h4>
+                          <p className="text-sm text-gray-500">{call.timestamp}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={`mb-2 ${
+                          call.outcome === 'payment_agreed' ? 'bg-green-100 text-green-800' :
+                          call.outcome === 'callback_requested' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {call.outcome.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                        <p className="text-sm font-medium">Duration: {call.duration}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <Target className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-600">Confidence: {Math.round(call.confidence * 100)}%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={`h-2 w-2 rounded-full ${
+                            call.sentiment === 'positive' ? 'bg-green-500' :
+                            call.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
+                          }`}></span>
+                          <span className="text-sm text-gray-600 capitalize">{call.sentiment}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8"
+                          onClick={() => openTranscriptionModal(call)}
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          View Full
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8">
+                          <Download className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
+                      <strong>Keywords:</strong> {call.keywords.join(", ")}
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -427,5 +600,59 @@ export const AIAssistant = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+export const AIConfigModal = ({ open, onOpenChange }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>AI Configuration</DialogTitle>
+          <DialogDescription>
+            Customize your AI assistant settings
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6">
+          {/* AI Configuration Content */}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export const AddDebtorModal = ({ open, onOpenChange }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Debtor</DialogTitle>
+          <DialogDescription>
+            Add a new debtor to your collection system
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6">
+          {/* Add Debtor Form */}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export const QuickCampaignModal = ({ open, onOpenChange }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Quick Campaign</DialogTitle>
+          <DialogDescription>
+            Create a new automated campaign
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6">
+          {/* Quick Campaign Form */}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
