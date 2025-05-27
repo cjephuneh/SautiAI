@@ -253,7 +253,7 @@ export const AIAssistant = () => {
                 />
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex gap-2">
-                    <Badge variant="outline">Variables: {name}, {amount}, {due_date}</Badge>
+                    <Badge variant="outline">Variables: {"{name}"}, {"{amount}"}, {"{due_date}"}</Badge>
                     <Button size="sm" variant="ghost">
                       <Volume2 className="h-4 w-4 mr-1" />
                       Preview Audio
