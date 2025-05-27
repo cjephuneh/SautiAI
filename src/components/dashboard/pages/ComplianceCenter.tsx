@@ -223,13 +223,12 @@ export const ComplianceCenter = () => {
         <CardContent>
           <div className="space-y-4">
             {complianceRules.map((rule) => {
-              const CategoryIcon = getCategoryIcon(rule.category);
               return (
                 <div key={rule.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <CategoryIcon />
+                        {getCategoryIcon(rule.category)}
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">{rule.name}</h3>
