@@ -10,6 +10,7 @@ import Integrations from "./pages/Integrations";
 import Transcriptions from "./pages/Transcriptions";
 import BookCall from "./pages/BookCall";
 import SignIn from "./pages/SignIn";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/transcriptions" element={<Transcriptions />} />
           <Route path="/book-call" element={<BookCall />} />
           <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

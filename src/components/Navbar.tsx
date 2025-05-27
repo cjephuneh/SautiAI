@@ -16,7 +16,7 @@ const Navbar = () => {
     { name: "AI Voice Calls", href: "#features" },
     { name: "WhatsApp & SMS", href: "#features" },
     { name: "Call Transcriptions", href: "/transcriptions" },
-    { name: "Dashboard & Reports", href: "#features" }
+    { name: "Dashboard & Reports", href: "/dashboard" }
   ];
 
   const resources = [
