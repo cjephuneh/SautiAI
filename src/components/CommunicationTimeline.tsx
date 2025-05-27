@@ -7,7 +7,7 @@ const CommunicationTimeline = () => {
       type: "EMAIL",
       icon: Mail,
       time: "7d ago",
-      title: "Action Required: $4,581 Overdue Balance",
+      title: "Action Required: Ksh4,581 Overdue Balance",
       status: "sent",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
@@ -16,7 +16,7 @@ const CommunicationTimeline = () => {
       type: "EMAIL", 
       icon: Mail,
       time: "5d ago",
-      title: "Urgent: Outstanding Payment of $4,581",
+      title: "Urgent: Outstanding Payment of Ksh4,581",
       status: "opened",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
@@ -25,7 +25,7 @@ const CommunicationTimeline = () => {
       type: "EMAIL",
       icon: Mail,
       time: "4d ago", 
-      title: "Immediate Attention Needed: $4,581 Past...",
+      title: "Immediate Attention Needed: Ksh4,581 Past...",
       status: "sent",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
@@ -34,7 +34,7 @@ const CommunicationTimeline = () => {
       type: "PHONE",
       icon: Phone,
       time: "4d ago",
-      title: "New Voicemail: Hi Doug, following up on y...",
+      title: "New Voicemail: Hi Doug, following up on Ksh4,581...",
       status: "completed",
       bgColor: "bg-green-100", 
       iconColor: "text-green-600"
@@ -43,7 +43,7 @@ const CommunicationTimeline = () => {
       type: "EMAIL",
       icon: Mail,
       time: "3d ago",
-      title: "Resolve Your $4,581 Overdue Invoice Today",
+      title: "Resolve Your Ksh4,581 Overdue Invoice Today",
       status: "sent",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
@@ -52,7 +52,7 @@ const CommunicationTimeline = () => {
       type: "PHONE",
       icon: Phone,
       time: "14h ago",
-      title: "New Voicemail: Doug, we need your imme...",
+      title: "New Voicemail: Doug, we need your immediate attention...",
       status: "completed",
       bgColor: "bg-green-100",
       iconColor: "text-green-600"
@@ -61,7 +61,7 @@ const CommunicationTimeline = () => {
       type: "EMAIL",
       icon: Mail,
       time: "6h ago", 
-      title: "Overdue Notice: $4,581 Payment Required",
+      title: "Overdue Notice: Ksh4,581 Payment Required",
       status: "sent",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
@@ -69,7 +69,7 @@ const CommunicationTimeline = () => {
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+    <div className=" rounded-2xl p-8   ">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           Sending multiple notices and getting ghosted?
@@ -79,9 +79,9 @@ const CommunicationTimeline = () => {
         </p>
       </div>
 
-      <div className="max-w-md mx-auto space-y-3">
+      <div className="max-w-md mx-auto space-y-3 ">
         {communications.map((comm, index) => (
-          <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+          <div key={index} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors bg-white  shadow-2xl border border-gray-100">
             <div className={`w-10 h-10 rounded-lg ${comm.bgColor} flex items-center justify-center`}>
               <comm.icon className={`w-5 h-5 ${comm.iconColor}`} />
             </div>

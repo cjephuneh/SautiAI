@@ -98,7 +98,7 @@ const PhoneMockup = ({
 
             {/* Security Note */}
             {!isLoading && (
-              <div className="mt-4 text-gray-400 text-xs flex items-center gap-1">
+              <div className="mt-6 text-gray-400 text-xs flex items-center gap-1 mb-6">
                 🔒 Your information is secure
               </div>
             )}

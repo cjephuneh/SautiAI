@@ -96,13 +96,13 @@ const Hero = () => {
                 size="lg"
                 className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 text-base font-semibold rounded-lg"
               >
-                Watch Demo
+                Book a Demo
               </Button>
             </div>
           </div>
 
           {/* Right - Phone Mockup */}
-          <div className="flex justify-center lg:justify-end">
+          <div className="flex justify-center lg:justify-end mt-16">
             <PhoneMockup 
               isLoading={isLoading} 
               phoneNumber={phoneNumber}
@@ -114,10 +114,7 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Communication Timeline Section */}
-        <div className="mt-12">
-          <CommunicationTimeline />
-        </div>
+        
 
         {/* Trust Indicators */}
         <div className="mt-12 text-center">
@@ -131,6 +128,10 @@ const Hero = () => {
             <div className="text-base font-bold text-gray-700">Stripe</div>
           </div>
         </div>
+         {/* Communication Timeline Section */}
+         <div className="mt-12">
+          <CommunicationTimeline />
+        </div> 
       </div>
     </section>
   );
