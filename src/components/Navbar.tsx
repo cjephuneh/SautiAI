@@ -129,12 +129,11 @@ const Navbar = () => {
             <Button variant="ghost" className="text-gray-700 hover:text-blue-600 font-medium text-sm">
               Sign In
             </Button>
-            <Button 
-              onClick={handleRequestDemo}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all text-sm"
-            >
-              Get Started Free
-            </Button>
+            <Link to="/book-call">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-5 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all text-sm">
+                Book a Call
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -217,15 +216,14 @@ const Navbar = () => {
                 <Button variant="ghost" className="text-gray-700 hover:text-blue-600 justify-start">
                   Sign In
                 </Button>
-                <Button 
-                  onClick={() => {
-                    handleRequestDemo();
-                    setIsMenuOpen(false);
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white justify-start"
-                >
-                  Get Started Free
-                </Button>
+                <Link to="/book-call">
+                  <Button 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white justify-start w-full"
+                  >
+                    Book a Call
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
