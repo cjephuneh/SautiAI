@@ -103,7 +103,7 @@ const CommunicationTimeline = () => {
 
       <div className="text-center mt-8">
         <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold">
-          Let DebtAI Take Over
+          Let SautiAI Take Over
         </Button>
       </div>
     </div>

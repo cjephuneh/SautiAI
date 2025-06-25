@@ -20,7 +20,7 @@ const HowItWorks = () => {
     {
       icon: Zap,
       title: "Automated Outreach",
-      description: "DebtAI reaches out via voice calls, WhatsApp, SMS, and email with human-like conversations tailored to each debtor.",
+      description: "SautiAII reaches out via voice calls, WhatsApp, SMS, and email with human-like conversations tailored to each debtor.",
       emoji: "⚡",
       details: ["Voice AI calls", "WhatsApp messaging", "Email sequences", "SMS reminders"]
     },
@@ -41,7 +41,7 @@ const HowItWorks = () => {
             🚀 Simple 4-Step Process
           </div>
           <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-8">
-            How DebtAI Works
+            How SautiAII Works
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Transform your debt collection process in minutes. Our AI handles everything from initial contact to payment collection with unprecedented efficiency.
@@ -97,7 +97,7 @@ const HowItWorks = () => {
               Ready to automate your debt collection? 🚀
             </h3>
             <p className="text-xl mb-8 opacity-90">
-              Join 1,200+ businesses using DebtAI to recover more debts faster
+              Join 1,200+ businesses using SautiAII to recover more debts faster
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg">

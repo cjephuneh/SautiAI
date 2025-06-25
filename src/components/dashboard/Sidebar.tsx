@@ -51,7 +51,7 @@ export const Sidebar = ({ currentPage, onPageChange, collapsed, onToggleCollapse
             </div>
             <div>
               <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                DebtAI
+                SautiAI
               </span>
             </div>
           </div>

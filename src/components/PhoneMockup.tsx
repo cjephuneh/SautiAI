@@ -45,7 +45,7 @@ const PhoneMockup = ({
             <h3 className="text-gray-900 text-lg font-bold mb-2">
               Get a callback from 
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                DebtAI
+                SautiAI
               </span>
             </h3>
             <p className="text-gray-500 text-sm mb-6 leading-relaxed">

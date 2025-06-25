@@ -38,7 +38,7 @@ const Hero = () => {
       setIsLoading(false);
       toast({
         title: "Success! 🎉",
-        description: "DebtAI will call you within 2 minutes",
+        description: "SautiAI will call you within 2 minutes",
       });
       setPhoneNumber("");
       setEmail("");
@@ -64,7 +64,7 @@ const Hero = () => {
               </h1>
               
               <p className="text-lg text-gray-600 leading-relaxed">
-                Recover 65% more outstanding payments in half the time. DebtAI handles conversations naturally while you focus on growing your business.
+                Recover 65% more outstanding payments in half the time. SautiAI handles conversations naturally while you focus on growing your business.
               </p>
             </div>
 
