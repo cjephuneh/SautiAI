@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,92 +21,132 @@ import {
   Download,
   AlertTriangle,
   CheckCircle,
-  Plus
+  Plus,
+  Loader2
 } from "lucide-react";
+import { contactsApi, agentsApi, callsApi } from "@/services/api";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DebtorProfileProps {
   debtorId: string | null;
   onBack: () => void;
 }
 
+interface Debtor {
+  id: string;
+  name: string;
+  email?: string;
+  phone_number: string;
+  debt_amount: number;
+  due_date: string;
+  payment_status: string;
+  original_creditor: string;
+  account_number: string;
+  last_payment: string;
+  contact_attempts: number;
+  created_at: string;
+  // UI specific fields
+  address?: string;
+  company?: string;
+  riskLevel?: string;
+  creditScore?: number;
+  assignedCollector?: string;
+  notes?: string;
+  // Derived fields
+  status?: string;
+  phone?: string;
+}
+
 export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [debtor, setDebtor] = useState<Debtor | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [initiatingCall, setInitiatingCall] = useState(false);
+  const { toast } = useToast();
 
-  // Mock data - in real app, this would be fetched based on debtorId
-  const debtor = {
-    id: debtorId || "1",
-    name: "John Smith",
-    email: "john.smith@email.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main Street, New York, NY 10001",
-    company: "Tech Solutions Inc.",
-    amountOwed: 2500,
-    originalDebt: 3000,
-    dueDate: "2024-01-15",
-    status: "overdue",
-    paymentPlan: true,
-    riskLevel: "medium",
-    creditScore: 650,
-    lastPayment: "2023-12-01",
-    lastContact: "2024-01-10",
-    assignedCollector: "Sarah Wilson",
-    notes: "Customer agreed to payment plan but missed last installment"
+  useEffect(() => {
+    if (debtorId) {
+      fetchDebtorDetails();
+      fetchAgents();
+    }
+  }, [debtorId]);
+
+  const fetchDebtorDetails = async () => {
+    if (!debtorId) return;
+    
+    setLoading(true);
+    try {
+      const data = await contactsApi.getContact(Number(debtorId));
+      
+      // Transform API response to fit our component's data structure
+      const transformedData = {
+        ...data,
+        id: data.id.toString(),
+        status: data.payment_status,
+        phone: data.phone_number,
+        amountOwed: data.debt_amount,
+        originalDebt: data.debt_amount, // Use the same amount if original is not provided
+        lastContact: new Date(data.created_at).toLocaleDateString(),
+        // Calculate estimated risk level based on payment status
+        riskLevel: data.payment_status === 'overdue' ? 'high' : 
+                  data.payment_status === 'partial' ? 'medium' : 'low',
+        // Default values for fields not provided by API
+        creditScore: 650, // Mock value
+        company: data.original_creditor, // Using creditor as company name
+        address: "Address information not available", // Default value
+        assignedCollector: "Not assigned", // Default value
+        notes: "",
+        paymentPlan: data.payment_status === 'partial'
+      };
+      
+      setDebtor(transformedData);
+    } catch (error) {
+      console.error("Failed to fetch debtor details:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load debtor information. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const timeline = [
-    {
-      id: 1,
-      type: "debt_created",
-      title: "Debt Created",
-      description: "Initial debt of $3,000 created",
-      amount: 3000,
-      date: "2023-10-01",
-      status: "completed"
-    },
-    {
-      id: 2,
-      type: "payment",
-      title: "Payment Received",
-      description: "Partial payment received",
-      amount: -500,
-      date: "2023-12-01",
-      status: "completed"
-    },
-    {
-      id: 3,
-      type: "communication",
-      title: "AI Call Attempt",
-      description: "Automated reminder call - No answer",
-      date: "2024-01-05",
-      status: "failed"
-    },
-    {
-      id: 4,
-      type: "communication",
-      title: "Email Sent",
-      description: "Payment reminder email sent",
-      date: "2024-01-08",
-      status: "completed"
-    },
-    {
-      id: 5,
-      type: "escalation",
-      title: "Manual Follow-up",
-      description: "Assigned to collector for personal contact",
-      date: "2024-01-10",
-      status: "in_progress"
+  const fetchAgents = async () => {
+    try {
+      const data = await agentsApi.getAgents();
+      setAgents(data);
+    } catch (error) {
+      console.error("Failed to fetch AI agents:", error);
     }
-  ];
+  };
 
-  const paymentPlan = {
-    totalAmount: 2500,
-    installments: [
-      { id: 1, amount: 500, dueDate: "2024-01-15", status: "overdue" },
-      { id: 2, amount: 500, dueDate: "2024-02-15", status: "pending" },
-      { id: 3, amount: 500, dueDate: "2024-03-15", status: "pending" },
-      { id: 4, amount: 500, dueDate: "2024-04-15", status: "pending" },
-      { id: 5, amount: 500, dueDate: "2024-05-15", status: "pending" }
-    ]
+  const initiateAICall = async () => {
+    if (!debtor || agents.length === 0) return;
+    
+    setInitiatingCall(true);
+    try {
+      // Use the first available agent
+      const agentId = agents[0].id;
+      const result = await callsApi.makeOutboundCall(parseInt(debtor.id), agentId);
+      
+      toast({
+        title: "Call Initiated",
+        description: "AI agent is calling the debtor now.",
+      });
+      
+      // You could now redirect to a call monitoring page
+    } catch (error) {
+      console.error("Failed to initiate call:", error);
+      toast({
+        title: "Call Failed",
+        description: "Unable to initiate call. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setInitiatingCall(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -128,6 +167,79 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
     }
   };
 
+  // Generate mock timeline data since API doesn't provide it
+  const timeline = debtor ? [
+    {
+      id: 1,
+      type: "debt_created",
+      title: "Debt Created",
+      description: `Initial debt of $${debtor.debt_amount} created`,
+      amount: debtor.debt_amount,
+      date: new Date(debtor.created_at).toLocaleDateString(),
+      status: "completed"
+    },
+    {
+      id: 2,
+      type: "communication",
+      title: "Account Created",
+      description: "Debtor added to system",
+      date: new Date(debtor.created_at).toLocaleDateString(),
+      status: "completed"
+    },
+    ...(debtor.last_payment ? [
+      {
+        id: 3,
+        type: "payment",
+        title: "Payment Received",
+        description: "Partial payment received",
+        amount: -500, // Mock value
+        date: new Date(debtor.last_payment).toLocaleDateString(),
+        status: "completed"
+      }
+    ] : []),
+    {
+      id: 4,
+      type: "communication",
+      title: "AI Call Attempt Planned",
+      description: "Scheduled for follow-up",
+      date: new Date().toLocaleDateString(),
+      status: "in_progress"
+    }
+  ] : [];
+
+  // Mock payment plan data
+  const paymentPlan = debtor?.paymentPlan ? {
+    totalAmount: debtor.debt_amount,
+    installments: [
+      { id: 1, amount: debtor.debt_amount / 5, dueDate: new Date(debtor.due_date).toLocaleDateString(), status: "pending" },
+      { id: 2, amount: debtor.debt_amount / 5, dueDate: new Date(new Date(debtor.due_date).setMonth(new Date(debtor.due_date).getMonth() + 1)).toLocaleDateString(), status: "pending" },
+      { id: 3, amount: debtor.debt_amount / 5, dueDate: new Date(new Date(debtor.due_date).setMonth(new Date(debtor.due_date).getMonth() + 2)).toLocaleDateString(), status: "pending" },
+      { id: 4, amount: debtor.debt_amount / 5, dueDate: new Date(new Date(debtor.due_date).setMonth(new Date(debtor.due_date).getMonth() + 3)).toLocaleDateString(), status: "pending" },
+      { id: 5, amount: debtor.debt_amount / 5, dueDate: new Date(new Date(debtor.due_date).setMonth(new Date(debtor.due_date).getMonth() + 4)).toLocaleDateString(), status: "pending" }
+    ]
+  } : null;
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <p className="mt-4 text-gray-600">Loading debtor profile...</p>
+      </div>
+    );
+  }
+
+  if (!debtor) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <AlertTriangle className="h-12 w-12 text-yellow-600" />
+        <p className="mt-4 text-gray-600">Debtor information not found</p>
+        <Button onClick={onBack} variant="outline" className="mt-4">
+          Go Back
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -144,8 +256,16 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <Edit className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
-            <Bot className="h-4 w-4 mr-2" />
+          <Button 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+            disabled={initiatingCall || agents.length === 0}
+            onClick={initiateAICall}
+          >
+            {initiatingCall ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Bot className="h-4 w-4 mr-2" />
+            )}
             AI Actions
           </Button>
         </div>
@@ -158,7 +278,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Amount Owed</p>
-                <p className="text-2xl font-bold text-red-600">${debtor.amountOwed.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-red-600">${debtor.debt_amount.toLocaleString()}</p>
               </div>
               <DollarSign className="h-8 w-8 text-red-600" />
             </div>
@@ -170,7 +290,11 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Days Overdue</p>
-                <p className="text-2xl font-bold text-orange-600">12</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {debtor.status === 'overdue' ? 
+                    Math.floor((new Date().getTime() - new Date(debtor.due_date).getTime()) / (1000 * 3600 * 24)) : 
+                    0}
+                </p>
               </div>
               <Calendar className="h-8 w-8 text-orange-600" />
             </div>
@@ -182,7 +306,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Credit Score</p>
-                <p className="text-2xl font-bold text-blue-600">{debtor.creditScore}</p>
+                <p className="text-2xl font-bold text-blue-600">{debtor.creditScore || 'N/A'}</p>
               </div>
               <CreditCard className="h-8 w-8 text-blue-600" />
             </div>
@@ -194,8 +318,8 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Risk Level</p>
-                <Badge className={`mt-1 ${getRiskColor(debtor.riskLevel)}`}>
-                  {debtor.riskLevel.toUpperCase()}
+                <Badge className={`mt-1 ${getRiskColor(debtor.riskLevel || 'medium')}`}>
+                  {(debtor.riskLevel || 'medium').toUpperCase()}
                 </Badge>
               </div>
               <AlertTriangle className="h-8 w-8 text-yellow-600" />
@@ -219,25 +343,25 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{debtor.email}</span>
-                <Button size="sm" variant="ghost" className="h-6 w-6 p-0 ml-auto">
+                <span className="text-sm">{debtor.email || 'No email provided'}</span>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0 ml-auto" disabled={!debtor.email}>
                   <Mail className="h-3 w-3" />
                 </Button>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{debtor.phone}</span>
+                <span className="text-sm">{debtor.phone_number}</span>
                 <Button size="sm" variant="ghost" className="h-6 w-6 p-0 ml-auto">
                   <Phone className="h-3 w-3" />
                 </Button>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{debtor.address}</span>
+                <span className="text-sm">{debtor.address || 'No address on record'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Building className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{debtor.company}</span>
+                <span className="text-sm">{debtor.original_creditor}</span>
               </div>
               
               <Separator />
@@ -256,7 +380,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
           </Card>
 
           {/* Payment Plan */}
-          {debtor.paymentPlan && (
+          {paymentPlan && (
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -264,7 +388,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
                   Payment Plan
                 </CardTitle>
                 <CardDescription>
-                  5 installments of $500 each
+                  {paymentPlan.installments.length} installments of ${(paymentPlan.totalAmount / paymentPlan.installments.length).toFixed(2)} each
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -272,7 +396,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
                   {paymentPlan.installments.slice(0, 3).map((installment) => (
                     <div key={installment.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                       <div>
-                        <p className="text-sm font-medium">${installment.amount}</p>
+                        <p className="text-sm font-medium">${installment.amount.toFixed(2)}</p>
                         <p className="text-xs text-gray-500">{installment.dueDate}</p>
                       </div>
                       <Badge variant={installment.status === 'overdue' ? 'destructive' : 'outline'}>
@@ -304,8 +428,16 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Phone className="h-4 w-4 mr-2" />
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={initiatingCall || agents.length === 0}
+                  onClick={initiateAICall}
+                >
+                  {initiatingCall ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Phone className="h-4 w-4 mr-2" />
+                  )}
                   Initiate AI Call
                 </Button>
                 <Button variant="outline" className="bg-white">

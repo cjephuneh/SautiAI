@@ -1,0 +1,846 @@
+{
+  "info": {
+    "name": "DebtAI Collection API",
+    "description": "Comprehensive debt collection management system with AI-powered voice calls",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5050",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contact Management",
+      "item": [
+        {
+          "name": "Create Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"+12345678901\",\n  \"name\": \"John Smith\",\n  \"debt_amount\": 2500.00,\n  \"original_creditor\": \"ABC Credit Card Company\",\n  \"account_number\": \"****1234\",\n  \"due_date\": \"2024-03-15T00:00:00\",\n  \"last_payment\": \"2023-12-01T00:00:00\",\n  \"payment_status\": \"overdue\",\n  \"collection_type\": \"debt\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contacts/?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contacts/?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contact by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contacts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contact",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"debt_amount\": 2000.00,\n  \"payment_status\": \"partial\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contacts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Contact",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contacts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Contacts CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contacts/upload-csv?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", "upload-csv"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Call Contact",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/contacts/1/call?agent_id=1&user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["contacts", "1", "call"],
+              "query": [
+                {
+                  "key": "agent_id",
+                  "value": "1"
+                },
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Voice Management",
+      "item": [
+        {
+          "name": "Get All Voices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/voices/",
+              "host": ["{{baseUrl}}"],
+              "path": ["voices", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Voices by Provider",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/voices/?provider=openai",
+              "host": ["{{baseUrl}}"],
+              "path": ["voices", ""],
+              "query": [
+                {
+                  "key": "provider",
+                  "value": "openai"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add New Voice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"voice_id\": \"nova\",\n  \"name\": \"Nova\",\n  \"provider\": \"elevenlabs\",\n  \"gender\": \"female\",\n  \"language\": \"en-US\",\n  \"sample_url\": \"https://example.com/voice-samples/nova.mp3\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voices/",
+              "host": ["{{baseUrl}}"],
+              "path": ["voices", ""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Agent Management",
+      "item": [
+        {
+          "name": "Create Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Friendly Collector\",\n  \"prompt_template\": \"You are a friendly debt collection agent named James. Your goal is to help customers pay their debts while maintaining a positive relationship. Be empathetic and solution-focused.\",\n  \"voice_id\": \"ash\",\n  \"temperature\": 0.8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agents/?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Agents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agents/?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agents/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Agent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Agent Name\",\n  \"prompt_template\": \"Updated system prompt...\",\n  \"voice_id\": \"coral\",\n  \"temperature\": 0.7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agents/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Agent System Message",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt_template\": \"You are Sarah, an empathetic debt collection specialist. Your approach is warm and understanding. You focus on finding solutions that work for both the creditor and the debtor.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agents/1/system-message",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "1", "system-message"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Agent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/agents/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Call Management",
+      "item": [
+        {
+          "name": "Create Outbound Call",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_id\": 1,\n  \"agent_id\": 1,\n  \"call_type\": \"outbound\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/outbound?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "outbound"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Calls",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calls/?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Calls by Type and Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calls/?user_id={{user_id}}&call_type=outbound&status=completed",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", ""],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "call_type",
+                  "value": "outbound"
+                },
+                {
+                  "key": "status",
+                  "value": "completed"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Call by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calls/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Call Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"duration\": 300,\n  \"end_time\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Call Transcript",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transcript\": \"Full conversation transcript...\",\n  \"summary\": \"Customer agreed to payment plan...\",\n  \"sentiment\": \"positive\",\n  \"confidence_score\": 0.85,\n  \"recording_url\": \"https://example.com/recording.mp3\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/transcript",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "transcript"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transcript Management",
+      "item": [
+        {
+          "name": "Get Call Transcript",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/transcript",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "transcript"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Transcript as PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"call_id\": 1,\n  \"format\": \"pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/transcript/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "transcript", "download"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Email Transcript",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"call_id\": 1,\n  \"format\": \"pdf\",\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/transcript/download",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "transcript", "download"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Get Call Center Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "summary"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Summary for Specific Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary?user_id={{user_id}}&date=2024-01-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "summary"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "date",
+                  "value": "2024-01-15"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Calls",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/active-calls?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "active-calls"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Call Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/call-logs?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "call-logs"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Collection Performance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/collection-performance?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "collection-performance"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Performance for Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/collection-performance?user_id={{user_id}}&start_date=2024-01-01&end_date=2024-01-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "collection-performance"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                },
+                {
+                  "key": "start_date",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-01-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Debt Recovery Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/debt-recovery?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "debt-recovery"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment & Reminders",
+      "item": [
+        {
+          "name": "Verify Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_id\": 1,\n  \"amount\": 2500.00,\n  \"confirmation_code\": \"ABC123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payment/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["payment", "verify"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule Reminder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_id\": 1,\n  \"reminder_date\": \"2024-02-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reminders/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["reminders", "schedule"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stream Access",
+      "item": [
+        {
+          "name": "Get Stream Information",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stream/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["stream", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Interface",
+      "item": [
+        {
+          "name": "Access Admin Interface",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

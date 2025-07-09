@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,32 @@ import {
   Download,
   Mic,
   Play,
-  Pause
+  Pause,
+  Loader2
 } from "lucide-react";
+import { agentsApi, voicesApi, callsApi, contactsApi } from "@/services/api";
+import { useToast } from "@/components/ui/use-toast";
+
+// Interfaces for data from API
+interface Agent {
+  id: number;
+  name: string;
+  user_id: number;
+  prompt_template: string;
+  voice_id: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+interface Voice {
+  id: number;
+  voice_id: string;
+  name: string;
+  gender: string;
+  provider: string;
+  language: string;
+  sample_url?: string;
+}
 
 export const AIAssistant = () => {
   const [selectedTone, setSelectedTone] = useState("friendly");
@@ -44,7 +68,220 @@ export const AIAssistant = () => {
   const [showQuickCampaign, setShowQuickCampaign] = useState(false);
   const [showTranscription, setShowTranscription] = useState(false);
   const [selectedCall, setSelectedCall] = useState<any>(null);
+  
+  // API related state
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [loadingAgents, setLoadingAgents] = useState(false);
+  const [loadingVoices, setLoadingVoices] = useState(false);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<number | null>(null);
+  const [creatingAgent, setCreatingAgent] = useState(false);
+  const { toast } = useToast();
 
+  useEffect(() => {
+    fetchAgents();
+    fetchVoices();
+    fetchContacts();
+  }, []);
+
+  const fetchAgents = async () => {
+    setLoadingAgents(true);
+    try {
+      const data = await agentsApi.getAgents();
+      setAgents(data);
+      if (data.length > 0) {
+        setSelectedAgent(data[0].id);
+      }
+    } catch (error) {
+      console.error("Failed to fetch agents:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load AI agents. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingAgents(false);
+    }
+  };
+
+  const fetchVoices = async () => {
+    setLoadingVoices(true);
+    try {
+      const data = await voicesApi.getVoices();
+      setVoices(data);
+    } catch (error) {
+      console.error("Failed to fetch voices:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load voice options. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingVoices(false);
+    }
+  };
+
+  const fetchContacts = async () => {
+    setLoadingContacts(true);
+    try {
+      const data = await contactsApi.getContacts();
+      setContacts(data);
+    } catch (error) {
+      console.error("Failed to fetch contacts:", error);
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const createNewAgent = async (agentData: any) => {
+    try {
+      setCreatingAgent(true);
+      const data = await agentsApi.createAgent(agentData);
+      setAgents(prev => [...prev, data]);
+      toast({
+        title: "Agent Created",
+        description: `${data.name} has been created successfully.`,
+      });
+      return data;
+    } catch (error) {
+      console.error("Failed to create agent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create AI agent. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setCreatingAgent(false);
+    }
+  };
+
+  const updateAgentPrompt = async (agentId: number, promptTemplate: string) => {
+    try {
+      const data = await agentsApi.updateAgentSystemMessage(agentId, promptTemplate);
+      setAgents(prev => prev.map(agent => 
+        agent.id === agentId ? { ...agent, prompt_template: promptTemplate } : agent
+      ));
+      toast({
+        title: "Agent Updated",
+        description: "Agent prompt has been updated successfully.",
+      });
+      return data;
+    } catch (error) {
+      console.error("Failed to update agent prompt:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update agent prompt. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const initiateCall = async (contactId: number) => {
+    if (!selectedAgent) {
+      toast({
+        title: "Error",
+        description: "Please select an AI agent first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const data = await callsApi.makeOutboundCall(contactId, selectedAgent);
+      toast({
+        title: "Call Initiated",
+        description: "AI agent is calling the debtor now.",
+      });
+      return data;
+    } catch (error) {
+      console.error("Failed to initiate call:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate call. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // Templates data
+  const templates = {
+    whatsapp: [
+      {
+        id: "reminder_friendly",
+        title: "Friendly Payment Reminder",
+        content: "Hi {name}! This is a gentle reminder about your outstanding payment of ${amount}. We're here to help if you need to discuss payment options. 😊"
+      },
+      {
+        id: "reminder_firm",
+        title: "Firm Payment Notice", 
+        content: "Dear {name}, your payment of ${amount} is now overdue. Please contact us immediately to avoid further action."
+      },
+      {
+        id: "settlement_offer",
+        title: "Settlement Proposal",
+        content: "Hi {name}, we'd like to offer you a settlement option for your outstanding balance. Let's discuss a payment plan that works for you."
+      }
+    ],
+    sms: [
+      {
+        id: "sms_reminder",
+        title: "SMS Reminder",
+        content: "Payment reminder: ${amount} due. Call us at (555) 123-4567 to discuss options. Reply STOP to opt out."
+      },
+      {
+        id: "sms_urgent",
+        title: "Urgent Notice",
+        content: "URGENT: ${amount} payment overdue. Contact us today to avoid collection action."
+      }
+    ],
+    email: [
+      {
+        id: "email_formal",
+        title: "Formal Payment Request",
+        content: "Dear {name},\n\nThis letter serves as a formal request for payment of your outstanding balance of ${amount}, which was due on {due_date}.\n\nPlease remit payment immediately or contact our office to discuss payment arrangements.\n\nSincerely,\nCollections Department"
+      },
+      {
+        id: "email_friendly",
+        title: "Friendly Follow-up",
+        content: "Hi {name},\n\nI hope this email finds you well. I wanted to reach out regarding your account balance of ${amount}.\n\nIf you're experiencing financial difficulties, we're here to work with you on a payment plan.\n\nBest regards,\n{collector_name}"
+      }
+    ]
+  };
+
+  // AI personalities mapped to prompt templates for agent creation
+  const aiPersonalities = [
+    {
+      id: "friendly",
+      name: "Friendly",
+      icon: Smile,
+      description: "Warm and understanding approach",
+      color: "text-green-600 bg-green-100",
+      promptTemplate: "You are a friendly debt collection agent. Your goal is to be understanding and help customers find a comfortable way to repay their debts. Always be polite and empathetic."
+    },
+    {
+      id: "firm",
+      name: "Firm", 
+      icon: Meh,
+      description: "Professional and direct",
+      color: "text-yellow-600 bg-yellow-100",
+      promptTemplate: "You are a firm debt collection agent. Your goal is to be direct and professional. Clearly explain the debtor's obligations and consequences for non-payment. Remain courteous but emphasize the importance of prompt payment."
+    },
+    {
+      id: "legal",
+      name: "Legal",
+      icon: Shield,
+      description: "Formal and compliance-focused",
+      color: "text-red-600 bg-red-100",
+      promptTemplate: "You are a legally-focused debt collection agent. Your primary concern is compliance with debt collection regulations. Use formal language and make sure to include all required legal disclaimers. Inform debtors of their rights and avoid making threats."
+    }
+  ];
+
+  // Mock data for UI elements that aren't from API
   const callTranscriptions = [
     {
       id: 1,
@@ -106,74 +343,6 @@ Sarah: Thank you, bye.`,
     }
   ];
 
-  const templates = {
-    whatsapp: [
-      {
-        id: "reminder_friendly",
-        title: "Friendly Payment Reminder",
-        content: "Hi {name}! This is a gentle reminder about your outstanding payment of ${amount}. We're here to help if you need to discuss payment options. 😊"
-      },
-      {
-        id: "reminder_firm",
-        title: "Firm Payment Notice", 
-        content: "Dear {name}, your payment of ${amount} is now overdue. Please contact us immediately to avoid further action."
-      },
-      {
-        id: "settlement_offer",
-        title: "Settlement Proposal",
-        content: "Hi {name}, we'd like to offer you a settlement option for your outstanding balance. Let's discuss a payment plan that works for you."
-      }
-    ],
-    sms: [
-      {
-        id: "sms_reminder",
-        title: "SMS Reminder",
-        content: "Payment reminder: ${amount} due. Call us at (555) 123-4567 to discuss options. Reply STOP to opt out."
-      },
-      {
-        id: "sms_urgent",
-        title: "Urgent Notice",
-        content: "URGENT: ${amount} payment overdue. Contact us today to avoid collection action."
-      }
-    ],
-    email: [
-      {
-        id: "email_formal",
-        title: "Formal Payment Request",
-        content: "Dear {name},\n\nThis letter serves as a formal request for payment of your outstanding balance of ${amount}, which was due on {due_date}.\n\nPlease remit payment immediately or contact our office to discuss payment arrangements.\n\nSincerely,\nCollections Department"
-      },
-      {
-        id: "email_friendly",
-        title: "Friendly Follow-up",
-        content: "Hi {name},\n\nI hope this email finds you well. I wanted to reach out regarding your account balance of ${amount}.\n\nIf you're experiencing financial difficulties, we're here to work with you on a payment plan.\n\nBest regards,\n{collector_name}"
-      }
-    ]
-  };
-
-  const aiPersonalities = [
-    {
-      id: "friendly",
-      name: "Friendly",
-      icon: Smile,
-      description: "Warm and understanding approach",
-      color: "text-green-600 bg-green-100"
-    },
-    {
-      id: "firm",
-      name: "Firm", 
-      icon: Meh,
-      description: "Professional and direct",
-      color: "text-yellow-600 bg-yellow-100"
-    },
-    {
-      id: "legal",
-      name: "Legal",
-      icon: Shield,
-      description: "Formal and compliance-focused",
-      color: "text-red-600 bg-red-100"
-    }
-  ];
-
   const recentCampaigns = [
     {
       id: 1,
@@ -208,15 +377,44 @@ Sarah: Thank you, bye.`,
   ];
 
   const quickActions = [
-    { icon: MessageSquare, label: "WhatsApp Blast", count: 156, color: "text-green-600" },
-    { icon: Phone, label: "AI Voice Calls", count: 89, color: "text-blue-600" },
-    { icon: Mail, label: "Email Campaign", count: 234, color: "text-purple-600" },
-    { icon: Calendar, label: "Schedule Follow-up", count: 45, color: "text-orange-600" }
+    { icon: MessageSquare, label: "WhatsApp Blast", count: contacts.length || 0, color: "text-green-600" },
+    { icon: Phone, label: "AI Voice Calls", count: contacts.length || 0, color: "text-blue-600" },
+    { icon: Mail, label: "Email Campaign", count: contacts.length || 0, color: "text-purple-600" },
+    { icon: Calendar, label: "Schedule Follow-up", count: Math.min(contacts.length || 0, 45), color: "text-orange-600" }
   ];
 
   const openTranscriptionModal = (call: any) => {
     setSelectedCall(call);
     setShowTranscription(true);
+  };
+
+  // Create a new agent with the selected personality
+  const handleCreateAgentWithPersonality = async () => {
+    const personality = aiPersonalities.find(p => p.id === selectedTone);
+    if (!personality) return;
+    
+    // Find a voice that matches the selected personality (just for demo)
+    const voiceId = voices.length > 0 ? 
+      voices.find(v => v.gender === (personality.id === 'friendly' ? 'female' : 'male'))?.voice_id || voices[0].voice_id :
+      "default";
+
+    try {
+      const agentData = {
+        name: `${personality.name} Agent`,
+        prompt_template: personality.promptTemplate,
+        voice_id: voiceId
+      };
+      
+      const newAgent = await createNewAgent(agentData);
+      setSelectedAgent(newAgent.id);
+      
+      toast({
+        title: "Success",
+        description: `Created new ${personality.name} AI agent with matching voice.`,
+      });
+    } catch (error) {
+      console.error("Failed to create agent:", error);
+    }
   };
 
   return (
@@ -262,7 +460,13 @@ Sarah: Thank you, bye.`,
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{action.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{action.count}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loadingContacts ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    ) : (
+                      action.count
+                    )}
+                  </p>
                   <p className="text-xs text-gray-500">available actions</p>
                 </div>
                 <action.icon className={`h-8 w-8 ${action.color}`} />
@@ -286,9 +490,31 @@ Sarah: Thank you, bye.`,
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* AI Personality Selection */}
+              {/* AI Personality Selection with Agent Creation */}
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-3 block">AI Personality</label>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-gray-700">AI Personality</label>
+                  {loadingAgents ? (
+                    <div className="flex items-center">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2 text-blue-600" />
+                      <span className="text-sm">Loading agents...</span>
+                    </div>
+                  ) : agents.length > 0 ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Available Agents: {agents.length}</span>
+                      <select 
+                        value={selectedAgent?.toString() || ""} 
+                        onChange={(e) => setSelectedAgent(parseInt(e.target.value))}
+                        className="text-sm border-gray-200 rounded"
+                      >
+                        {agents.map(agent => (
+                          <option key={agent.id} value={agent.id}>{agent.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : null}
+                </div>
+                
                 <div className="grid grid-cols-3 gap-3">
                   {aiPersonalities.map((personality) => (
                     <button
@@ -308,6 +534,28 @@ Sarah: Thank you, bye.`,
                     </button>
                   ))}
                 </div>
+                
+                {agents.length === 0 && !loadingAgents && (
+                  <div className="mt-3">
+                    <Button 
+                      onClick={handleCreateAgentWithPersonality}
+                      className="w-full"
+                      disabled={creatingAgent || loadingVoices}
+                    >
+                      {creatingAgent ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Creating Agent...
+                        </>
+                      ) : (
+                        <>
+                          <Bot className="h-4 w-4 mr-2" />
+                          Create Agent with Selected Personality
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <Separator />
@@ -327,7 +575,13 @@ Sarah: Thank you, bye.`,
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Template</label>
                   <select 
                     value={selectedTemplate}
-                    onChange={(e) => setSelectedTemplate(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedTemplate(e.target.value);
+                      const template = templates.whatsapp.find(t => t.id === e.target.value);
+                      if (template) {
+                        setMessage(template.content);
+                      }
+                    }}
                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select template...</option>
@@ -361,9 +615,12 @@ Sarah: Thank you, bye.`,
 
               {/* Send Options */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+                <Button 
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  disabled={message.trim().length === 0 || contacts.length === 0}
+                >
                   <Send className="h-4 w-4 mr-2" />
-                  Send to Selected Debtors (12)
+                  Send to Selected Debtors ({contacts.length})
                 </Button>
                 <Button variant="outline" className="bg-white">
                   <Calendar className="h-4 w-4 mr-2" />
@@ -513,6 +770,79 @@ Sarah: Thank you, bye.`,
 
         {/* Side Panel */}
         <div className="space-y-6">
+          {/* AI Agents */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                AI Agents
+              </CardTitle>
+              <CardDescription>
+                Your configured AI voice agents
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {loadingAgents ? (
+                <div className="flex flex-col items-center justify-center py-6">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
+                  <p className="text-sm text-gray-500">Loading agents...</p>
+                </div>
+              ) : agents.length > 0 ? (
+                <>
+                  {agents.map((agent) => (
+                    <div key={agent.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                      <div>
+                        <p className="text-sm font-medium">{agent.name}</p>
+                        <p className="text-xs text-gray-500">
+                          Voice: {voices.find(v => v.voice_id === agent.voice_id)?.name || agent.voice_id}
+                        </p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                  ))}
+                  <Button 
+                    onClick={handleCreateAgentWithPersonality}
+                    className="w-full"
+                    disabled={creatingAgent || loadingVoices}
+                  >
+                    {creatingAgent ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating Agent
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create New Agent
+                      </>
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6">
+                  <Bot className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 mb-4">No AI agents configured yet</p>
+                  <Button 
+                    onClick={handleCreateAgentWithPersonality}
+                    disabled={creatingAgent || loadingVoices}
+                  >
+                    {creatingAgent ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating Agent
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create First Agent
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Auto-Reminders */}
           <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-blue-50">
             <CardHeader>
