@@ -2,43 +2,31 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AIConfigModal } from "../modals/AIConfigModal";
-import { AddDebtorModal } from "../modals/AddDebtorModal";
-import { QuickCampaignModal } from "../modals/QuickCampaignModal";
 import { 
   Bot,
-  MessageSquare,
-  Phone,
-  Mail,
-  Send,
-  Calendar,
-  Settings,
-  Zap,
-  Target,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Users,
-  Smile,
-  Frown,
-  Meh,
-  Shield,
-  Volume2,
-  FileText,
-  User,
   Plus,
-  Download,
-  Mic,
+  Settings,
+  Trash2,
+  Edit,
   Play,
   Pause,
-  Loader2
+  Volume2,
+  MessageSquare,
+  Phone,
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
+  Copy,
+  Sparkles
 } from "lucide-react";
-import { agentsApi, voicesApi, callsApi, contactsApi } from "@/services/api";
+import { agentsApi, voicesApi } from "@/services/api";
 import { useToast } from "@/components/ui/use-toast";
 
-// Interfaces for data from API
 interface Agent {
   id: number;
   name: string;
@@ -47,6 +35,7 @@ interface Agent {
   voice_id: string;
   created_at: string;
   is_active: boolean;
+  temperature?: number;
 }
 
 interface Voice {
@@ -59,43 +48,139 @@ interface Voice {
   sample_url?: string;
 }
 
+const promptTemplates = [
+  {
+    id: "professional",
+    name: "Professional Collector",
+    description: "Professional, direct, and results-oriented approach",
+    template: `You are a professional debt collection agent named {agent_name}. Your role is to collect outstanding debts in a professional, direct manner while maintaining compliance with all applicable laws.
+
+Key Guidelines:
+- Always identify yourself and your company at the beginning of each call
+- Verify the debtor's identity before discussing any debt information
+- Be direct about the debt amount and payment expectations
+- Explain consequences of non-payment clearly
+- Offer reasonable payment arrangements when appropriate
+- Maintain a professional tone throughout the conversation
+- Document all promises and agreements made during the call
+
+Remember: You must comply with FDCPA regulations and treat all debtors with respect while being firm about collection expectations.`
+  },
+  {
+    id: "empathetic",
+    name: "Empathetic Collector",
+    description: "Understanding and supportive approach to debt collection",
+    template: `You are an empathetic debt collection agent named {agent_name}. Your approach focuses on understanding the debtor's situation while working together to find a solution.
+
+Key Guidelines:
+- Start with a warm, understanding tone
+- Listen actively to the debtor's concerns and circumstances
+- Show empathy for their financial situation
+- Focus on finding mutually beneficial solutions
+- Offer flexible payment options and plans
+- Provide encouragement and support throughout the process
+- Be patient and allow time for the debtor to explain their situation
+- Use phrases like "I understand" and "Let's work together"
+
+Remember: Your goal is to collect the debt while building a positive relationship that encourages voluntary compliance and payment.`
+  },
+  {
+    id: "legal_focused",
+    name: "Legal & Compliance Focused",
+    description: "Strict adherence to legal requirements and formal communication",
+    template: `You are a legally-focused debt collection agent named {agent_name}. Your primary concern is strict compliance with all debt collection laws and regulations.
+
+Key Guidelines:
+- Begin every call with required legal disclosures
+- Inform debtors of their rights under the FDCPA
+- Use formal, legally appropriate language
+- Avoid any statements that could be considered threats or harassment
+- Document all communications meticulously
+- Provide written validation notices when requested
+- Never discuss debt details with third parties
+- Respect all cease and desist requests immediately
+- Maintain detailed records of all interactions
+
+Remember: Legal compliance is your top priority. When in doubt, err on the side of caution and follow all applicable regulations.`
+  },
+  {
+    id: "solution_oriented",
+    name: "Solution-Oriented Collector",
+    description: "Focus on finding creative solutions and win-win outcomes",
+    template: `You are a solution-oriented debt collection agent named {agent_name}. Your specialty is finding creative solutions that work for both the creditor and debtor.
+
+Key Guidelines:
+- Approach each call as a problem-solving session
+- Ask open-ended questions to understand the debtor's financial situation
+- Present multiple payment options and alternatives
+- Be flexible and creative with payment arrangements
+- Focus on what the debtor CAN do rather than what they can't
+- Offer incentives for early payment or lump sum settlements
+- Suggest budgeting tips and financial resources when appropriate
+- Celebrate small wins and progress made
+
+Remember: Every debtor's situation is unique. Your job is to find the path that leads to successful debt resolution while maintaining a positive relationship.`
+  },
+  {
+    id: "high_volume",
+    name: "High-Volume Efficiency",
+    description: "Optimized for handling large volumes of calls efficiently",
+    template: `You are an efficient debt collection agent named {agent_name}. You're optimized for handling high volumes of calls while maintaining effectiveness.
+
+Key Guidelines:
+- Keep calls concise and focused on key objectives
+- Use standardized scripts for common scenarios
+- Quickly identify decision makers and payment ability
+- Offer standard payment options (full payment, 30/60/90 day plans)
+- Set clear next steps and follow-up dates
+- Use time-efficient verification processes
+- Prioritize calls that are most likely to result in payment
+- Maintain detailed but concise notes for each interaction
+
+Remember: Efficiency doesn't mean sacrificing compliance or respect. Be quick but thorough, direct but professional.`
+  }
+];
+
 export const AIAssistant = () => {
-  const [selectedTone, setSelectedTone] = useState("friendly");
-  const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [message, setMessage] = useState("");
-  const [showAIConfig, setShowAIConfig] = useState(false);
-  const [showAddDebtor, setShowAddDebtor] = useState(false);
-  const [showQuickCampaign, setShowQuickCampaign] = useState(false);
-  const [showTranscription, setShowTranscription] = useState(false);
-  const [selectedCall, setSelectedCall] = useState<any>(null);
-  
-  // API related state
   const [agents, setAgents] = useState<Agent[]>([]);
   const [voices, setVoices] = useState<Voice[]>([]);
-  const [contacts, setContacts] = useState<any[]>([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
   const [loadingVoices, setLoadingVoices] = useState(false);
-  const [loadingContacts, setLoadingContacts] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<number | null>(null);
   const [creatingAgent, setCreatingAgent] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    prompt_template: "",
+    voice_id: "",
+    temperature: 0.7
+  });
+
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAgents();
     fetchVoices();
-    fetchContacts();
   }, []);
 
   const fetchAgents = async () => {
     setLoadingAgents(true);
     try {
       const data = await agentsApi.getAgents();
-      setAgents(data);
-      if (data.length > 0) {
-        setSelectedAgent(data[0].id);
+      console.log("Fetched agents data:", data); // Debug log
+      
+      // Ensure we always set an array
+      if (Array.isArray(data)) {
+        setAgents(data);
+      } else {
+        console.warn("Agents data is not an array:", data);
+        setAgents([]);
       }
     } catch (error) {
       console.error("Failed to fetch agents:", error);
+      setAgents([]); // Ensure we set empty array on error
       toast({
         title: "Error",
         description: "Failed to load AI agents. Please try again.",
@@ -110,9 +195,18 @@ export const AIAssistant = () => {
     setLoadingVoices(true);
     try {
       const data = await voicesApi.getVoices();
-      setVoices(data);
+      console.log("Fetched voices data:", data); // Debug log
+      
+      // Ensure we always set an array
+      if (Array.isArray(data)) {
+        setVoices(data);
+      } else {
+        console.warn("Voices data is not an array:", data);
+        setVoices([]);
+      }
     } catch (error) {
       console.error("Failed to fetch voices:", error);
+      setVoices([]); // Ensure we set empty array on error
       toast({
         title: "Error",
         description: "Failed to load voice options. Please try again.",
@@ -123,28 +217,28 @@ export const AIAssistant = () => {
     }
   };
 
-  const fetchContacts = async () => {
-    setLoadingContacts(true);
-    try {
-      const data = await contactsApi.getContacts();
-      setContacts(data);
-    } catch (error) {
-      console.error("Failed to fetch contacts:", error);
-    } finally {
-      setLoadingContacts(false);
-    }
-  };
-
-  const createNewAgent = async (agentData: any) => {
-    try {
-      setCreatingAgent(true);
-      const data = await agentsApi.createAgent(agentData);
-      setAgents(prev => [...prev, data]);
+  const handleCreateAgent = async () => {
+    if (!formData.name || !formData.prompt_template || !formData.voice_id) {
       toast({
-        title: "Agent Created",
-        description: `${data.name} has been created successfully.`,
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
       });
-      return data;
+      return;
+    }
+
+    setCreatingAgent(true);
+    try {
+      const data = await agentsApi.createAgent(formData);
+      // Ensure agents is always an array before spreading
+      setAgents(prev => Array.isArray(prev) ? [...prev, data] : [data]);
+      setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
+      setSelectedTemplate("");
+      setShowCreateForm(false);
+      toast({
+        title: "Success",
+        description: "AI agent created successfully.",
+      });
     } catch (error) {
       console.error("Failed to create agent:", error);
       toast({
@@ -152,269 +246,84 @@ export const AIAssistant = () => {
         description: "Failed to create AI agent. Please try again.",
         variant: "destructive",
       });
-      throw error;
     } finally {
       setCreatingAgent(false);
     }
   };
 
-  const updateAgentPrompt = async (agentId: number, promptTemplate: string) => {
+  const handleDeleteAgent = async (agentId: number) => {
     try {
-      const data = await agentsApi.updateAgentSystemMessage(agentId, promptTemplate);
-      setAgents(prev => prev.map(agent => 
-        agent.id === agentId ? { ...agent, prompt_template: promptTemplate } : agent
-      ));
-      toast({
-        title: "Agent Updated",
-        description: "Agent prompt has been updated successfully.",
-      });
-      return data;
-    } catch (error) {
-      console.error("Failed to update agent prompt:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update agent prompt. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const initiateCall = async (contactId: number) => {
-    if (!selectedAgent) {
-      toast({
-        title: "Error",
-        description: "Please select an AI agent first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const data = await callsApi.makeOutboundCall(contactId, selectedAgent);
-      toast({
-        title: "Call Initiated",
-        description: "AI agent is calling the debtor now.",
-      });
-      return data;
-    } catch (error) {
-      console.error("Failed to initiate call:", error);
-      toast({
-        title: "Error",
-        description: "Failed to initiate call. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  // Templates data
-  const templates = {
-    whatsapp: [
-      {
-        id: "reminder_friendly",
-        title: "Friendly Payment Reminder",
-        content: "Hi {name}! This is a gentle reminder about your outstanding payment of ${amount}. We're here to help if you need to discuss payment options. 😊"
-      },
-      {
-        id: "reminder_firm",
-        title: "Firm Payment Notice", 
-        content: "Dear {name}, your payment of ${amount} is now overdue. Please contact us immediately to avoid further action."
-      },
-      {
-        id: "settlement_offer",
-        title: "Settlement Proposal",
-        content: "Hi {name}, we'd like to offer you a settlement option for your outstanding balance. Let's discuss a payment plan that works for you."
-      }
-    ],
-    sms: [
-      {
-        id: "sms_reminder",
-        title: "SMS Reminder",
-        content: "Payment reminder: ${amount} due. Call us at (555) 123-4567 to discuss options. Reply STOP to opt out."
-      },
-      {
-        id: "sms_urgent",
-        title: "Urgent Notice",
-        content: "URGENT: ${amount} payment overdue. Contact us today to avoid collection action."
-      }
-    ],
-    email: [
-      {
-        id: "email_formal",
-        title: "Formal Payment Request",
-        content: "Dear {name},\n\nThis letter serves as a formal request for payment of your outstanding balance of ${amount}, which was due on {due_date}.\n\nPlease remit payment immediately or contact our office to discuss payment arrangements.\n\nSincerely,\nCollections Department"
-      },
-      {
-        id: "email_friendly",
-        title: "Friendly Follow-up",
-        content: "Hi {name},\n\nI hope this email finds you well. I wanted to reach out regarding your account balance of ${amount}.\n\nIf you're experiencing financial difficulties, we're here to work with you on a payment plan.\n\nBest regards,\n{collector_name}"
-      }
-    ]
-  };
-
-  // AI personalities mapped to prompt templates for agent creation
-  const aiPersonalities = [
-    {
-      id: "friendly",
-      name: "Friendly",
-      icon: Smile,
-      description: "Warm and understanding approach",
-      color: "text-green-600 bg-green-100",
-      promptTemplate: "You are a friendly debt collection agent. Your goal is to be understanding and help customers find a comfortable way to repay their debts. Always be polite and empathetic."
-    },
-    {
-      id: "firm",
-      name: "Firm", 
-      icon: Meh,
-      description: "Professional and direct",
-      color: "text-yellow-600 bg-yellow-100",
-      promptTemplate: "You are a firm debt collection agent. Your goal is to be direct and professional. Clearly explain the debtor's obligations and consequences for non-payment. Remain courteous but emphasize the importance of prompt payment."
-    },
-    {
-      id: "legal",
-      name: "Legal",
-      icon: Shield,
-      description: "Formal and compliance-focused",
-      color: "text-red-600 bg-red-100",
-      promptTemplate: "You are a legally-focused debt collection agent. Your primary concern is compliance with debt collection regulations. Use formal language and make sure to include all required legal disclaimers. Inform debtors of their rights and avoid making threats."
-    }
-  ];
-
-  // Mock data for UI elements that aren't from API
-  const callTranscriptions = [
-    {
-      id: 1,
-      debtorName: "John Smith",
-      callId: "call_001",
-      duration: "05:23",
-      timestamp: "2024-01-27 14:30",
-      outcome: "payment_agreed",
-      confidence: 0.98,
-      transcription: `AI: Hello, this is calling regarding your account with ABC Collections. Am I speaking with John Smith?
-
-John: Yes, this is John.
-
-AI: Thank you for confirming, John. I'm calling about your outstanding balance of $2,500 that was due on January 15th. We want to work with you to resolve this matter. Can you tell me about your current situation?
-
-John: Look, I've been having some financial difficulties since I lost my job last month. I want to pay, but I just don't have the full amount right now.
-
-AI: I understand that can be challenging, John. We appreciate your honesty and willingness to work with us. Would you be interested in setting up a payment plan that works with your current budget?
-
-John: Yes, that would be helpful. What kind of options do you have?
-
-AI: We can offer a 6-month payment plan of approximately $417 per month, or if that's still too high, we can discuss an 8-month plan for about $312 per month. Which would work better for you?
-
-John: The 8-month plan sounds more manageable. Can we set that up today?
-
-AI: Absolutely! I can set up the 8-month payment plan starting with your first payment on February 15th. Would you like to make that first payment today to get started?
-
-John: Yes, I can do that. Let me get my card.
-
-AI: Perfect! I'll transfer you to our secure payment system to process that first payment and finalize the agreement.`,
-      sentiment: "positive",
-      keywords: ["payment plan", "financial difficulties", "willing to pay", "8-month plan"]
-    },
-    {
-      id: 2,
-      debtorName: "Sarah Johnson",
-      callId: "call_002", 
-      duration: "03:45",
-      timestamp: "2024-01-27 13:15",
-      outcome: "callback_requested",
-      confidence: 0.92,
-      transcription: `AI: Hello, this is calling from XYZ Collections regarding your account. Is this Sarah Johnson?
-
-Sarah: Yes, but I'm at work right now and can't really talk.
-
-AI: I understand you're busy, Sarah. This will just take a moment. I'm calling about your outstanding balance of $1,200. When would be a good time to call you back to discuss this?
-
-Sarah: Can you call me tonight after 7 PM? I'll be home then and can talk properly.
-
-AI: Of course! I'll schedule a callback for tonight at 7:15 PM. We'll discuss payment options that work for your situation. Is this the best number to reach you at?
-
-Sarah: Yes, this number is fine. Thank you for being understanding.
-
-AI: You're welcome, Sarah. We look forward to speaking with you tonight at 7:15 PM. Have a good rest of your day at work.
-
-Sarah: Thank you, bye.`,
-      sentiment: "neutral",
-      keywords: ["work", "callback", "7 PM", "understanding"]
-    }
-  ];
-
-  const recentCampaigns = [
-    {
-      id: 1,
-      name: "Monthly Reminder Campaign",
-      type: "whatsapp",
-      sent: 245,
-      responded: 82,
-      collected: 15400,
-      status: "active",
-      lastRun: "2 hours ago"
-    },
-    {
-      id: 2,
-      name: "Overdue SMS Blast",
-      type: "sms",
-      sent: 156,
-      responded: 23, 
-      collected: 7800,
-      status: "completed",
-      lastRun: "1 day ago"
-    },
-    {
-      id: 3,
-      name: "Settlement Email Series",
-      type: "email",
-      sent: 89,
-      responded: 34,
-      collected: 12600,
-      status: "active",
-      lastRun: "4 hours ago"
-    }
-  ];
-
-  const quickActions = [
-    { icon: MessageSquare, label: "WhatsApp Blast", count: contacts.length || 0, color: "text-green-600" },
-    { icon: Phone, label: "AI Voice Calls", count: contacts.length || 0, color: "text-blue-600" },
-    { icon: Mail, label: "Email Campaign", count: contacts.length || 0, color: "text-purple-600" },
-    { icon: Calendar, label: "Schedule Follow-up", count: Math.min(contacts.length || 0, 45), color: "text-orange-600" }
-  ];
-
-  const openTranscriptionModal = (call: any) => {
-    setSelectedCall(call);
-    setShowTranscription(true);
-  };
-
-  // Create a new agent with the selected personality
-  const handleCreateAgentWithPersonality = async () => {
-    const personality = aiPersonalities.find(p => p.id === selectedTone);
-    if (!personality) return;
-    
-    // Find a voice that matches the selected personality (just for demo)
-    const voiceId = voices.length > 0 ? 
-      voices.find(v => v.gender === (personality.id === 'friendly' ? 'female' : 'male'))?.voice_id || voices[0].voice_id :
-      "default";
-
-    try {
-      const agentData = {
-        name: `${personality.name} Agent`,
-        prompt_template: personality.promptTemplate,
-        voice_id: voiceId
-      };
-      
-      const newAgent = await createNewAgent(agentData);
-      setSelectedAgent(newAgent.id);
-      
+      await agentsApi.deleteAgent(agentId);
+      // Ensure agents is always an array before filtering
+      setAgents(prev => Array.isArray(prev) ? prev.filter(agent => agent.id !== agentId) : []);
       toast({
         title: "Success",
-        description: `Created new ${personality.name} AI agent with matching voice.`,
+        description: "Agent deleted successfully.",
       });
     } catch (error) {
-      console.error("Failed to create agent:", error);
+      console.error("Failed to delete agent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete agent. Please try again.",
+        variant: "destructive",
+      });
     }
+  };
+
+  const handleUpdateAgent = async () => {
+    if (!editingAgent) return;
+
+    try {
+      const data = await agentsApi.updateAgentSystemMessage(editingAgent.id, formData.prompt_template);
+      // Ensure agents is always an array before mapping
+      setAgents(prev => Array.isArray(prev) ? prev.map(agent => 
+        agent.id === editingAgent.id 
+          ? { ...agent, prompt_template: formData.prompt_template }
+          : agent
+      ) : []);
+      setEditingAgent(null);
+      setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
+      toast({
+        title: "Success",
+        description: "Agent updated successfully.",
+      });
+    } catch (error) {
+      console.error("Failed to update agent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update agent. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    const template = promptTemplates.find(t => t.id === templateId);
+    if (template) {
+      setFormData(prev => ({
+        ...prev,
+        prompt_template: template.template
+      }));
+      setSelectedTemplate(templateId);
+    }
+  };
+
+  const handleEditAgent = (agent: Agent) => {
+    setEditingAgent(agent);
+    setFormData({
+      name: agent.name,
+      prompt_template: agent.prompt_template,
+      voice_id: agent.voice_id,
+      temperature: agent.temperature || 0.7
+    });
+    setShowCreateForm(true);
+  };
+
+  const resetForm = () => {
+    setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
+    setSelectedTemplate("");
+    setEditingAgent(null);
+    setShowCreateForm(false);
   };
 
   return (
@@ -422,573 +331,211 @@ Sarah: Thank you, bye.`,
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Assistant</h1>
-          <p className="text-gray-600">Automate communications and manage debtor interactions</p>
+          <h1 className="text-2xl font-bold text-gray-900">AI Assistant Management</h1>
+          <p className="text-gray-600">Create and manage your AI debt collection agents</p>
         </div>
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            className="bg-white shadow-sm"
-            onClick={() => setShowAIConfig(true)}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            AI Settings
-          </Button>
-          <Button 
-            variant="outline" 
-            className="bg-white shadow-sm"
-            onClick={() => setShowAddDebtor(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Debtor
-          </Button>
-          <Button 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-            onClick={() => setShowQuickCampaign(true)}
-          >
-            <Zap className="h-4 w-4 mr-2" />
-            Quick Campaign
-          </Button>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {quickActions.map((action) => (
-          <Card key={action.label} className="border-0 shadow-md bg-white/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{action.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {loadingContacts ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                    ) : (
-                      action.count
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-500">available actions</p>
-                </div>
-                <action.icon className={`h-8 w-8 ${action.color}`} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <Button 
+          onClick={() => setShowCreateForm(true)}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create AI Agent
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* AI Composer */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
+        {/* Existing Agents */}
+        <div className="lg:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                AI Message Composer
+                Your AI Agents
               </CardTitle>
               <CardDescription>
-                Create personalized messages for your debtors
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* AI Personality Selection with Agent Creation */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-gray-700">AI Personality</label>
-                  {loadingAgents ? (
-                    <div className="flex items-center">
-                      <Loader2 className="h-4 w-4 animate-spin mr-2 text-blue-600" />
-                      <span className="text-sm">Loading agents...</span>
-                    </div>
-                  ) : agents.length > 0 ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">Available Agents: {agents.length}</span>
-                      <select 
-                        value={selectedAgent?.toString() || ""} 
-                        onChange={(e) => setSelectedAgent(parseInt(e.target.value))}
-                        className="text-sm border-gray-200 rounded"
-                      >
-                        {agents.map(agent => (
-                          <option key={agent.id} value={agent.id}>{agent.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : null}
-                </div>
-                
-                <div className="grid grid-cols-3 gap-3">
-                  {aiPersonalities.map((personality) => (
-                    <button
-                      key={personality.id}
-                      onClick={() => setSelectedTone(personality.id)}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        selectedTone === personality.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 ${personality.color}`}>
-                        <personality.icon className="h-5 w-5" />
-                      </div>
-                      <p className="font-medium text-sm">{personality.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">{personality.description}</p>
-                    </button>
-                  ))}
-                </div>
-                
-                {agents.length === 0 && !loadingAgents && (
-                  <div className="mt-3">
-                    <Button 
-                      onClick={handleCreateAgentWithPersonality}
-                      className="w-full"
-                      disabled={creatingAgent || loadingVoices}
-                    >
-                      {creatingAgent ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Creating Agent...
-                        </>
-                      ) : (
-                        <>
-                          <Bot className="h-4 w-4 mr-2" />
-                          Create Agent with Selected Personality
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Message Type & Template */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Message Type</label>
-                  <select className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="whatsapp">WhatsApp Message</option>
-                    <option value="sms">SMS</option>
-                    <option value="email">Email</option>
-                    <option value="voice">AI Voice Call</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Template</label>
-                  <select 
-                    value={selectedTemplate}
-                    onChange={(e) => {
-                      setSelectedTemplate(e.target.value);
-                      const template = templates.whatsapp.find(t => t.id === e.target.value);
-                      if (template) {
-                        setMessage(template.content);
-                      }
-                    }}
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select template...</option>
-                    {templates.whatsapp.map((template) => (
-                      <option key={template.id} value={template.id}>{template.title}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Message Composer */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Message Content</label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message here or select a template..."
-                  className="w-full h-32 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
-                <div className="flex items-center justify-between mt-3">
-                  <div className="flex gap-2">
-                    <Badge variant="outline">Variables: {"{name}"}, {"{amount}"}, {"{due_date}"}</Badge>
-                    <Button size="sm" variant="ghost">
-                      <Volume2 className="h-4 w-4 mr-1" />
-                      Preview Audio
-                    </Button>
-                  </div>
-                  <span className="text-sm text-gray-500">{message.length}/160 characters</span>
-                </div>
-              </div>
-
-              {/* Send Options */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  disabled={message.trim().length === 0 || contacts.length === 0}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Send to Selected Debtors ({contacts.length})
-                </Button>
-                <Button variant="outline" className="bg-white">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Schedule Campaign
-                </Button>
-                <Button variant="outline" className="bg-white">
-                  <Target className="h-4 w-4 mr-2" />
-                  Test Message
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Call Transcriptions */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mic className="h-5 w-5" />
-                Recent Call Transcriptions
-              </CardTitle>
-              <CardDescription>
-                AI-generated transcriptions of recent debt collection calls
+                Manage your existing AI collection agents
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {callTranscriptions.map((call) => (
-                  <div key={call.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                          <Mic className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">{call.debtorName}</h4>
-                          <p className="text-sm text-gray-500">{call.timestamp}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={`mb-2 ${
-                          call.outcome === 'payment_agreed' ? 'bg-green-100 text-green-800' :
-                          call.outcome === 'callback_requested' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {call.outcome.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                        <p className="text-sm font-medium">Duration: {call.duration}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Target className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">Confidence: {Math.round(call.confidence * 100)}%</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className={`h-2 w-2 rounded-full ${
-                            call.sentiment === 'positive' ? 'bg-green-500' :
-                            call.sentiment === 'negative' ? 'bg-red-500' : 'bg-yellow-500'
-                          }`}></span>
-                          <span className="text-sm text-gray-600 capitalize">{call.sentiment}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="h-8"
-                          onClick={() => openTranscriptionModal(call)}
-                        >
-                          <FileText className="h-3 w-3 mr-1" />
-                          View Full
-                        </Button>
-                        <Button size="sm" variant="outline" className="h-8">
-                          <Download className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
-                      <strong>Keywords:</strong> {call.keywords.join(", ")}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Campaigns */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Recent Campaigns
-              </CardTitle>
-              <CardDescription>
-                Track performance of your automated campaigns
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentCampaigns.map((campaign) => (
-                  <div key={campaign.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          {campaign.type === 'whatsapp' && <MessageSquare className="h-5 w-5 text-green-600" />}
-                          {campaign.type === 'sms' && <Phone className="h-5 w-5 text-blue-600" />}
-                          {campaign.type === 'email' && <Mail className="h-5 w-5 text-purple-600" />}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">{campaign.name}</h4>
-                          <p className="text-sm text-gray-500">Last run {campaign.lastRun}</p>
-                        </div>
-                      </div>
-                      <Badge variant={campaign.status === 'active' ? 'default' : 'outline'}>
-                        {campaign.status}
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-4 gap-4 text-center">
-                      <div>
-                        <p className="text-lg font-semibold text-gray-900">{campaign.sent}</p>
-                        <p className="text-xs text-gray-500">Sent</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-blue-600">{campaign.responded}</p>
-                        <p className="text-xs text-gray-500">Responded</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-green-600">${campaign.collected.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">Collected</p>
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-purple-600">{Math.round((campaign.responded / campaign.sent) * 100)}%</p>
-                        <p className="text-xs text-gray-500">Response Rate</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Side Panel */}
-        <div className="space-y-6">
-          {/* AI Agents */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
-                AI Agents
-              </CardTitle>
-              <CardDescription>
-                Your configured AI voice agents
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
               {loadingAgents ? (
-                <div className="flex flex-col items-center justify-center py-6">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
-                  <p className="text-sm text-gray-500">Loading agents...</p>
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 </div>
-              ) : agents.length > 0 ? (
-                <>
+              ) : !Array.isArray(agents) || agents.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 mb-4">No AI agents created yet</p>
+                  <Button onClick={() => setShowCreateForm(true)}>
+                    Create your first agent
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
                   {agents.map((agent) => (
-                    <div key={agent.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                      <div>
-                        <p className="text-sm font-medium">{agent.name}</p>
-                        <p className="text-xs text-gray-500">
-                          Voice: {voices.find(v => v.voice_id === agent.voice_id)?.name || agent.voice_id}
-                        </p>
+                    <div key={agent.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-lg">{agent.name}</h3>
+                            <Badge variant={agent.is_active ? "default" : "secondary"}>
+                              {agent.is_active ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">
+                            Voice: {Array.isArray(voices) ? voices.find(v => v.voice_id === agent.voice_id)?.name || "Unknown" : "Unknown"}
+                          </p>
+                          <p className="text-sm text-gray-500 line-clamp-2">
+                            {agent.prompt_template.substring(0, 150)}...
+                          </p>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditAgent(agent)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteAgent(agent.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <Badge className="bg-green-100 text-green-800">Active</Badge>
                     </div>
                   ))}
-                  <Button 
-                    onClick={handleCreateAgentWithPersonality}
-                    className="w-full"
-                    disabled={creatingAgent || loadingVoices}
-                  >
-                    {creatingAgent ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating Agent
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create New Agent
-                      </>
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6">
-                  <Bot className="h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 mb-4">No AI agents configured yet</p>
-                  <Button 
-                    onClick={handleCreateAgentWithPersonality}
-                    disabled={creatingAgent || loadingVoices}
-                  >
-                    {creatingAgent ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating Agent
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create First Agent
-                      </>
-                    )}
-                  </Button>
                 </div>
               )}
             </CardContent>
           </Card>
+        </div>
 
-          {/* Auto-Reminders */}
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-blue-50">
+        {/* Create/Edit Form */}
+        <div className="space-y-6">
+          {showCreateForm && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  {editingAgent ? "Edit Agent" : "Create New Agent"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Agent Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Professional Collector"
+                    disabled={editingAgent !== null}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="voice">Voice</Label>
+                  <Select 
+                    value={formData.voice_id} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, voice_id: value }))}
+                    disabled={editingAgent !== null}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a voice" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(voices) && voices.map((voice) => (
+                        <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                          {voice.name} ({voice.gender})
+                        </SelectItem>
+                      ))}
+                      {(!Array.isArray(voices) || voices.length === 0) && (
+                        <SelectItem value="default" disabled>
+                          No voices available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="template">Template</Label>
+                  <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {promptTemplates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="prompt">Custom Prompt</Label>
+                  <Textarea
+                    id="prompt"
+                    value={formData.prompt_template}
+                    onChange={(e) => setFormData(prev => ({ ...prev, prompt_template: e.target.value }))}
+                    placeholder="Enter your custom prompt or select a template above..."
+                    rows={8}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={editingAgent ? handleUpdateAgent : handleCreateAgent}
+                    disabled={creatingAgent}
+                    className="flex-1"
+                  >
+                    {creatingAgent ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : null}
+                    {editingAgent ? "Update Agent" : "Create Agent"}
+                  </Button>
+                  <Button variant="outline" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Template Library */}
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Auto-Reminders
-              </CardTitle>
+              <CardTitle>Template Library</CardTitle>
               <CardDescription>
-                Automated follow-up sequences
+                Pre-built prompts for different collection styles
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                <div>
-                  <p className="text-sm font-medium">7-Day Overdue</p>
-                  <p className="text-xs text-gray-500">WhatsApp + Email</p>
-                </div>
-                <Badge className="bg-green-100 text-green-800">Active</Badge>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                <div>
-                  <p className="text-sm font-medium">30-Day Final Notice</p>
-                  <p className="text-xs text-gray-500">All channels</p>
-                </div>
-                <Badge className="bg-green-100 text-green-800">Active</Badge>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                <div>
-                  <p className="text-sm font-medium">Payment Plan Reminder</p>
-                  <p className="text-xs text-gray-500">SMS + Call</p>
-                </div>
-                <Badge variant="outline">Paused</Badge>
-              </div>
-              
-              <Button variant="outline" className="w-full bg-white">
-                <Settings className="h-4 w-4 mr-2" />
-                Configure Rules
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Today's Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Messages Sent</span>
-                </div>
-                <span className="font-semibold">1,247</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm">Responses</span>
-                </div>
-                <span className="font-semibold">89</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm">Failed Deliveries</span>
-                </div>
-                <span className="font-semibold">23</span>
-              </div>
-              
-              <Separator />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Collection Rate</span>
-                <span className="font-bold text-green-600">7.1%</span>
+            <CardContent>
+              <div className="space-y-3">
+                {promptTemplates.map((template) => (
+                  <div key={template.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <h4 className="font-medium text-sm">{template.name}</h4>
+                    <p className="text-xs text-gray-500 mt-1">{template.description}</p>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="mt-2"
+                      onClick={() => handleTemplateSelect(template.id)}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Use Template
+                    </Button>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-
-      {/* Modals */}
-      <AIConfigModal open={showAIConfig} onOpenChange={setShowAIConfig} />
-      <AddDebtorModal open={showAddDebtor} onOpenChange={setShowAddDebtor} />
-      <QuickCampaignModal open={showQuickCampaign} onOpenChange={setShowQuickCampaign} />
-
-      {/* Transcription Modal */}
-      {selectedCall && (
-        <Dialog open={showTranscription} onOpenChange={setShowTranscription}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Mic className="h-5 w-5" />
-                Call Transcription - {selectedCall.debtorName}
-              </DialogTitle>
-              <DialogDescription>
-                Full conversation transcript with AI analysis
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-600">Call Duration</p>
-                  <p className="font-semibold">{selectedCall.duration}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Confidence Score</p>
-                  <p className="font-semibold">{Math.round(selectedCall.confidence * 100)}%</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Sentiment</p>
-                  <Badge className={`${
-                    selectedCall.sentiment === 'positive' ? 'bg-green-100 text-green-800' :
-                    selectedCall.sentiment === 'negative' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {selectedCall.sentiment}
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="p-4 bg-white border rounded-lg">
-                <h4 className="font-semibold mb-3">Full Transcript</h4>
-                <div className="whitespace-pre-wrap text-sm">{selectedCall.transcription}</div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
-                <Button variant="outline">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Email Transcript
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };

@@ -1,20 +1,18 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
   Users, 
-  Phone, 
+  PhoneCall, 
+  MessageSquare, 
+  Bot, 
   BarChart3, 
-  DollarSign, 
-  FileText, 
-  Settings,
+  Settings, 
+  CreditCard,
   ChevronLeft,
   ChevronRight,
-  Bot,
-  Headphones,
-  UsersRound,
-  Shield
+  Phone,
+  Zap
 } from "lucide-react";
 import type { DashboardPage } from "@/pages/Dashboard";
 
@@ -29,12 +27,13 @@ export const Sidebar = ({ currentPage, onPageChange, collapsed, onToggleCollapse
   const menuItems = [
     { id: 'overview' as DashboardPage, label: 'Overview', icon: LayoutDashboard },
     { id: 'debtors' as DashboardPage, label: 'Debtors', icon: Users },
+    { id: 'call-logs' as DashboardPage, label: 'Call Logs', icon: PhoneCall },
+    { id: 'batch-calling' as DashboardPage, label: 'Batch Communications', icon: Zap },
+    { id: 'phone-numbers' as DashboardPage, label: 'Phone Numbers', icon: Phone },
     { id: 'ai-assistant' as DashboardPage, label: 'AI Assistant', icon: Bot },
-    { id: 'call-center' as DashboardPage, label: 'Call Center', icon: Headphones },
-    { id: 'teams' as DashboardPage, label: 'Teams', icon: UsersRound },
+    { id: 'integrations' as DashboardPage, label: 'Integrations', icon: Settings },
+    { id: 'messages' as DashboardPage, label: 'Messages', icon: MessageSquare },
     { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
-    { id: 'settings' as DashboardPage, label: 'Settings', icon: Settings },
-    { id: 'admin' as DashboardPage, label: 'Admin Panel', icon: Shield },
   ];
 
   return (

@@ -4,7 +4,7 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'http://localhost:5050', // From the API spec's server URL
 });
-
+const API_BASE_URL = 'http://localhost:5050'; // Base URL for the API
 // Mock user ID for now - in a real app this would come from authentication
 const DEFAULT_USER_ID = 1;
 
@@ -76,14 +76,28 @@ export const contactsApi = {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      
       const response = await api.post(`/contacts/upload-csv?user_id=${DEFAULT_USER_ID}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: 60000, // 60 second timeout for large files
       });
+      
+      console.log("CSV upload response:", response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("API error in uploadContactsCSV:", error);
+      
+      // Provide more specific error information
+      if (error.code === 'ECONNABORTED') {
+        throw new Error("Upload timeout. Please try with a smaller file.");
+      }
+      
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      
       throw error;
     }
   },
@@ -102,27 +116,94 @@ export const contactsApi = {
 // Agents API
 export const agentsApi = {
   getAgents: async () => {
-    const response = await api.get(`/agents/?user_id=${DEFAULT_USER_ID}`);
-    return response.data;
+    try {
+      const response = await api.get(`/agents/?user_id=${DEFAULT_USER_ID}`);
+      console.log("Raw agents API response:", response.data); // Debug log
+      
+      // Handle different response structures
+      let agentsData = response.data;
+      if (Array.isArray(agentsData)) {
+        return agentsData;
+      } else if (agentsData && Array.isArray(agentsData.agents)) {
+        return agentsData.agents;
+      } else if (agentsData && Array.isArray(agentsData.data)) {
+        return agentsData.data;
+      } else {
+        console.warn("Unexpected agents response structure:", agentsData);
+        return [];
+      }
+    } catch (error: any) {
+      console.error("API error in getAgents:", error);
+      
+      // If it's a network error or server is down, provide more specific error
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        throw new Error("Cannot connect to server. Please ensure the API server is running on http://localhost:5050");
+      }
+      
+      // If it's a 404, the endpoint might not exist
+      if (error.response?.status === 404) {
+        throw new Error("Agents API endpoint not found. Please check if the server supports agent management.");
+      }
+      
+      throw error;
+    }
   },
   
   createAgent: async (agentData: any) => {
-    const response = await api.post(`/agents/?user_id=${DEFAULT_USER_ID}`, agentData);
-    return response.data;
+    try {
+      const response = await api.post(`/agents/?user_id=${DEFAULT_USER_ID}`, agentData);
+      console.log("Agent created:", response.data); // Debug log
+      return response.data;
+    } catch (error) {
+      console.error("API error in createAgent:", error);
+      throw error;
+    }
   },
   
   updateAgentSystemMessage: async (agentId: number, promptTemplate: string) => {
-    const response = await api.put(`/agents/${agentId}/system-message`, { prompt_template: promptTemplate });
-    return response.data;
+    try {
+      const response = await api.put(`/agents/${agentId}/system-message`, { prompt_template: promptTemplate });
+      return response.data;
+    } catch (error) {
+      console.error("API error in updateAgentSystemMessage:", error);
+      throw error;
+    }
+  },
+  
+  deleteAgent: async (agentId: number) => {
+    try {
+      const response = await api.delete(`/agents/${agentId}`);
+      return response.data;
+    } catch (error) {
+      console.error("API error in deleteAgent:", error);
+      throw error;
+    }
   }
 };
 
 // Voices API
 export const voicesApi = {
   getVoices: async (provider?: string) => {
-    const url = provider ? `/voices/?provider=${provider}` : '/voices/';
-    const response = await api.get(url);
-    return response.data;
+    try {
+      const url = provider ? `/voices/?provider=${provider}` : '/voices/';
+      const response = await api.get(url);
+      
+      // Handle different response structures
+      let voicesData = response.data;
+      if (Array.isArray(voicesData)) {
+        return voicesData;
+      } else if (voicesData && Array.isArray(voicesData.voices)) {
+        return voicesData.voices;
+      } else if (voicesData && Array.isArray(voicesData.data)) {
+        return voicesData.data;
+      } else {
+        console.warn("Unexpected voices response structure:", voicesData);
+        return [];
+      }
+    } catch (error) {
+      console.error("API error in getVoices:", error);
+      return []; // Return empty array on error
+    }
   },
   
   createVoice: async (voiceData: any) => {
@@ -133,64 +214,185 @@ export const voicesApi = {
 
 // Calls API
 export const callsApi = {
-  makeOutboundCall: async (contactId: number, agentId: number) => {
-    const response = await api.post(`/calls/outbound?user_id=${DEFAULT_USER_ID}`, {
-      contact_id: contactId,
-      agent_id: agentId,
-      call_type: 'outbound'
-    });
-    return response.data;
-  },
-  
-  getAllCalls: async (callType?: string, status?: string) => {
+  // Get all calls for a user
+  getCalls: async (userId: number = 1) => {
     try {
-      let url = `/calls/?user_id=${DEFAULT_USER_ID}`;
-      const params = [];
-      if (callType) params.push(`call_type=${callType}`);
-      if (status) params.push(`status=${status}`);
-      if (params.length > 0) url += `&${params.join('&')}`;
+      const response = await api.get(`/calls/?user_id=${userId}`);
       
-      const response = await api.get(url);
-      return response.data;
-    } catch (error) {
-      console.error("API error in getAllCalls:", error);
-      throw error;
+      // Handle different response structures
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (response.data && Array.isArray(response.data.calls)) {
+        return response.data.calls;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      } else {
+        console.warn("Unexpected calls response structure:", response.data);
+        return [];
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch calls:", error);
+      return [];
     }
   },
-  
-  getCall: async (callId: number) => {
+
+  // Get calls with filters
+  getCallsWithFilters: async (userId: number = 1, filters: { call_type?: string, status?: string } = {}) => {
+    try {
+      const params = new URLSearchParams({ user_id: userId.toString() });
+      
+      if (filters.call_type) {
+        params.append('call_type', filters.call_type);
+      }
+      
+      if (filters.status) {
+        params.append('status', filters.status);
+      }
+      
+      const response = await api.get(`/calls/?${params}`);
+      
+      // Handle different response structures
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (response.data && Array.isArray(response.data.calls)) {
+        return response.data.calls;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      } else {
+        console.warn("Unexpected calls response structure:", response.data);
+        return [];
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch calls with filters:", error);
+      return [];
+    }
+  },
+
+  // Get specific call by ID
+  getCallById: async (callId: string) => {
     try {
       const response = await api.get(`/calls/${callId}`);
       return response.data;
-    } catch (error) {
-      console.error("API error in getCall:", error);
-      throw error;
+    } catch (error: any) {
+      console.error("Failed to fetch call by ID:", error);
+      // Return null instead of throwing for 404s
+      if (error.response?.status === 404) {
+        return null;
+      }
+      return null;
     }
   },
-  
-  getCallTranscript: async (callId: number) => {
+
+  // Create outbound call
+  makeOutboundCall: async (contactId: number, agentId: number, userId: number = 1) => {
     try {
-      const response = await api.get(`/calls/${callId}/transcript`);
+      const response = await api.post(`/calls/outbound?user_id=${userId}`, {
+        contact_id: contactId,
+        agent_id: agentId,
+        call_type: 'outbound'
+      });
       return response.data;
     } catch (error) {
-      console.error("API error in getCallTranscript:", error);
+      console.error("Failed to initiate call:", error);
       throw error;
     }
   },
-  
-  updateCallTranscript: async (callId: number, transcriptData: any) => {
+
+  // Update call status
+  updateCallStatus: async (callId: string, status: string, duration?: number) => {
+    try {
+      const response = await api.put(`/calls/${callId}/status`, {
+        status,
+        duration,
+        end_time: status === 'completed'
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to update call status:", error);
+      throw error;
+    }
+  },
+
+  // Update call transcript
+  updateCallTranscript: async (callId: string, transcriptData: {
+    transcript: string;
+    summary?: string;
+    sentiment?: string;
+    confidence_score?: number;
+    recording_url?: string;
+  }) => {
     try {
       const response = await api.put(`/calls/${callId}/transcript`, transcriptData);
       return response.data;
     } catch (error) {
-      console.error("API error in updateCallTranscript:", error);
+      console.error("Failed to update call transcript:", error);
       throw error;
     }
   },
-  
-  getCallStream: async (callId: number) => {
-    const response = await api.get(`/stream/${callId}`);
-    return response.data;
+
+  // Get call transcript
+  getCallTranscript: async (callId: string) => {
+    try {
+      const response = await api.get(`/calls/${callId}/transcript`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Failed to fetch call transcript:", error);
+      // Return null instead of throwing for 404s
+      return null;
+    }
+  },
+
+  // Download transcript
+  downloadTranscript: async (callId: string, format: 'pdf' | 'txt' = 'pdf') => {
+    try {
+      const response = await api.post(`/calls/${callId}/transcript/download`, {
+        call_id: callId,
+        format
+      }, {
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to download transcript:", error);
+      throw error;
+    }
+  },
+
+  // Email transcript
+  emailTranscript: async (callId: string, email: string, format: 'pdf' | 'txt' = 'pdf') => {
+    try {
+      const response = await api.post(`/calls/${callId}/transcript/download`, {
+        call_id: callId,
+        format,
+        email
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to email transcript:", error);
+      throw error;
+    }
+  },
+
+  // Get live transcript for active calls
+  getLiveTranscript: async (callId: string) => {
+    try {
+      const response = await api.get(`/calls/${callId}/live-transcript`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch live transcript:", error);
+      return null;
+    }
+  },
+
+  // Get real-time call status
+  getCallStatus: async (callId: string) => {
+    try {
+      const response = await api.get(`/calls/${callId}/status`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch call status:", error);
+      return null;
+    }
   }
 };
 
@@ -198,34 +400,45 @@ export const callsApi = {
 export const dashboardApi = {
   getSummary: async (date?: string) => {
     try {
-      const url = date 
-        ? `/dashboard/summary?user_id=${DEFAULT_USER_ID}&date=${date}`
-        : `/dashboard/summary?user_id=${DEFAULT_USER_ID}`;
-      const response = await api.get(url);
+      const params = new URLSearchParams({ user_id: DEFAULT_USER_ID.toString() });
+      if (date) {
+        params.append('date', date);
+      }
+      const response = await api.get(`/dashboard/summary?${params}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("API error in getSummary:", error);
-      throw error;
+      return null;
     }
   },
 
   getActiveCalls: async () => {
     try {
       const response = await api.get(`/dashboard/active-calls?user_id=${DEFAULT_USER_ID}`);
-      return response.data;
-    } catch (error) {
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error: any) {
       console.error("API error in getActiveCalls:", error);
-      throw error;
+      return [];
     }
   },
 
   getCallLogs: async () => {
     try {
       const response = await api.get(`/dashboard/call-logs?user_id=${DEFAULT_USER_ID}`);
-      return response.data;
-    } catch (error) {
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error: any) {
       console.error("API error in getCallLogs:", error);
-      throw error;
+      return [];
+    }
+  },
+
+  getAccountUsage: async () => {
+    try {
+      const response = await api.get(`/dashboard/usage?user_id=${DEFAULT_USER_ID}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in getAccountUsage:", error);
+      return null;
     }
   }
 };
@@ -240,9 +453,9 @@ export const analyticsApi = {
       }
       const response = await api.get(url);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("API error in getCollectionPerformance:", error);
-      throw error;
+      return null;
     }
   },
 
@@ -250,9 +463,9 @@ export const analyticsApi = {
     try {
       const response = await api.get(`/analytics/debt-recovery?user_id=${DEFAULT_USER_ID}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("API error in getDebtRecoveryAnalytics:", error);
-      throw error;
+      return null;
     }
   }
 };

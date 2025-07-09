@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -17,12 +16,20 @@ import { AgentDashboard } from "@/components/dashboard/pages/AgentDashboard";
 import { PaymentProcessing } from "@/components/dashboard/pages/PaymentProcessing";
 import { ComplianceCenter } from "@/components/dashboard/pages/ComplianceCenter";
 import { PredictiveAnalytics } from "@/components/dashboard/pages/PredictiveAnalytics";
+import CallLogs from "@/components/dashboard/pages/CallLogs";
+import PhoneNumbers from "@/components/dashboard/pages/PhoneNumbers";
+import Integrations from "@/components/dashboard/pages/Integrations";
+import BatchCalling from "@/components/dashboard/pages/BatchCalling";
 
 export type DashboardPage = 
   | 'overview' 
   | 'debtors' 
   | 'debtor-profile' 
+  | 'call-logs'
+  | 'batch-calling'
+  | 'phone-numbers'
   | 'ai-assistant' 
+  | 'integrations'
   | 'call-center'
   | 'calls'
   | 'collections'
@@ -51,8 +58,16 @@ const Dashboard = () => {
         }} />;
       case 'debtor-profile':
         return <DebtorProfile debtorId={selectedDebtorId} onBack={() => setCurrentPage('debtors')} />;
+      case 'call-logs':
+        return <CallLogs />;
+      case 'batch-calling':
+        return <BatchCalling />;
+      case 'phone-numbers':
+        return <PhoneNumbers />;
       case 'ai-assistant':
         return <AIAssistant />;
+      case 'integrations':
+        return <Integrations />;
       case 'call-center':
         return <CallCenter />;
       case 'calls':

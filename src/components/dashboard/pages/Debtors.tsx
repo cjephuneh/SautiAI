@@ -22,7 +22,7 @@ import {
   Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { contactsApi } from "@/services/api";
+import { contactsApi, callsApi, agentsApi } from "@/services/api";
 import { useToast } from "@/components/ui/use-toast";
 import { AddDebtorModal } from "../modals/AddDebtorModal";
 import { EditDebtorModal } from "../modals/EditDebtorModal";
@@ -65,10 +65,13 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
   const [showEditDebtorModal, setShowEditDebtorModal] = useState(false);
   const [selectedDebtorForEdit, setSelectedDebtorForEdit] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [initiatingCall, setInitiatingCall] = useState<string | null>(null);
+  const [agents, setAgents] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchDebtors();
+    fetchAgents();
   }, []);
 
   const fetchDebtors = async () => {
@@ -110,24 +113,70 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
     }
   };
 
+  const fetchAgents = async () => {
+    try {
+      const response = await agentsApi.getAgents();
+      console.log("Agents API response:", response); // Debug log
+      
+      // Handle different response structures
+      const agentsArray = Array.isArray(response) ? response : response.data || response.agents || [];
+      setAgents(agentsArray);
+    } catch (error) {
+      console.error("Failed to fetch agents:", error);
+      setAgents([]); // Set empty array on error
+    }
+  };
+
   const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
+    
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast({
+        title: "Error",
+        description: "Please select a valid CSV file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Error", 
+        description: "File size must be less than 10MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
     
     try {
-      await contactsApi.uploadContactsCSV(file);
+      const result = await contactsApi.uploadContactsCSV(file);
+      
       toast({
         title: "Success",
-        description: "Debtors imported successfully",
+        description: `Successfully imported ${result.imported_count || 'multiple'} contacts from CSV.`,
       });
+      
       fetchDebtors(); // Refresh the list
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to import CSV:", error);
+      
+      let errorMessage = "Failed to import contacts. Please check your file format and try again.";
+      
+      if (error.response?.status === 400) {
+        errorMessage = "Invalid CSV format. Please ensure your file has the required columns: name, phone_number, debt_amount.";
+      } else if (error.response?.status === 413) {
+        errorMessage = "File too large. Please reduce file size and try again.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to import contacts. Please check your file format and try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -164,6 +213,73 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
       });
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleInitiateCall = async (debtorId: string, debtorName: string) => {
+    console.log("Available agents:", agents); // Debug log
+    
+    if (!agents || agents.length === 0) {
+      toast({
+        title: "No Agents Available",
+        description: "Please create an AI agent first before initiating calls.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Find the first valid agent with an id
+    const selectedAgent = agents.find(agent => agent && agent.id);
+    
+    if (!selectedAgent) {
+      toast({
+        title: "Invalid Agent Configuration",
+        description: "No valid agents found. Please check your agent configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!confirm(`Initiate AI call to ${debtorName}? Agent "${selectedAgent.name || 'Unknown Agent'}" will handle the call.`)) {
+      return;
+    }
+
+    setInitiatingCall(debtorId);
+    
+    try {
+      const callResult = await callsApi.makeOutboundCall(
+        Number(debtorId), 
+        selectedAgent.id
+      );
+      
+      toast({
+        title: "Call Initiated",
+        description: `AI agent "${selectedAgent.name || 'Agent'}" is now calling ${debtorName}.`,
+      });
+      
+      // You can redirect to call monitoring page or show call details
+      console.log("Call initiated:", callResult);
+      
+    } catch (error: any) {
+      console.error("Failed to initiate call:", error);
+      
+      let errorMessage = "Failed to initiate call. Please try again.";
+      
+      if (error.response?.status === 404) {
+        errorMessage = "Contact or agent not found. Please refresh the page and try again.";
+      } else if (error.response?.status === 400) {
+        errorMessage = "Invalid call parameters. Please check the contact details.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setInitiatingCall(null);
     }
   };
 
@@ -403,13 +519,31 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
                         <div className="flex flex-col gap-1">
                           <span className="text-sm text-gray-600">{debtor.phone_number}</span>
                           <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                              <Phone className="h-3 w-3" />
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleInitiateCall(debtor.id.toString(), debtor.name);
+                              }}
+                              disabled={initiatingCall === debtor.id.toString() || !agents || agents.length === 0}
+                              title={
+                                !agents || agents.length === 0 
+                                  ? "No AI agents available" 
+                                  : "Initiate AI Call"
+                              }
+                            >
+                              {initiatingCall === debtor.id.toString() ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Phone className="h-3 w-3" />
+                              )}
                             </Button>
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Send Email">
                               <Mail className="h-3 w-3" />
                             </Button>
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Send SMS">
                               <MessageSquare className="h-3 w-3" />
                             </Button>
                           </div>

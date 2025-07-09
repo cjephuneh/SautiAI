@@ -608,6 +608,78 @@
       ]
     },
     {
+      "name": "Live Transcript Management",
+      "item": [
+        {
+          "name": "Get Live Transcript",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/live-transcript",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "live-transcript"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Call Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Active Calls",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/active-calls?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "active-calls"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Live Transcript",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transcript\": \"Agent: Hello, this is Sarah calling about your account. Customer: Hi Sarah, I've been expecting your call.\",\n  \"participants\": [\n    {\"name\": \"Sarah\", \"type\": \"agent\"},\n    {\"name\": \"John\", \"type\": \"customer\"}\n  ],\n  \"metrics\": {\n    \"sentiment\": \"positive\",\n    \"confidence\": 0.92,\n    \"word_count\": 15\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/1/live-transcript",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "1", "live-transcript"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Dashboard & Analytics",
       "item": [
         {
@@ -836,6 +908,287 @@
               "raw": "{{baseUrl}}/admin",
               "host": ["{{baseUrl}}"],
               "path": ["admin"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Batch Calling",
+      "item": [
+        {
+          "name": "Start Batch Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_ids\": [1, 2, 3, 4, 5],\n  \"agent_id\": 1,\n  \"campaign_name\": \"Weekly Collection Campaign\",\n  \"schedule_type\": \"immediate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-calls/start?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-calls", "start"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Batch Campaign Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch-calls/campaign/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-calls", "campaign", "1", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pause Batch Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"pause\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-calls/campaign/1/control",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-calls", "campaign", "1", "control"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resume Batch Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"resume\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-calls/campaign/1/control",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-calls", "campaign", "1", "control"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stop Batch Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"stop\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-calls/campaign/1/control",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-calls", "campaign", "1", "control"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Campaign Results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch-calls/campaign/1/results",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-calls", "campaign", "1", "results"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Batch Communications",
+      "item": [
+        {
+          "name": "Start Batch Voice Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_ids\": [1, 2, 3, 4, 5],\n  \"agent_id\": 1,\n  \"campaign_name\": \"Weekly Collection Campaign\",\n  \"channel\": \"voice\",\n  \"schedule_type\": \"immediate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/start?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "start"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Batch Email Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_ids\": [1, 2, 3, 4, 5],\n  \"campaign_name\": \"Payment Reminder Emails\",\n  \"channel\": \"email\",\n  \"subject\": \"Payment Reminder - {name}\",\n  \"content\": \"Dear {name}, we're reaching out regarding your outstanding balance of ${debt_amount}. Please contact us to discuss payment options.\",\n  \"schedule_type\": \"immediate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/start?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "start"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Batch SMS Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_ids\": [1, 2, 3, 4, 5],\n  \"campaign_name\": \"SMS Payment Reminders\",\n  \"channel\": \"sms\",\n  \"content\": \"Hi {name}, this is a reminder about your ${debt_amount} balance. Please call us at 1-800-COLLECT.\",\n  \"schedule_type\": \"immediate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/start?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "start"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Batch WhatsApp Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_ids\": [1, 2, 3, 4, 5],\n  \"campaign_name\": \"WhatsApp Payment Reminders\",\n  \"channel\": \"whatsapp\",\n  \"content\": \"Hello {name}! 👋 We hope you're doing well. We wanted to reach out about your ${debt_amount} balance. Let's work together to find a solution that works for you.\",\n  \"schedule_type\": \"immediate\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/start?user_id={{user_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "start"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Campaign Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/campaign/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "campaign", "1", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Campaign Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/campaign/1/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "campaign", "1", "analytics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Message Delivery Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batch-communications/message/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["batch-communications", "message", "1", "status"]
             }
           },
           "response": []

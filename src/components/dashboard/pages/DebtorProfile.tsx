@@ -52,6 +52,7 @@ interface Debtor {
   creditScore?: number;
   assignedCollector?: string;
   notes?: string;
+  paymentPlan?: boolean;
   // Derived fields
   status?: string;
   phone?: string;
@@ -115,33 +116,79 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
 
   const fetchAgents = async () => {
     try {
-      const data = await agentsApi.getAgents();
-      setAgents(data);
+      const response = await agentsApi.getAgents();
+      console.log("Agents API response:", response); // Debug log
+      
+      // Handle different response structures
+      const agentsArray = Array.isArray(response) ? response : response.data || response.agents || [];
+      setAgents(agentsArray);
     } catch (error) {
       console.error("Failed to fetch AI agents:", error);
+      setAgents([]); // Set empty array on error
     }
   };
 
-  const initiateAICall = async () => {
-    if (!debtor || agents.length === 0) return;
+  const handleInitiateCall = async () => {
+    console.log("Available agents:", agents); // Debug log
     
+    if (!agents || agents.length === 0) {
+      toast({
+        title: "No Agents Available",
+        description: "Please create an AI agent first before initiating calls.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!debtor) return;
+
+    // Find the first valid agent with an id
+    const selectedAgent = agents.find(agent => agent && agent.id);
+    
+    if (!selectedAgent) {
+      toast({
+        title: "Invalid Agent Configuration",
+        description: "No valid agents found. Please check your agent configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!confirm(`Initiate AI call to ${debtor.name}? Agent "${selectedAgent.name || 'Unknown Agent'}" will handle the call.`)) {
+      return;
+    }
+
     setInitiatingCall(true);
+    
     try {
-      // Use the first available agent
-      const agentId = agents[0].id;
-      const result = await callsApi.makeOutboundCall(parseInt(debtor.id), agentId);
+      const callResult = await callsApi.makeOutboundCall(
+        Number(debtorId), 
+        selectedAgent.id
+      );
       
       toast({
         title: "Call Initiated",
-        description: "AI agent is calling the debtor now.",
+        description: `AI agent "${selectedAgent.name || 'Agent'}" is now calling ${debtor.name}.`,
       });
       
-      // You could now redirect to a call monitoring page
-    } catch (error) {
+      console.log("Call initiated:", callResult);
+      
+    } catch (error: any) {
       console.error("Failed to initiate call:", error);
+      
+      let errorMessage = "Failed to initiate call. Please try again.";
+      
+      if (error.response?.status === 404) {
+        errorMessage = "Contact or agent not found. Please refresh the page and try again.";
+      } else if (error.response?.status === 400) {
+        errorMessage = "Invalid call parameters. Please check the contact details.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Call Failed",
-        description: "Unable to initiate call. Please try again.",
+        title: "Error",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -259,7 +306,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
           <Button 
             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
             disabled={initiatingCall || agents.length === 0}
-            onClick={initiateAICall}
+            onClick={handleInitiateCall}
           >
             {initiatingCall ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -430,8 +477,8 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button 
                   className="bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={initiatingCall || agents.length === 0}
-                  onClick={initiateAICall}
+                  disabled={initiatingCall || !agents || agents.length === 0}
+                  onClick={handleInitiateCall}
                 >
                   {initiatingCall ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -439,6 +486,9 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
                     <Phone className="h-4 w-4 mr-2" />
                   )}
                   Initiate AI Call
+                  {(!agents || agents.length === 0) && (
+                    <span className="text-xs ml-2">(No agents)</span>
+                  )}
                 </Button>
                 <Button variant="outline" className="bg-white">
                   <MessageSquare className="h-4 w-4 mr-2" />

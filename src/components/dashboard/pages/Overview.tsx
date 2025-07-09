@@ -14,121 +14,117 @@ import {
   XCircle,
   Loader2,
   Calendar,
-  BarChart3
+  BarChart3,
+  AlertCircle,
+  RefreshCw,
+  PhoneCall,
+  PhoneOff,
+  Eye,
+  FileText,
+  Play,
+  Radio
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { dashboardApi, analyticsApi, contactsApi } from "@/services/api";
-import { useToast } from "@/components/ui/use-toast";
+import { dashboardApi, analyticsApi, contactsApi, callsApi } from "@/services/api";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-interface OverviewProps {
-  onSelectCall?: (callId: string) => void;
-}
+const DEFAULT_USER_ID = 12345; // Changed from string to number
 
-interface DashboardStats {
-  totalCalls: number;
-  activeCalls: number;
-  totalContacts: number;
-  totalDebtAmount: number;
-  successfulCalls: number;
-  failedCalls: number;
-  averageCallDuration: number;
-  collectionRate: number;
-}
-
-interface CallLog {
-  id: number;
-  contact_name: string;
-  phone_number: string;
-  status: string;
-  duration: number;
-  started_at: string;
-  agent_name?: string;
-  outcome?: string;
-}
-
-export const Overview = ({ onSelectCall }: OverviewProps) => {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalCalls: 0,
-    activeCalls: 0,
-    totalContacts: 0,
-    totalDebtAmount: 0,
-    successfulCalls: 0,
-    failedCalls: 0,
-    averageCallDuration: 0,
-    collectionRate: 0
-  });
-  const [recentCalls, setRecentCalls] = useState<CallLog[]>([]);
+export const Overview = () => {
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [activeCalls, setActiveCalls] = useState<any[]>([]);
-  const { toast } = useToast();
+  const [callLogs, setCallLogs] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<any>(null);
+  const [accountUsage, setAccountUsage] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [liveTranscriptCall, setLiveTranscriptCall] = useState<any>(null);
+  const [showLiveTranscript, setShowLiveTranscript] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        fetchActiveCalls();
+      }, 2000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh]);
+
   const fetchDashboardData = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
-      // Fetch all dashboard data in parallel
-      const [
-        summaryData,
-        activeCallsData,
-        callLogsData,
-        contactsData,
-        performanceData
-      ] = await Promise.all([
-        dashboardApi.getSummary().catch(() => null),
-        dashboardApi.getActiveCalls().catch(() => []),
-        dashboardApi.getCallLogs().catch(() => []),
-        contactsApi.getContacts().catch(() => []),
-        analyticsApi.getCollectionPerformance().catch(() => null)
+      const [summary, calls, logs, performance, usage] = await Promise.allSettled([
+        dashboardApi.getSummary(),
+        dashboardApi.getActiveCalls(),
+        callsApi.getCalls(DEFAULT_USER_ID),
+        analyticsApi.getCollectionPerformance(),
+        dashboardApi.getAccountUsage()
       ]);
 
-      // Process contacts data
-      const contactsArray = Array.isArray(contactsData) ? contactsData : contactsData?.data || [];
-      const totalDebtAmount = contactsArray.reduce((sum: number, contact: any) => sum + (contact.debt_amount || 0), 0);
+      if (summary.status === 'fulfilled') {
+        setDashboardData(summary.value);
+      } else {
+        console.error("Failed to fetch dashboard summary:", summary.reason);
+        setDashboardData(null);
+      }
 
-      // Process call logs
-      const callLogsArray = Array.isArray(callLogsData) ? callLogsData : callLogsData?.data || [];
-      
-      // Calculate stats
-      const calculatedStats: DashboardStats = {
-        totalCalls: summaryData?.total_calls || callLogsArray.length,
-        activeCalls: Array.isArray(activeCallsData) ? activeCallsData.length : 0,
-        totalContacts: contactsArray.length,
-        totalDebtAmount: totalDebtAmount,
-        successfulCalls: summaryData?.successful_calls || callLogsArray.filter((call: any) => call.status === 'completed').length,
-        failedCalls: summaryData?.failed_calls || callLogsArray.filter((call: any) => call.status === 'failed').length,
-        averageCallDuration: summaryData?.average_duration || calculateAverageDuration(callLogsArray),
-        collectionRate: performanceData?.collection_rate || calculateCollectionRate(contactsArray)
-      };
+      if (calls.status === 'fulfilled') {
+        setActiveCalls(Array.isArray(calls.value) ? calls.value : []);
+      } else {
+        console.error("Failed to fetch active calls:", calls.reason);
+        setActiveCalls([]);
+      }
 
-      setStats(calculatedStats);
-      setRecentCalls(callLogsArray.slice(0, 10)); // Show last 10 calls
-      setActiveCalls(Array.isArray(activeCallsData) ? activeCallsData : []);
+      if (logs.status === 'fulfilled') {
+        setCallLogs(Array.isArray(logs.value) ? logs.value.slice(0, 5) : []);
+      } else {
+        console.error("Failed to fetch call logs:", logs.reason);
+        setCallLogs([]);
+      }
+
+      if (performance.status === 'fulfilled') {
+        setPerformanceData(performance.value);
+      } else {
+        console.error("Failed to fetch performance data:", performance.reason);
+        setPerformanceData(null);
+      }
+
+      if (usage.status === 'fulfilled') {
+        setAccountUsage(usage.value);
+      } else {
+        console.error("Failed to fetch account usage:", usage.reason);
+        setAccountUsage(null);
+      }
 
     } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load dashboard data. Please check your connection and try again.",
-        variant: "destructive",
-      });
+      console.error("Unexpected error in fetchDashboardData:", error);
+      setError("Unable to load dashboard data. Please check your connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateAverageDuration = (calls: any[]) => {
-    if (calls.length === 0) return 0;
-    const totalDuration = calls.reduce((sum, call) => sum + (call.duration || 0), 0);
-    return Math.round(totalDuration / calls.length);
+  const fetchActiveCalls = async () => {
+    try {
+      const data = await dashboardApi.getActiveCalls();
+      setActiveCalls(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to fetch active calls:", error);
+    }
   };
 
-  const calculateCollectionRate = (contacts: any[]) => {
-    if (contacts.length === 0) return 0;
-    const paidContacts = contacts.filter(contact => contact.payment_status === 'paid').length;
-    return Math.round((paidContacts / contacts.length) * 100);
+  const openLiveTranscript = (call: any) => {
+    setLiveTranscriptCall(call);
+    setShowLiveTranscript(true);
+    setAutoRefresh(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -147,31 +143,66 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const formatMinutesToHours = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    return `${hours}h ${remainingMins}m`;
+  };
+
+  const getMinutesColor = (remaining: number, total: number) => {
+    const percentage = (remaining / total) * 100;
+    if (percentage > 50) return "text-green-600";
+    if (percentage > 25) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const stats = dashboardData || {
+    total_contacts: 0,
+    active_campaigns: 0,
+    calls_today: 0,
+    collection_rate: 0,
+    total_collected: 0,
+    pending_calls: 0,
+    successful_calls: 0,
+    failed_calls: 0
+  };
+
+  const usage = accountUsage || {
+    minutes_remaining: 0,
+    minutes_used: 0,
+    total_minutes: 0,
+    plan_name: "No Plan Data",
+    renewal_date: new Date().toISOString(),
+    cost_per_minute: 0
+  };
+
   const dashboardMetrics = [
     {
       label: "Total Calls Today",
-      value: stats.totalCalls,
+      value: stats.calls_today || 0,
       icon: Phone,
       color: "text-blue-600",
       bgColor: "bg-blue-50"
     },
     {
-      label: "Active Calls",
-      value: stats.activeCalls,
+      label: "Minutes Remaining",
+      value: formatMinutesToHours(usage.minutes_remaining || 0),
       icon: Clock,
-      color: "text-green-600",
-      bgColor: "bg-green-50"
+      color: getMinutesColor(usage.minutes_remaining || 0, usage.total_minutes || 1),
+      bgColor: (usage.minutes_remaining || 0) > (usage.total_minutes || 1) * 0.5 ? "bg-green-50" : 
+                (usage.minutes_remaining || 0) > (usage.total_minutes || 1) * 0.25 ? "bg-yellow-50" : "bg-red-50",
+      subtitle: `${Math.round(((usage.minutes_remaining || 0) / (usage.total_minutes || 1)) * 100)}% of plan`
     },
     {
       label: "Total Contacts",
-      value: stats.totalContacts,
+      value: stats.total_contacts || 0,
       icon: Users,
       color: "text-purple-600",
       bgColor: "bg-purple-50"
     },
     {
       label: "Total Debt Amount",
-      value: `KSh ${stats.totalDebtAmount.toLocaleString()}`,
+      value: `KSh ${(stats.total_collected || 0).toLocaleString()}`,
       icon: DollarSign,
       color: "text-orange-600",
       bgColor: "bg-orange-50"
@@ -181,25 +212,19 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
   const performanceMetrics = [
     {
       label: "Successful Calls",
-      value: stats.successfulCalls,
+      value: stats.successful_calls || 0,
       icon: CheckCircle,
       color: "text-green-600"
     },
     {
       label: "Failed Calls",
-      value: stats.failedCalls,
+      value: stats.failed_calls || 0,
       icon: XCircle,
       color: "text-red-600"
     },
     {
-      label: "Avg Call Duration",
-      value: formatDuration(stats.averageCallDuration),
-      icon: Clock,
-      color: "text-blue-600"
-    },
-    {
       label: "Collection Rate",
-      value: `${stats.collectionRate}%`,
+      value: `${stats.collection_rate || 0}%`,
       icon: TrendingUp,
       color: "text-purple-600"
     }
@@ -207,16 +232,91 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-gray-600">Loading dashboard...</span>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={fetchDashboardData} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Metrics */}
+      {!dashboardData && !loading && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-blue-700">
+              <AlertCircle className="h-5 w-5" />
+              <span className="font-medium">Dashboard Data Unavailable</span>
+            </div>
+            <p className="text-blue-600 text-sm mt-1">
+              Unable to load dashboard statistics. Please ensure your API server is running and try refreshing.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100"
+              onClick={fetchDashboardData}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {!accountUsage && !loading && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-blue-700">
+              <AlertCircle className="h-5 w-5" />
+              <span className="font-medium">Usage Data Unavailable</span>
+            </div>
+            <p className="text-blue-600 text-sm mt-1">
+              Unable to load account usage information. Please ensure your API server is running.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {accountUsage && usage.minutes_remaining < usage.total_minutes * 0.1 && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-medium">Low Minutes Warning</span>
+            </div>
+            <p className="text-red-600 text-sm mt-1">
+              You have only {formatMinutesToHours(usage.minutes_remaining)} left. 
+              Your plan renews on {new Date(usage.renewal_date).toLocaleDateString()}.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-3 border-red-300 text-red-700 hover:bg-red-100"
+            >
+              Upgrade Plan
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {dashboardMetrics.map((metric) => (
           <Card key={metric.label} className="border-0 shadow-md bg-white/80 backdrop-blur">
@@ -224,7 +324,10 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{metric.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+                  <p className={`text-2xl font-bold ${metric.color}`}>{metric.value}</p>
+                  {metric.subtitle && (
+                    <p className="text-xs text-gray-500 mt-1">{metric.subtitle}</p>
+                  )}
                 </div>
                 <div className={`p-3 rounded-full ${metric.bgColor}`}>
                   <metric.icon className={`h-6 w-6 ${metric.color}`} />
@@ -235,7 +338,83 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
         ))}
       </div>
 
-      {/* Performance Overview */}
+      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Account Usage Details
+          </CardTitle>
+          <CardDescription>Your current plan usage and billing information</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Current Plan</p>
+                <p className="text-lg font-semibold text-gray-900">{usage.plan_name || 'No Plan'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Plan Renewal</p>
+                <p className="text-sm text-gray-700">
+                  {usage.renewal_date ? new Date(usage.renewal_date).toLocaleDateString() : 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Cost per Minute</p>
+                <p className="text-sm text-gray-700">${(usage.cost_per_minute || 0).toFixed(3)}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Minutes Used</p>
+                <p className="text-lg font-semibold text-gray-900">{formatMinutesToHours(usage.minutes_used || 0)}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Minutes Remaining</p>
+                <p className={`text-lg font-semibold ${getMinutesColor(usage.minutes_remaining || 0, usage.total_minutes || 1)}`}>
+                  {formatMinutesToHours(usage.minutes_remaining || 0)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Plan Minutes</p>
+                <p className="text-sm text-gray-700">{formatMinutesToHours(usage.total_minutes || 0)}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-2">Usage Progress</p>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      (usage.minutes_remaining || 0) > (usage.total_minutes || 1) * 0.5 ? 'bg-green-500' :
+                      (usage.minutes_remaining || 0) > (usage.total_minutes || 1) * 0.25 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${((usage.minutes_used || 0) / (usage.total_minutes || 1)) * 100}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {Math.round(((usage.minutes_used || 0) / (usage.total_minutes || 1)) * 100)}% used
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-600">Current Bill</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  ${((usage.minutes_used || 0) * (usage.cost_per_minute || 0)).toFixed(2)}
+                </p>
+              </div>
+
+              <Button variant="outline" className="w-full mt-3">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                View Usage Analytics
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -260,29 +439,84 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Active Calls */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              Active Calls
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Phone className="h-5 w-5" />
+                Active Calls
+                {activeCalls.length > 0 && (
+                  <Badge className="bg-red-100 text-red-800 animate-pulse">
+                    {activeCalls.length} LIVE
+                  </Badge>
+                )}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={autoRefresh ? 'bg-blue-100 border-blue-300' : ''}
+              >
+                <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
+              </Button>
             </CardTitle>
-            <CardDescription>Currently ongoing calls</CardDescription>
+            <CardDescription>Currently ongoing calls with real-time monitoring</CardDescription>
           </CardHeader>
           <CardContent>
             {activeCalls.length === 0 ? (
-              <p className="text-center text-gray-500 py-4">No active calls</p>
+              <div className="text-center py-8">
+                <PhoneOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No active calls</p>
+                <p className="text-sm text-gray-400">Calls will appear here when agents are speaking with contacts</p>
+              </div>
             ) : (
               <div className="space-y-3">
                 {activeCalls.map((call) => (
-                  <div key={call.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">{call.contact_name || "Unknown Contact"}</p>
-                      <p className="text-sm text-gray-600">{call.phone_number}</p>
+                  <div key={call.id || call.call_id} className="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <PhoneCall className="h-5 w-5 text-blue-600 animate-pulse" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{call.contact_name || "Unknown Contact"}</p>
+                          <p className="text-sm text-gray-600">{call.phone_number}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge className="bg-green-100 text-green-800 text-xs">
+                              {call.status || 'Active'}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              Agent: {call.agent_name || 'Unknown'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <p className="text-sm font-medium">
+                            {call.duration || '00:00'}
+                          </p>
+                          <p className="text-xs text-gray-500">duration</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => openLiveTranscript(call)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Live
+                        </Button>
+                      </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800 border-green-200">
-                      Active
-                    </Badge>
+                    
+                    <div className="flex items-center gap-2 mt-3 text-xs text-gray-600">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>Live conversation in progress</span>
+                      <span className="ml-auto">
+                        Started: {new Date(call.start_time || call.started_at || Date.now()).toLocaleTimeString()}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -290,17 +524,16 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
           </CardContent>
         </Card>
 
-        {/* Recent Calls */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
               Recent Calls
             </CardTitle>
-            <CardDescription>Latest call activity</CardDescription>
+            <CardDescription>Latest call activity and transcripts</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            {recentCalls.length === 0 ? (
+            {callLogs.length === 0 ? (
               <p className="text-center text-gray-500 py-4">No recent calls</p>
             ) : (
               <div className="overflow-x-auto">
@@ -310,15 +543,14 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
                       <TableHead>Contact</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Duration</TableHead>
-                      <TableHead>Time</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentCalls.map((call) => (
+                    {callLogs.map((call) => (
                       <TableRow 
-                        key={call.id} 
+                        key={call.id || call.call_id} 
                         className="cursor-pointer hover:bg-gray-50"
-                        onClick={() => onSelectCall?.(call.id.toString())}
                       >
                         <TableCell>
                           <div>
@@ -332,8 +564,19 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
                           </Badge>
                         </TableCell>
                         <TableCell>{formatDuration(call.duration || 0)}</TableCell>
-                        <TableCell className="text-sm text-gray-600">
-                          {new Date(call.started_at).toLocaleTimeString()}
+                        <TableCell>
+                          <div className="flex gap-1">
+                            {call.transcript && (
+                              <Button size="sm" variant="outline">
+                                <FileText className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {call.recording_url && (
+                              <Button size="sm" variant="outline">
+                                <Play className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -345,40 +588,59 @@ export const Overview = ({ onSelectCall }: OverviewProps) => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur">
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and shortcuts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button 
-              className="h-20 flex flex-col gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              onClick={() => window.location.reload()}
-            >
-              <Phone className="h-6 w-6" />
-              Refresh Dashboard
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-20 flex flex-col gap-2 bg-white"
-              onClick={() => console.log("View all calls")}
-            >
-              <Calendar className="h-6 w-6" />
-              View All Calls
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-20 flex flex-col gap-2 bg-white"
-              onClick={() => console.log("Generate report")}
-            >
-              <BarChart3 className="h-6 w-6" />
-              Generate Report
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {liveTranscriptCall && (
+        <Dialog open={showLiveTranscript} onOpenChange={setShowLiveTranscript}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Radio className="h-5 w-5 text-red-500 animate-pulse" />
+                Live Call Monitor
+                <Badge className="bg-red-100 text-red-800 animate-pulse">
+                  LIVE
+                </Badge>
+              </DialogTitle>
+              <DialogDescription>
+                Real-time monitoring for {liveTranscriptCall.contact_name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="text-center p-8 border-2 border-dashed border-gray-200 rounded-lg">
+                <PhoneCall className="h-12 w-12 text-blue-500 mx-auto mb-4 animate-pulse" />
+                <p className="text-lg font-medium">Call in Progress</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Connect to the Call Logs page for full live transcript functionality
+                </p>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => {
+                    setShowLiveTranscript(false);
+                  }}
+                >
+                  View Full Transcript
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Duration</p>
+                  <p className="font-semibold">{liveTranscriptCall.duration || '00:00'}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Agent</p>
+                  <p className="font-semibold">{liveTranscriptCall.agent_name}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Status</p>
+                  <Badge className="bg-green-100 text-green-800">
+                    {liveTranscriptCall.status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
