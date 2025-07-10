@@ -57,11 +57,11 @@ const PhoneMockup = ({
               {/* Phone Input */}
               <div className="relative">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-                  <span className="text-sm">🇺🇸</span>
+                  <span className="text-sm">🇰🇪</span>
                 </div>
                 <Input
                   type="tel"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+254 708 419 386"
                   value={phoneNumber}
                   onChange={(e) => onPhoneChange(e.target.value)}
                   className="border-gray-200 h-10 pl-12 text-gray-900 placeholder:text-gray-400 rounded-lg text-sm"

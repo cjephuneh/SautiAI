@@ -120,12 +120,12 @@ const Hero = () => {
         <div className="mt-12 text-center">
           <p className="text-gray-500 mb-6 text-sm">Trusted by 1,200+ businesses worldwide</p>
           <div className="flex items-center justify-center gap-8 flex-wrap opacity-60">
-            <div className="text-base font-bold text-gray-700">Uber Freight</div>
-            <div className="text-base font-bold text-blue-600">deel.</div>
+            <div className="text-base font-bold text-gray-700">BricklabsAI</div>
+            <div className="text-base font-bold text-blue-600">Therabot</div>
             <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">KM</div>
-            <div className="text-base font-bold text-gray-700">CLIPBOARD HEALTH</div>
-            <div className="text-base font-bold text-red-500 italic">Redis</div>
-            <div className="text-base font-bold text-gray-700">Stripe</div>
+            {/* <div className="text-base font-bold text-gray-700">CLIPBOARD HEALTH</div> */}
+            <div className="text-base font-bold text-red-500 italic">Farmsawa</div>
+            {/* <div className="text-base font-bold text-gray-700">Stripe</div> */}
           </div>
         </div>
          {/* Communication Timeline Section */}

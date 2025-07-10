@@ -72,7 +72,7 @@ const Features = () => {
               Ready to revolutionize your debt collection? 🚀
             </h3>
             <p className="text-gray-600 mb-6">
-              Join over 500+ businesses already using DebAI to automate their collection process and increase recovery rates.
+              Join over 5+ businesses already using DebAI to automate their collection process and increase recovery rates.
             </p>
             <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
               Start Free Trial
