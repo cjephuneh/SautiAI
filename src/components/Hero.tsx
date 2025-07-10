@@ -118,7 +118,7 @@ const Hero = () => {
 
         {/* Trust Indicators */}
         <div className="mt-12 text-center">
-          <p className="text-gray-500 mb-6 text-sm">Trusted by 1,200+ businesses worldwide</p>
+          <p className="text-gray-500 mb-6 text-sm">Trusted by 5+ businesses worldwide</p>
           <div className="flex items-center justify-center gap-8 flex-wrap opacity-60">
             <div className="text-base font-bold text-gray-700">BricklabsAI</div>
             <div className="text-base font-bold text-blue-600">Therabot</div>
