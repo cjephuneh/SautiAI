@@ -76,12 +76,12 @@ const Pricing = () => {
       answer: "You only pay when we successfully collect a debt. Our fee is a percentage of the amount collected, so you never pay upfront costs or monthly subscriptions."
     },
     {
-      question: "What happens if DebtAI doesn't collect the debt?",
+      question: "What happens if SautiAI doesn't collect the debt?",
       answer: "If we don't collect, you don't pay. It's that simple. We're incentivized to recover your debts successfully, aligning our success with yours."
     },
     {
       question: "How quickly can I get started?",
-      answer: "Setup takes less than 10 minutes. Simply upload your debtor list, configure your preferences, and DebtAI will start working immediately."
+      answer: "Setup takes less than 10 minutes. Simply upload your debtor list, configure your preferences, and SautiAI will start working immediately."
     },
     {
       question: "Can I upgrade or downgrade my plan?",

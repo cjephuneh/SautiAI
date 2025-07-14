@@ -156,7 +156,7 @@ export const Settings = () => {
                   <Textarea 
                     id="voicemail" 
                     rows={4}
-                    defaultValue="Hello, this is a message from DebtAI regarding your account. Please call us back at your earliest convenience at 1-800-555-DEBT."
+                    defaultValue="Hello, this is a message from SautiAI regarding your account. Please call us back at your earliest convenience at 1-800-555-DEBT."
                   />
                 </div>
                 

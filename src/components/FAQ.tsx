@@ -8,8 +8,8 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "How does DebtAI collect debts differently than traditional methods?",
-      answer: "DebtAI uses advanced AI to have natural, human-like conversations with debtors via voice calls, WhatsApp, and SMS. Our AI understands context, shows empathy, and negotiates payment plans automatically - recovering 65% more debts than traditional methods."
+      question: "How does SautiAI collect debts differently than traditional methods?",
+      answer: "SautiAI uses advanced AI to have natural, human-like conversations with debtors via voice calls, WhatsApp, and SMS. Our AI understands context, shows empathy, and negotiates payment plans automatically - recovering 65% more debts than traditional methods."
     },
     {
       question: "What happens if the AI can't resolve a debt?",
@@ -20,8 +20,8 @@ const FAQ = () => {
       answer: "Most clients see their first successful collections within 24-48 hours of setup. Our AI works 24/7, so it's constantly engaging with debtors across different time zones and schedules."
     },
     {
-      question: "Is DebtAI compliant with debt collection regulations?",
-      answer: "Absolutely. DebtAI is fully compliant with FDCPA, TCPA, and other relevant regulations. Our AI is trained on current compliance requirements and automatically follows all legal guidelines for debt collection communications."
+      question: "Is SautiAI compliant with debt collection regulations?",
+      answer: "Absolutely. SautiAI is fully compliant with FDCPA, TCPA, and other relevant regulations. Our AI is trained on current compliance requirements and automatically follows all legal guidelines for debt collection communications."
     },
     {
       question: "Can I customize how the AI communicates with my debtors?",
@@ -29,7 +29,7 @@ const FAQ = () => {
     },
     {
       question: "What integrations are available?",
-      answer: "DebtAI integrates with popular CRMs (Salesforce, HubSpot), accounting software (QuickBooks, Xero), and payment processors (Stripe, PayPal). We also offer a robust API for custom integrations."
+      answer: "SautiAI integrates with popular CRMs (Salesforce, HubSpot), accounting software (QuickBooks, Xero), and payment processors (Stripe, PayPal). We also offer a robust API for custom integrations."
     }
   ];
 
@@ -41,7 +41,7 @@ const FAQ = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-gray-600">
-            Everything you need to know about DebtAI
+            Everything you need to know about SautiAI
           </p>
         </div>
 

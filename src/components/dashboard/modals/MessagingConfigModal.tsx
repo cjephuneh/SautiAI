@@ -32,7 +32,7 @@ export const MessagingConfigModal = ({ open, onOpenChange }: MessagingConfigModa
 
   const [testMessage, setTestMessage] = useState({
     phoneNumber: '',
-    message: 'Test message from DebtAI'
+    message: 'Test message from SautiAI'
   });
 
   const { toast } = useToast();

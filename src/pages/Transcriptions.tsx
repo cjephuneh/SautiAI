@@ -14,17 +14,17 @@ const Transcriptions = () => {
       id: 1,
       debtor: "John Smith",
       company: "Smith & Associates",
-      amount: "$4,581",
+      amount: "Ksh 4,581",
       date: "March 15, 2024",
       duration: "3:42",
       status: "Payment Promised",
       sentiment: "Positive",
       transcript: [
-        { speaker: "AI", time: "0:00", text: "Hi John, this is Sarah from DebtAI calling about your outstanding invoice of $4,581. Do you have a moment to discuss this?" },
+        { speaker: "AI", time: "0:00", text: "Hi John, this is Sarah from SautiAI calling about your outstanding invoice of Ksh 4,581. Do you have a moment to discuss this?" },
         { speaker: "John", time: "0:08", text: "Oh hi, yes I've been meaning to call about that. We've had some cash flow issues this quarter." },
         { speaker: "AI", time: "0:15", text: "I understand cash flow can be challenging. The invoice has been outstanding for 45 days now. Can we work out a payment plan that works for your business?" },
         { speaker: "John", time: "0:27", text: "That would be great. Could we do it in two payments? Half now and half next month?" },
-        { speaker: "AI", time: "0:34", text: "Absolutely! So that would be $2,290.50 by March 20th and the remaining $2,290.50 by April 20th. Does that work?" },
+        { speaker: "AI", time: "0:34", text: "Absolutely! So that would be Ksh 2,290.50 by March 20th and the remaining Ksh 2,290.50 by April 20th. Does that work?" },
         { speaker: "John", time: "0:45", text: "Perfect. I'll send the first payment by the end of this week." },
         { speaker: "AI", time: "0:50", text: "Excellent! I'll send you a payment confirmation email with the details. Thank you for working with us on this, John." }
       ]
@@ -33,13 +33,13 @@ const Transcriptions = () => {
       id: 2,
       debtor: "Lisa Chen",
       company: "Tech Solutions Inc",
-      amount: "$2,750",
+      amount: "Ksh 2,750",
       date: "March 14, 2024", 
       duration: "2:18",
       status: "Dispute Raised",
       sentiment: "Neutral",
       transcript: [
-        { speaker: "AI", time: "0:00", text: "Hello Lisa, this is calling from DebtAI regarding invoice #INV-2024-0312 for $2,750." },
+        { speaker: "AI", time: "0:00", text: "Hello Lisa, this is calling from SautiAI regarding invoice #INV-2024-0312 for Ksh 2,750." },
         { speaker: "Lisa", time: "0:07", text: "Hi there. Actually, I need to discuss this invoice. We never received the services listed." },
         { speaker: "AI", time: "0:14", text: "I'm sorry to hear about this issue. Let me help you resolve this. Can you tell me more about what services were expected versus what was delivered?" },
         { speaker: "Lisa", time: "0:25", text: "We paid for premium support but only received basic support. The contract clearly states 24/7 availability but we couldn't reach anyone on weekends." },
@@ -170,7 +170,7 @@ const Transcriptions = () => {
                             <span className={`text-sm font-semibold ${
                               message.speaker === 'AI' ? 'text-blue-700' : 'text-gray-700'
                             }`}>
-                              {message.speaker === 'AI' ? 'DebtAI' : message.speaker}
+                              {message.speaker === 'AI' ? 'SautiAI' : message.speaker}
                             </span>
                           </div>
                           <p className="text-gray-700 text-sm leading-relaxed">{message.text}</p>

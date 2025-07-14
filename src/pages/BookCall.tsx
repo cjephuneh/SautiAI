@@ -132,7 +132,7 @@ const BookCall = () => {
                     {
                       icon: "💰",
                       title: "ROI Calculator",
-                      description: "Estimate your potential revenue increase with DebtAI"
+                      description: "Estimate your potential revenue increase with SautiAI"
                     }
                   ].map((benefit, index) => (
                     <div key={index} className="flex gap-4 p-4 bg-white rounded-lg border border-gray-100 shadow-sm">

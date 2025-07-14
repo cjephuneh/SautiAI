@@ -45,7 +45,7 @@ const PhoneMockup = ({
             <h3 className="text-gray-900 text-lg font-bold mb-2">
               Get a callback from 
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                DebtAI
+                SautiAI
               </span>
             </h3>
             <p className="text-gray-500 text-sm mb-6 leading-relaxed">
@@ -57,11 +57,11 @@ const PhoneMockup = ({
               {/* Phone Input */}
               <div className="relative">
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-                  <span className="text-sm">🇺🇸</span>
+                  <span className="text-sm">🇰🇪</span>
                 </div>
                 <Input
                   type="tel"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="+254 708 419 386"
                   value={phoneNumber}
                   onChange={(e) => onPhoneChange(e.target.value)}
                   className="border-gray-200 h-10 pl-12 text-gray-900 placeholder:text-gray-400 rounded-lg text-sm"

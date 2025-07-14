@@ -137,7 +137,7 @@ const Integrations = () => {
             Connect with Your Existing Tools
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            DebtAI integrates seamlessly with 100+ popular business tools. 
+            SautiAI integrates seamlessly with 100+ popular business tools. 
             No disruption to your current workflows.
           </p>
           <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg">
@@ -194,7 +194,7 @@ const Integrations = () => {
           </p>
           <div className="bg-gray-900 rounded-xl p-6 text-left mb-8 overflow-x-auto">
             <pre className="text-green-400 text-sm">
-{`curl -X POST https://api.debtai.com/v1/debts \\
+{`curl -X POST https://api.SautiAI.com/v1/debts \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{

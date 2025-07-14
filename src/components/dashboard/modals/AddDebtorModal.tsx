@@ -1,279 +1,247 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { contactsApi } from "@/services/api";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar as CalendarIcon,
-  DollarSign,
-  FileText
-} from "lucide-react";
 
 interface AddDebtorModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export const AddDebtorModal = ({ open, onOpenChange }: AddDebtorModalProps) => {
-  const [dueDate, setDueDate] = useState<Date>();
+export function AddDebtorModal({ open, onOpenChange, onSuccess }: AddDebtorModalProps) {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
+    phone_number: "",
     email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    amount: "",
-    description: "",
-    priority: "medium",
-    status: "active"
+    debt_amount: "",
+    original_creditor: "",
+    account_number: "",
+    due_date: "",
+    last_payment: "",
+    payment_status: "overdue"
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    console.log("Adding debtor:", { ...formData, dueDate });
-    onOpenChange(false);
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Convert debt_amount to a number
+      const payload = {
+        ...formData,
+        debt_amount: parseFloat(formData.debt_amount) || 0
+      };
+
+      await contactsApi.createContact(payload);
+      toast({
+        title: "Success",
+        description: "Debtor added successfully.",
+      });
+      
+      // Reset form
+      setFormData({
+        name: "",
+        phone_number: "",
+        email: "",
+        debt_amount: "",
+        original_creditor: "",
+        account_number: "",
+        due_date: "",
+        last_payment: "",
+        payment_status: "overdue"
+      });
+      
+      onOpenChange(false);
+      
+      // Callback to refresh the parent component's data
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error("Failed to add debtor:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add debtor. Using mock data instead for development.",
+        variant: "destructive",
+      });
+      
+      // We're still going to close the modal and refresh since 
+      // our updated API service will create a mock entry
+      onOpenChange(false);
+      if (onSuccess) {
+        onSuccess();
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Add New Debtor
-          </DialogTitle>
+          <DialogTitle>Add New Debtor</DialogTitle>
           <DialogDescription>
-            Enter the debtor's information and debt details
+            Enter the debtor's details to add them to your collection system.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Personal Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Personal Information</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  placeholder="John"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    className="pl-10"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="john.doe@email.com"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    className="pl-10"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="+254 700 123 456"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Address Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Address Information</h3>
+        
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="address">Street Address</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <Input
-                  id="address"
-                  className="pl-10"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  placeholder="123 Main Street"
-                />
-              </div>
+              <Label htmlFor="name">Full Name</Label>
+              <Input 
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                required
+              />
             </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange("city", e.target.value)}
-                  placeholder="Nairobi"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">County</Label>
-                <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) => handleInputChange("state", e.target.value)}
-                  placeholder="Nairobi"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="zipCode">Postal Code</Label>
-                <Input
-                  id="zipCode"
-                  value={formData.zipCode}
-                  onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                  placeholder="00100"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Debt Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Debt Information</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount Owed (KSh) *</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    id="amount"
-                    type="number"
-                    className="pl-10"
-                    value={formData.amount}
-                    onChange={(e) => handleInputChange("amount", e.target.value)}
-                    placeholder="1000.00"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Due Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !dueDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dueDate ? format(dueDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dueDate}
-                      onSelect={setDueDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority Level</Label>
-                <Select value={formData.priority} onValueChange={(value) => handleInputChange("priority", value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low Priority</SelectItem>
-                    <SelectItem value="medium">Medium Priority</SelectItem>
-                    <SelectItem value="high">High Priority</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in-plan">Payment Plan</SelectItem>
-                    <SelectItem value="legal">Legal Action</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
+            
             <div className="space-y-2">
-              <Label htmlFor="description">Description / Notes</Label>
-              <div className="relative">
-                <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Textarea
-                  id="description"
-                  className="pl-10"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  placeholder="Additional notes about the debt or debtor..."
-                  rows={3}
-                />
-              </div>
+              <Label htmlFor="phone_number">Phone Number</Label>
+              <Input 
+                id="phone_number"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                placeholder="+1234567890"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email (Optional)</Label>
+              <Input 
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john.doe@example.com"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="debt_amount">Debt Amount</Label>
+              <Input 
+                id="debt_amount"
+                name="debt_amount"
+                type="number"
+                step="0.01"
+                value={formData.debt_amount}
+                onChange={handleChange}
+                placeholder="2500.00"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="original_creditor">Original Creditor</Label>
+              <Input 
+                id="original_creditor"
+                name="original_creditor"
+                value={formData.original_creditor}
+                onChange={handleChange}
+                placeholder="Bank Name"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="account_number">Account Number</Label>
+              <Input 
+                id="account_number"
+                name="account_number"
+                value={formData.account_number}
+                onChange={handleChange}
+                placeholder="****1234"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="due_date">Due Date</Label>
+              <Input 
+                id="due_date"
+                name="due_date"
+                type="date"
+                value={formData.due_date}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="last_payment">Last Payment Date</Label>
+              <Input 
+                id="last_payment"
+                name="last_payment"
+                type="date"
+                value={formData.last_payment}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
-        </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="payment_status">Payment Status</Label>
+            <Select 
+              value={formData.payment_status}
+              onValueChange={(value) => handleSelectChange("payment_status", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="partial">Partial Payment</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit}>
-            Add Debtor
-          </Button>
-        </div>
+          <DialogFooter className="mt-6">
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add Debtor"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
-};
+}

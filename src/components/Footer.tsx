@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="w-9 h-9 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
                 <span className="font-bold text-lg">AI</span>
               </div>
-              <span className="text-xl font-bold">DebtAI</span>
+              <span className="text-xl font-bold">SautiAI</span>
             </div>
             <p className="text-gray-300 mb-6 max-w-md leading-relaxed">
               Revolutionizing debt collection with AI-powered automation. Professional, efficient, and results-driven collection services for modern businesses.
@@ -56,7 +56,7 @@ const Footer = () => {
         <div className="border-t border-gray-700 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 mb-4 md:mb-0 text-sm">
-              © 2024 DebtAI. All rights reserved. Powered by AI technology.
+              © 2024 SautiAI. All rights reserved. Powered by AI technology.
             </p>
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <span className="flex items-center gap-2">

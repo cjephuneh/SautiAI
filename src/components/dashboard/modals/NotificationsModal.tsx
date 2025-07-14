@@ -61,7 +61,7 @@ const mockNotifications: Notification[] = [
   {
     id: '5',
     title: 'System Update',
-    message: 'DebtAI system maintenance scheduled for tonight at 2 AM EAT',
+    message: 'SautiAI system maintenance scheduled for tonight at 2 AM EAT',
     type: 'system',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8 hours ago
     read: true,
