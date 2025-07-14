@@ -2,9 +2,9 @@ import axios from 'axios';
 
 // Base API configuration
 const api = axios.create({
-  baseURL: 'http://localhost:5050', // From the API spec's server URL
+  baseURL: 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/', // From the API spec's server URL
 });
-const API_BASE_URL = 'http://localhost:5050'; // Base URL for the API
+const API_BASE_URL = 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/'; // Base URL for the API
 // Mock user ID for now - in a real app this would come from authentication
 const DEFAULT_USER_ID = 1;
 
@@ -20,7 +20,7 @@ export const contactsApi = {
       
       // If it's a network error or server is down, provide more specific error
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on http://localhost:5050");
+        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
       }
       
       // If it's a 404, the endpoint might not exist
@@ -137,7 +137,7 @@ export const agentsApi = {
       
       // If it's a network error or server is down, provide more specific error
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on http://localhost:5050");
+        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
       }
       
       // If it's a 404, the endpoint might not exist
