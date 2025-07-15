@@ -470,11 +470,143 @@ export const analyticsApi = {
   }
 };
 
+// Business Inquiries API
+export const businessInquiriesApi = {
+  createBusinessInquiry: async (inquiryData: {
+    date: string;
+    time: string;
+    full_name: string;
+    work_email: string;
+    company_name: string;
+    phone_number: string;
+    challenges: string;
+  }) => {
+    try {
+      const response = await api.post('/business-inquiries/', inquiryData);
+      console.log("Business inquiry created:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in createBusinessInquiry:", error);
+      
+      // Provide more specific error information
+      if (error.response?.status === 400) {
+        const errorMessage = error.response.data?.detail || "Invalid inquiry data";
+        throw new Error(errorMessage);
+      }
+      
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        throw new Error("Cannot connect to server. Please ensure the API server is running on http://localhost:5050");
+      }
+      
+      throw error;
+    }
+  }
+};
+
+// Authentication API
+export const authApi = {
+  login: async (email: string, password: string) => {
+    try {
+      const formData = new URLSearchParams();
+      formData.append('email', email);
+      formData.append('password', password);
+      
+      const response = await api.post('/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      
+      // Store token in localStorage
+      if (response.data.access_token) {
+        localStorage.setItem('access_token', response.data.access_token);
+        localStorage.setItem('token_type', response.data.token_type || 'bearer');
+        
+        // Set default authorization header for future requests
+        api.defaults.headers.common['Authorization'] = `${response.data.token_type || 'Bearer'} ${response.data.access_token}`;
+      }
+      
+      console.log("Login successful:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in login:", error);
+      
+      if (error.response?.status === 401) {
+        throw new Error("Invalid email or password");
+      }
+      
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        throw new Error("Cannot connect to server. Please ensure the API server is running on http://localhost:5050");
+      }
+      
+      throw error;
+    }
+  },
+  
+  logout: () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('token_type');
+    delete api.defaults.headers.common['Authorization'];
+  },
+  
+  getStoredToken: () => {
+    return localStorage.getItem('access_token');
+  },
+  
+  isAuthenticated: () => {
+    const token = localStorage.getItem('access_token');
+    return !!token;
+  },
+  
+  initializeAuth: () => {
+    const token = localStorage.getItem('access_token');
+    const tokenType = localStorage.getItem('token_type') || 'Bearer';
+    
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `${tokenType} ${token}`;
+    }
+  },
+
+  getProfile: async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+
+      const response = await api.get('/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log("Profile data:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in getProfile:", error);
+      
+      if (error.response?.status === 401) {
+        // Token is invalid, logout user
+        authApi.logout();
+        throw new Error("Session expired. Please login again.");
+      }
+      
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        throw new Error("Cannot connect to server. Please ensure the API server is running on http://localhost:5050");
+      }
+      
+      throw error;
+    }
+  }
+};
+
 export default {
   contacts: contactsApi,
   agents: agentsApi,
   voices: voicesApi,
   calls: callsApi,
   dashboard: dashboardApi,
-  analytics: analyticsApi
+  analytics: analyticsApi,
+  businessInquiries: businessInquiriesApi,
+  auth: authApi
 };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Calendar, Clock, User, Mail, Building, Phone } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { businessInquiriesApi } from "@/services/api";
 
 const BookCall = () => {
   const [selectedDate, setSelectedDate] = useState("");
@@ -38,9 +38,21 @@ const BookCall = () => {
 
     setIsLoading(true);
     
-    // Simulate booking process
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Prepare data for backend API
+      const inquiryData = {
+        date: selectedDate,
+        time: selectedTime,
+        full_name: formData.name,
+        work_email: formData.email,
+        company_name: formData.company || "Not provided",
+        phone_number: formData.phone || "Not provided",
+        challenges: formData.message || "No specific challenges mentioned"
+      };
+
+      // Send to backend
+      const response = await businessInquiriesApi.createBusinessInquiry(inquiryData);
+      
       toast({
         title: "Call Booked Successfully! 🎉",
         description: `Your call is scheduled for ${selectedDate} at ${selectedTime}. We'll send you a calendar invite shortly.`,
@@ -50,7 +62,17 @@ const BookCall = () => {
       setFormData({ name: "", email: "", company: "", phone: "", message: "" });
       setSelectedDate("");
       setSelectedTime("");
-    }, 2000);
+      
+    } catch (error: any) {
+      console.error("Failed to book call:", error);
+      toast({
+        title: "Booking Failed",
+        description: error.message || "Failed to book your call. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -277,7 +299,7 @@ const BookCall = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="+1 (555) 123-4567"
+                      placeholder="+254 708 419 386"
                       className="w-full"
                     />
                   </div>
