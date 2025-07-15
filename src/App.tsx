@@ -11,6 +11,7 @@ import BookCall from "./pages/BookCall";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
 import Transcriptions from "./pages/Transcriptions";
+import Blogs from "./pages/Blogs";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { authApi } from "./services/api";
 
@@ -35,6 +36,7 @@ const App = () => {
               <Route path="/book-call" element={<BookCall />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/transcriptions" element={<Transcriptions />} />
+              <Route path="/blogs" element={<Blogs />} />
               <Route path="/login" element={<Login />} />
               
               {/* Protected routes */}

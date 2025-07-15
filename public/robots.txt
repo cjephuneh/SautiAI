@@ -17,6 +17,7 @@ Allow: /
 Allow: /
 Allow: /book-call
 Allow: /login
+Allow: /blogs
 
 # Sitemap
 Sitemap: https://sautiai.com/sitemap.xml
