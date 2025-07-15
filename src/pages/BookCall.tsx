@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, Clock, User, Mail, Building, Phone } from "lucide-react";
@@ -25,6 +25,26 @@ const BookCall = () => {
     "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
   ];
 
+  useEffect(() => {
+    // Send page view to Google Tag Manager
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', 'GTM-W4PM23HN', {
+        page_title: 'Book Call - SautiAI',
+        page_location: window.location.href,
+      });
+    }
+    
+    // Send custom event to GTM
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'page_view',
+        page_title: 'Book Call - SautiAI',
+        page_location: window.location.href,
+        page_type: 'booking'
+      });
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -40,6 +60,15 @@ const BookCall = () => {
     setIsLoading(true);
     
     try {
+      // Send form start event to GTM
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
+          event: 'form_submit_start',
+          form_name: 'book_consultation',
+          page_location: window.location.href
+        });
+      }
+
       // Prepare data for backend API
       const inquiryData = {
         date: selectedDate,
@@ -54,6 +83,22 @@ const BookCall = () => {
       // Send to backend
       const response = await businessInquiriesApi.createBusinessInquiry(inquiryData);
       
+      // Send successful conversion event to GTM
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
+          event: 'conversion',
+          conversion_type: 'consultation_booking',
+          value: 1,
+          currency: 'USD',
+          form_name: 'book_consultation',
+          user_email: formData.email,
+          user_name: formData.name,
+          company: formData.company,
+          selected_date: selectedDate,
+          selected_time: selectedTime
+        });
+      }
+      
       toast({
         title: "Call Booked Successfully! 🎉",
         description: `Your call is scheduled for ${selectedDate} at ${selectedTime}. We'll send you a calendar invite shortly.`,
@@ -66,6 +111,17 @@ const BookCall = () => {
       
     } catch (error: any) {
       console.error("Failed to book call:", error);
+      
+      // Send error event to GTM
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
+          event: 'form_error',
+          form_name: 'book_consultation',
+          error_message: error.message,
+          page_location: window.location.href
+        });
+      }
+      
       toast({
         title: "Booking Failed",
         description: error.message || "Failed to book your call. Please try again.",
