@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
@@ -8,6 +9,26 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
+  useEffect(() => {
+    // Send page view to Google Tag Manager
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', 'GTM-W4PM23HN', {
+        page_title: 'SautiAI Homepage',
+        page_location: window.location.href,
+      });
+    }
+    
+    // Send custom event to GTM
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'page_view',
+        page_title: 'SautiAI Homepage',
+        page_location: window.location.href,
+        page_type: 'homepage'
+      });
+    }
+  }, []);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",

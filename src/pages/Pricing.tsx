@@ -1,206 +1,255 @@
-
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Check, Star } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Check, X, Star } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const Pricing = () => {
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+
+  useEffect(() => {
+    // Send page view to Google Tag Manager
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', 'GTM-W4PM23HN', {
+        page_title: 'Pricing - SautiAI',
+        page_location: window.location.href,
+      });
+    }
+    
+    // Send custom event to GTM
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'page_view',
+        page_title: 'Pricing - SautiAI',
+        page_location: window.location.href,
+        page_type: 'pricing'
+      });
+    }
+  }, []);
+
+  const handlePlanSelect = (planName: string, price: number) => {
+    // Send plan selection event to GTM
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'plan_selected',
+        plan_name: planName,
+        plan_price: price,
+        billing_cycle: billingCycle,
+        page_location: window.location.href
+      });
+    }
+
+    toast({
+      title: "Plan Selected! 🎉",
+      description: `You selected the ${planName} plan. Redirecting to checkout...`,
+    });
+  };
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "SautiAI Debt Collection Plans",
+    "description": "AI-powered debt collection pricing plans for businesses of all sizes",
+    "provider": {
+      "@type": "Organization",
+      "name": "SautiAI"
+    }
+  };
+
   const plans = [
     {
       name: "Starter",
-      price: "20%",
-      description: "Perfect for small businesses",
+      description: "Perfect for small businesses getting started",
+      price: { monthly: 49, annual: 490 },
       features: [
-        "Up to 100 debts per month",
-        "Email & SMS outreach",
-        "Basic analytics dashboard",
-        "Standard support (24h response)",
-        "CRM integration",
-        "Payment tracking"
+        "Up to 100 contacts",
+        "5 AI calling hours/month",
+        "Basic analytics",
+        "Email support",
+        "Standard compliance tools"
       ],
-      notIncluded: [
-        "Voice AI calls",
-        "WhatsApp messaging",
-        "Advanced analytics",
-        "Priority support"
-      ],
-      popular: false,
-      color: "blue"
+      popular: false
     },
     {
-      name: "Professional", 
-      price: "15%",
-      description: "Most popular for growing businesses",
+      name: "Professional",
+      description: "Ideal for growing collection agencies",
+      price: { monthly: 149, annual: 1490 },
       features: [
-        "Up to 500 debts per month",
-        "All communication channels",
-        "Voice AI calls included",
-        "WhatsApp messaging",
-        "Advanced analytics & reporting",
-        "Priority support (4h response)",
-        "Custom integrations",
-        "Real-time dashboards",
-        "A/B testing"
+        "Up to 1,000 contacts",
+        "25 AI calling hours/month",
+        "Advanced analytics",
+        "Priority support",
+        "Full compliance suite",
+        "Custom AI agents",
+        "Bulk operations"
       ],
-      notIncluded: [
-        "White-label solution",
-        "Dedicated account manager"
-      ],
-      popular: true,
-      color: "purple"
+      popular: true
     },
     {
       name: "Enterprise",
-      price: "Custom",
-      description: "For large organizations",
+      description: "For large organizations with complex needs",
+      price: { monthly: 399, annual: 3990 },
       features: [
-        "Unlimited debts",
-        "All Professional features",
-        "White-label solution", 
-        "Dedicated account manager",
-        "Custom AI training",
-        "SLA guarantees (99.9% uptime)",
-        "On-premise deployment options",
-        "24/7 phone support",
-        "Custom compliance rules"
+        "Unlimited contacts",
+        "100 AI calling hours/month",
+        "White-label solution",
+        "Dedicated support",
+        "Advanced compliance",
+        "API access",
+        "Custom integrations",
+        "Training & onboarding"
       ],
-      notIncluded: [],
-      popular: false,
-      color: "indigo"
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "How does the percentage-based pricing work?",
-      answer: "You only pay when we successfully collect a debt. Our fee is a percentage of the amount collected, so you never pay upfront costs or monthly subscriptions."
-    },
-    {
-      question: "What happens if SautiAI doesn't collect the debt?",
-      answer: "If we don't collect, you don't pay. It's that simple. We're incentivized to recover your debts successfully, aligning our success with yours."
-    },
-    {
-      question: "How quickly can I get started?",
-      answer: "Setup takes less than 10 minutes. Simply upload your debtor list, configure your preferences, and SautiAI will start working immediately."
-    },
-    {
-      question: "Can I upgrade or downgrade my plan?",
-      answer: "Yes, you can change your plan at any time. Upgrades take effect immediately, while downgrades take effect at your next billing cycle."
-    },
-    {
-      question: "Is there a minimum contract period?",
-      answer: "No long-term contracts required. You can cancel anytime with 30 days notice. We believe in earning your business every month."
+      popular: false
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-      <Navbar />
+    <>
+      <SEOHead
+        title="Pricing Plans - SautiAI AI Debt Collection Platform"
+        description="Choose the perfect SautiAI plan for your debt collection needs. Flexible pricing for businesses of all sizes with 65% higher recovery rates."
+        keywords="debt collection pricing, AI collection plans, SautiAI pricing, debt recovery software cost"
+        url="https://sautiai.com/pricing"
+        structuredData={structuredData}
+      />
       
-      {/* Hero Section */}
-      <section className="pt-24 pb-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-            💰 Only Pay When We Collect
-          </div>
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Simple, Transparent Pricing
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            No upfront costs. No hidden fees. Only pay when we successfully recover your debts.
-          </p>
-        </div>
-      </section>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
+        <Navbar />
+        
+        <div className="pt-20 pb-16 px-4">
+          <div className="container mx-auto max-w-6xl">
+            {/* Header */}
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                💰 Simple, Transparent Pricing
+              </div>
+              
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+                Choose Your 
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
+                  Perfect Plan
+                </span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
+                Start recovering 65% more outstanding payments today. No setup fees, cancel anytime.
+              </p>
 
-      {/* Pricing Plans */}
-      <section className="py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-6">
-            {plans.map((plan, index) => (
-              <div key={index} className={`bg-white rounded-2xl p-6 shadow-lg border-2 transition-all hover:shadow-xl ${
-                plan.popular 
-                  ? 'border-purple-500 relative scale-105' 
-                  : 'border-gray-200 hover:border-blue-300'
-              }`}>
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                      <Star className="w-3 h-3" /> Most Popular
-                    </span>
-                  </div>
-                )}
-                
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="mb-3">
-                    <span className={`text-4xl font-bold bg-gradient-to-r ${
-                      plan.color === 'purple' ? 'from-purple-600 to-blue-600' :
-                      plan.color === 'indigo' ? 'from-indigo-600 to-purple-600' :
-                      'from-blue-600 to-indigo-600'
-                    } bg-clip-text text-transparent`}>
-                      {plan.price}
-                    </span>
-                    {plan.price !== "Custom" && (
-                      <span className="text-sm text-gray-500 ml-1">of collected amount</span>
-                    )}
-                  </div>
-                  <p className="text-gray-600">{plan.description}</p>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{feature}</span>
-                    </div>
-                  ))}
-                  {plan.notIncluded.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <X className="w-4 h-4 text-gray-300 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-400 text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Button 
-                  className={`w-full py-3 font-semibold transition-all ${
-                    plan.popular 
-                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg' 
-                      : 'border-2 border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 bg-white'
+              {/* Billing Toggle */}
+              <div className="flex items-center justify-center gap-4 mb-12">
+                <span className={`font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>
+                  Monthly
+                </span>
+                <button
+                  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    billingCycle === 'annual' ? 'bg-blue-600' : 'bg-gray-200'
                   }`}
-                  variant={plan.popular ? "default" : "outline"}
                 >
-                  {plan.price === "Custom" ? "Contact Sales" : "Start Free Trial"}
-                </Button>
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`font-medium ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>
+                  Annual
+                </span>
+                {billingCycle === 'annual' && (
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                    Save 17%
+                  </span>
+                )}
               </div>
-            ))}
+            </div>
+
+            {/* Pricing Cards */}
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              {plans.map((plan, index) => (
+                <div
+                  key={plan.name}
+                  className={`relative bg-white rounded-2xl shadow-xl border-2 p-8 ${
+                    plan.popular 
+                      ? 'border-blue-500 scale-105' 
+                      : 'border-gray-100'
+                  }`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1">
+                        <Star className="w-4 h-4" />
+                        Most Popular
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 mb-6">{plan.description}</p>
+                    
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-gray-900">
+                        ${plan.price[billingCycle]}
+                      </span>
+                      <span className="text-gray-500">
+                        /{billingCycle === 'monthly' ? 'month' : 'year'}
+                      </span>
+                    </div>
+
+                    <Button
+                      onClick={() => handlePlanSelect(plan.name, plan.price[billingCycle])}
+                      className={`w-full py-3 rounded-lg font-semibold text-base ${
+                        plan.popular
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                      }`}
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {plan.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-center gap-3">
+                        <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span className="text-gray-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* FAQ Section */}
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
+              <div className="grid md:grid-cols-2 gap-8 text-left">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Can I change plans anytime?</h3>
+                  <p className="text-gray-600">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Is there a setup fee?</h3>
+                  <p className="text-gray-600">No setup fees or hidden costs. You only pay for your selected plan.</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">What happens if I exceed my limits?</h3>
+                  <p className="text-gray-600">We'll notify you when approaching limits and offer easy upgrade options.</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Do you offer refunds?</h3>
+                  <p className="text-gray-600">Yes, we offer a 30-day money-back guarantee for all plans.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* FAQ Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  {faq.question}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {faq.answer}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 };
 

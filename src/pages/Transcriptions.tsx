@@ -1,192 +1,192 @@
-
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { FileText, Download, Search, Clock, CheckCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Play, Pause, Download, Filter } from "lucide-react";
-import { useState } from "react";
+import SEOHead from "@/components/SEOHead";
 
 const Transcriptions = () => {
-  const [selectedCall, setSelectedCall] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  useEffect(() => {
+    // Send page view to Google Tag Manager
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', 'GTM-W4PM23HN', {
+        page_title: 'Transcriptions - SautiAI',
+        page_location: window.location.href,
+      });
+    }
+    
+    // Send custom event to GTM
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'page_view',
+        page_title: 'Transcriptions - SautiAI',
+        page_location: window.location.href,
+        page_type: 'feature'
+      });
+    }
+  }, []);
 
-  const callTranscripts = [
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "AI Call Transcriptions - SautiAI",
+    "description": "Automatic call transcription and analysis for debt collection calls with compliance monitoring and sentiment analysis.",
+    "url": "https://sautiai.com/transcriptions"
+  };
+
+  const features = [
     {
-      id: 1,
-      debtor: "John Smith",
-      company: "Smith & Associates",
-      amount: "Ksh 4,581",
-      date: "March 15, 2024",
-      duration: "3:42",
-      status: "Payment Promised",
-      sentiment: "Positive",
-      transcript: [
-        { speaker: "AI", time: "0:00", text: "Hi John, this is Sarah from SautiAI calling about your outstanding invoice of Ksh 4,581. Do you have a moment to discuss this?" },
-        { speaker: "John", time: "0:08", text: "Oh hi, yes I've been meaning to call about that. We've had some cash flow issues this quarter." },
-        { speaker: "AI", time: "0:15", text: "I understand cash flow can be challenging. The invoice has been outstanding for 45 days now. Can we work out a payment plan that works for your business?" },
-        { speaker: "John", time: "0:27", text: "That would be great. Could we do it in two payments? Half now and half next month?" },
-        { speaker: "AI", time: "0:34", text: "Absolutely! So that would be Ksh 2,290.50 by March 20th and the remaining Ksh 2,290.50 by April 20th. Does that work?" },
-        { speaker: "John", time: "0:45", text: "Perfect. I'll send the first payment by the end of this week." },
-        { speaker: "AI", time: "0:50", text: "Excellent! I'll send you a payment confirmation email with the details. Thank you for working with us on this, John." }
-      ]
+      icon: <FileText className="w-8 h-8 text-blue-600" />,
+      title: "Real-Time Transcription",
+      description: "Get instant, accurate transcriptions of all debt collection calls with 99.5% accuracy."
     },
     {
-      id: 2,
-      debtor: "Lisa Chen",
-      company: "Tech Solutions Inc",
-      amount: "Ksh 2,750",
-      date: "March 14, 2024", 
-      duration: "2:18",
-      status: "Dispute Raised",
-      sentiment: "Neutral",
-      transcript: [
-        { speaker: "AI", time: "0:00", text: "Hello Lisa, this is calling from SautiAI regarding invoice #INV-2024-0312 for Ksh 2,750." },
-        { speaker: "Lisa", time: "0:07", text: "Hi there. Actually, I need to discuss this invoice. We never received the services listed." },
-        { speaker: "AI", time: "0:14", text: "I'm sorry to hear about this issue. Let me help you resolve this. Can you tell me more about what services were expected versus what was delivered?" },
-        { speaker: "Lisa", time: "0:25", text: "We paid for premium support but only received basic support. The contract clearly states 24/7 availability but we couldn't reach anyone on weekends." },
-        { speaker: "AI", time: "0:38", text: "I understand your concern. This sounds like a legitimate service delivery issue. I'll escalate this to our billing disputes team and have them review your account within 24 hours." },
-        { speaker: "Lisa", time: "0:52", text: "That sounds fair. I appreciate you taking this seriously instead of just pushing for payment." }
-      ]
+      icon: <Search className="w-8 h-8 text-purple-600" />,
+      title: "AI-Powered Analysis",
+      description: "Automatic sentiment analysis, compliance checking, and key insight extraction."
+    },
+    {
+      icon: <CheckCircle className="w-8 h-8 text-green-600" />,
+      title: "Compliance Monitoring",
+      description: "Ensure FDCPA compliance with automatic flagging of potential violations."
+    },
+    {
+      icon: <Download className="w-8 h-8 text-orange-600" />,
+      title: "Export & Share",
+      description: "Download transcripts in multiple formats or share securely with team members."
     }
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <>
+      <SEOHead
+        title="AI Call Transcriptions - SautiAI Debt Collection Platform"
+        description="Automatic call transcription and analysis for debt collection calls. Real-time transcription with compliance monitoring and sentiment analysis."
+        keywords="call transcription, debt collection transcripts, AI transcription, compliance monitoring, call analysis"
+        url="https://sautiai.com/transcriptions"
+        structuredData={structuredData}
+      />
       
-      {/* Hero Section */}
-      <section className="pt-24 pb-8 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="container mx-auto max-w-6xl">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 text-center">
-            AI Call Transcriptions
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 text-center">
-            Review every conversation with complete transparency and AI-powered insights.
-          </p>
-        </div>
-      </section>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50">
+        <Navbar />
+        
+        <div className="pt-20 pb-16 px-4">
+          <div className="container mx-auto max-w-6xl">
+            {/* Header */}
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                📝 AI-Powered Transcriptions
+              </div>
+              
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+                Never Miss a Word with
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
+                  AI Transcriptions
+                </span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Get real-time, accurate transcriptions of all your debt collection calls with automatic compliance monitoring and sentiment analysis.
+              </p>
+            </div>
 
-      {/* Main Content */}
-      <section className="py-8 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Call List */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Recent Calls</h2>
-                    <Button variant="outline" size="sm">
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filter
-                    </Button>
+            {/* Features Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+              {features.map((feature, index) => (
+                <div key={index} className="text-center p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
+                  <div className="flex justify-center mb-4">
+                    {feature.icon}
                   </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Demo Section */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-16">
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6">See Transcriptions in Action</h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-blue-600" />
+                      <span className="text-gray-700">Real-time processing as calls happen</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="text-gray-700">Automatic compliance checking</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Search className="w-5 h-5 text-purple-600" />
+                      <span className="text-gray-700">Searchable conversation history</span>
+                    </div>
+                  </div>
+                  <Button className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                    Start Free Trial
+                  </Button>
                 </div>
 
-                <div className="divide-y divide-gray-100">
-                  {callTranscripts.map((call, index) => (
-                    <div 
-                      key={call.id}
-                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${selectedCall === index ? 'bg-blue-50 border-r-4 border-blue-500' : ''}`}
-                      onClick={() => setSelectedCall(index)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">{call.debtor}</h3>
-                        <span className="text-sm text-gray-500">{call.duration}</span>
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm font-medium text-gray-900">Live Transcription</span>
+                      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex gap-3">
+                        <span className="font-medium text-blue-600">Agent:</span>
+                        <span className="text-gray-700">Good morning, this is Sarah calling from ABC Collections regarding your account ending in 1234.</span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-1">{call.company}</p>
-                      <p className="text-sm font-semibold text-gray-900 mb-2">{call.amount}</p>
-                      <div className="flex items-center justify-between">
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          call.status === 'Payment Promised' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {call.status}
-                        </span>
-                        <span className="text-xs text-gray-500">{call.date}</span>
+                      <div className="flex gap-3">
+                        <span className="font-medium text-purple-600">Customer:</span>
+                        <span className="text-gray-700">Hi Sarah, I've been meaning to call about setting up a payment plan.</span>
+                      </div>
+                      <div className="flex gap-3">
+                        <span className="font-medium text-blue-600">Agent:</span>
+                        <span className="text-gray-700">I'd be happy to help you with that. Let me review your account options...</span>
                       </div>
                     </div>
-                  ))}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>🟢 Compliance: Approved</span>
+                        <span>😊 Sentiment: Positive</span>
+                        <span>⏱️ Duration: 2:34</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Call Details */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">
-                        Call with {callTranscripts[selectedCall].debtor}
-                      </h2>
-                      <p className="text-gray-600">{callTranscripts[selectedCall].company}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setIsPlaying(!isPlaying)}
-                      >
-                        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Amount:</span>
-                      <p className="font-semibold">{callTranscripts[selectedCall].amount}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Duration:</span>
-                      <p className="font-semibold">{callTranscripts[selectedCall].duration}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Status:</span>
-                      <p className="font-semibold">{callTranscripts[selectedCall].status}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Sentiment:</span>
-                      <p className="font-semibold">{callTranscripts[selectedCall].sentiment}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Transcript */}
+            {/* Benefits */}
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-12">Why Choose SautiAI Transcriptions?</h2>
+              <div className="grid md:grid-cols-3 gap-8">
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Transcript</h3>
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {callTranscripts[selectedCall].transcript.map((message, index) => (
-                      <div key={index} className={`flex gap-4 p-3 rounded-lg ${
-                        message.speaker === 'AI' ? 'bg-blue-50' : 'bg-gray-50'
-                      }`}>
-                        <div className="flex-shrink-0">
-                          <span className="text-xs font-semibold text-gray-500">{message.time}</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-sm font-semibold ${
-                              message.speaker === 'AI' ? 'text-blue-700' : 'text-gray-700'
-                            }`}>
-                              {message.speaker === 'AI' ? 'SautiAI' : message.speaker}
-                            </span>
-                          </div>
-                          <p className="text-gray-700 text-sm leading-relaxed">{message.text}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <div className="text-4xl font-bold text-blue-600 mb-4">99.5%</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Accuracy</h3>
+                  <p className="text-gray-600">Industry-leading transcription accuracy powered by advanced AI</p>
+                </div>
+                <div className="p-6">
+                  <div className="text-4xl font-bold text-purple-600 mb-4">&lt;2s</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-Time</h3>
+                  <p className="text-gray-600">Get transcriptions in near real-time as conversations happen</p>
+                </div>
+                <div className="p-6">
+                  <div className="text-4xl font-bold text-green-600 mb-4">100%</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Compliant</h3>
+                  <p className="text-gray-600">Automatic compliance monitoring and violation detection</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 };
 

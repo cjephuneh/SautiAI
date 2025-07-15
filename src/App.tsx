@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import BookCall from "./pages/BookCall";
 import Login from "./pages/Login";
+import Pricing from "./pages/Pricing";
+import Transcriptions from "./pages/Transcriptions";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { authApi } from "./services/api";
 
@@ -31,6 +33,8 @@ const App = () => {
               {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/book-call" element={<BookCall />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/transcriptions" element={<Transcriptions />} />
               <Route path="/login" element={<Login />} />
               
               {/* Protected routes */}
