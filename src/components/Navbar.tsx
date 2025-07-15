@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,7 +24,8 @@ const Navbar = () => {
     { name: "Case Studies", href: "#testimonials" },
     { name: "Integrations", href: "/integrations" },
     { name: "API Reference", href: "/integrations#api" },
-    { name: "Support Center", href: "#" }
+    { name: "Support Center", href: "#" },
+    { name: "Blogs", href: "/blogs" }
   ];
 
   return (
@@ -90,38 +92,35 @@ const Navbar = () => {
             </Link>
 
             {/* Resources Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setActiveDropdown('resources')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <button className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors font-medium text-sm">
-                Resources <ChevronDown className="w-3 h-3" />
-              </button>
-              {activeDropdown === 'resources' && (
-                <div className="absolute top-full left-0 mt-3 w-52 bg-white rounded-xl shadow-xl border border-gray-100/50 py-2 z-50 backdrop-blur-lg">
-                  {resources.map((item) => (
-                    item.href.startsWith('#') || item.href.startsWith('/integrations#') ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 text-gray-700 hover:text-blue-600">
+                  Resources
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {resources.map((item) => (
+                  <DropdownMenuItem asChild key={item.name}>
+                    {item.href.startsWith('#') || item.href.startsWith('/integrations#') ? (
                       <a
-                        key={item.name}
                         href={item.href}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="text-gray-700 hover:text-blue-600"
                       >
                         {item.name}
                       </a>
                     ) : (
                       <Link
-                        key={item.name}
                         to={item.href}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="text-gray-700 hover:text-blue-600"
                       >
                         {item.name}
                       </Link>
-                    )
-                  ))}
-                </div>
-              )}
-            </div>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* CTA Buttons */}
