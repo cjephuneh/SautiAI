@@ -1,9 +1,12 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { X } from "lucide-react";
 
 const Integrations = () => {
+  const [showModal, setShowModal] = useState(false);
+
   const integrations = [
     {
       category: "CRM Systems",
@@ -16,19 +19,19 @@ const Integrations = () => {
         },
         { 
           name: "HubSpot", 
-          logo: "🧡", 
+          logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png", 
           description: "Automate debt collection workflows seamlessly",
           color: "bg-orange-500"
         },
         { 
           name: "Pipedrive", 
-          logo: "🔷", 
+          logo: "https://cdn.worldvectorlogo.com/logos/pipedrive.svg", 
           description: "Track collection progress in your sales pipeline",
           color: "bg-green-500"
         },
         { 
           name: "Zoho CRM", 
-          logo: "🟠", 
+          logo: "https://www.zoho.com/sites/zweb/images/zoho-logo.svg", 
           description: "Complete customer data integration",
           color: "bg-red-500"
         }
@@ -39,25 +42,25 @@ const Integrations = () => {
       items: [
         { 
           name: "QuickBooks", 
-          logo: "💚", 
+          logo: "https://logos-world.net/wp-content/uploads/2021/03/QuickBooks-Logo.png", 
           description: "Automatic invoice sync and payment reconciliation",
           color: "bg-green-600"
         },
         { 
           name: "Xero", 
-          logo: "🔵", 
+          logo: "https://logos-world.net/wp-content/uploads/2021/04/Xero-Logo.png", 
           description: "Real-time financial data and reporting",
           color: "bg-blue-600"
         },
         { 
           name: "FreshBooks", 
-          logo: "🟢", 
+          logo: "https://www.freshbooks.com/wp-content/uploads/2021/10/freshbooks-logo.svg", 
           description: "Invoice tracking and collection automation",
           color: "bg-emerald-600"
         },
         { 
           name: "Sage", 
-          logo: "🟤", 
+          logo: "https://www.sage.com/-/media/sage/sage-com/global/logos/logo-sage-green-rgb.ashx", 
           description: "Enterprise-grade accounting integration",
           color: "bg-amber-600"
         }
@@ -68,25 +71,25 @@ const Integrations = () => {
       items: [
         { 
           name: "WhatsApp Business", 
-          logo: "💬", 
+          logo: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg", 
           description: "Reach customers on their preferred messaging platform",
           color: "bg-green-500"
         },
         { 
           name: "Twilio", 
-          logo: "📱", 
+          logo: "https://logos-world.net/wp-content/uploads/2021/11/Twilio-Logo.png", 
           description: "SMS and voice call infrastructure",
           color: "bg-red-500"
         },
         { 
           name: "SendGrid", 
-          logo: "📧", 
+          logo: "https://logos-world.net/wp-content/uploads/2021/04/SendGrid-Logo.png", 
           description: "Professional email delivery and tracking",
           color: "bg-blue-500"
         },
         { 
           name: "Mailgun", 
-          logo: "✉️", 
+          logo: "https://logos-world.net/wp-content/uploads/2021/04/Mailgun-Logo.png", 
           description: "Reliable transactional email API",
           color: "bg-orange-500"
         }
@@ -97,25 +100,25 @@ const Integrations = () => {
       items: [
         { 
           name: "Stripe", 
-          logo: "💳", 
+          logo: "https://logos-world.net/wp-content/uploads/2021/03/Stripe-Logo.png", 
           description: "Accept online payments instantly",
           color: "bg-indigo-500"
         },
         { 
           name: "PayPal", 
-          logo: "🅿️", 
+          logo: "https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png", 
           description: "Global payment processing solution",
           color: "bg-blue-500"
         },
         { 
           name: "Square", 
-          logo: "⬜", 
+          logo: "https://images.squareup.com/press/images/square-logo-black.png", 
           description: "In-person and online payment processing",
           color: "bg-gray-800"
         },
         { 
           name: "Authorize.Net", 
-          logo: "🔐", 
+          logo: "https://www.authorize.net/content/dam/authorize/images/authorize-net-logo.png", 
           description: "Secure payment gateway integration",
           color: "bg-green-500"
         }
@@ -159,8 +162,19 @@ const Integrations = () => {
                 {category.items.map((integration, index) => (
                   <div key={index} className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1 group">
                     <div className="text-center mb-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${integration.color}`}>
-                        <span className="text-2xl">{integration.logo}</span>
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 bg-white border border-gray-200">
+                        <img 
+                          src={integration.logo} 
+                          alt={`${integration.name} logo`}
+                          className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-8 h-8 rounded bg-gray-200 items-center justify-center text-gray-500 text-xs hidden">
+                          {integration.name.charAt(0)}
+                        </div>
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         {integration.name}
@@ -172,6 +186,7 @@ const Integrations = () => {
                     <Button 
                       variant="outline" 
                       className="w-full group-hover:bg-blue-50 group-hover:border-blue-300 group-hover:text-blue-600 transition-all"
+                      onClick={() => setShowModal(true)}
                     >
                       Connect
                     </Button>
@@ -215,6 +230,47 @@ const Integrations = () => {
           </div>
         </div>
       </section>
+
+      {/* Coming Soon Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X size={24} />
+            </button>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Coming Soon!
+              </h3>
+              <p className="text-gray-600 mb-6">
+                This integration is currently in development. We'll notify you as soon as it's available.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white flex-1"
+                  onClick={() => setShowModal(false)}
+                >
+                  Get Notified
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
