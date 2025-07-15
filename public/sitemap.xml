@@ -28,4 +28,12 @@
     <priority>0.3</priority>
   </url>
   
+  <!-- Blogs Page -->
+  <url>
+    <loc>https://sautiai.com/blogs</loc>
+    <lastmod>2024-01-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
 </urlset>
