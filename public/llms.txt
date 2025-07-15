@@ -1,0 +1,154 @@
+# SautiAI - AI-Powered Debt Collection Platform
+# This file provides information about the codebase for Large Language Models
+
+## Project Overview
+SautiAI is an AI-powered debt collection platform that helps businesses recover outstanding payments through automated calls, SMS, and smart collection strategies. The platform increases recovery rates by 65% using artificial intelligence.
+
+## Domain
+- Primary: https://sautiai.com
+- Backend API: https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net
+
+## Technology Stack
+- Frontend: React 18 + TypeScript + Vite
+- UI Framework: Tailwind CSS + Shadcn/ui components
+- State Management: TanStack React Query
+- Routing: React Router DOM
+- Authentication: JWT tokens with localStorage
+- API Client: Axios
+- Build Tool: Vite
+- Deployment: Static hosting (Vercel/Netlify recommended)
+
+## Architecture
+### Frontend Structure
+```
+src/
+├── components/           # Reusable UI components
+│   ├── ui/              # Shadcn/ui base components
+│   ├── dashboard/       # Dashboard-specific components
+│   └── *.tsx            # Page-level components (Navbar, Hero, etc.)
+├── pages/               # Route components
+│   ├── Index.tsx        # Homepage
+│   ├── Login.tsx        # Authentication
+│   ├── BookCall.tsx     # Lead generation
+│   └── Dashboard.tsx    # Protected dashboard
+├── services/            # API integration
+│   └── api.ts           # All API endpoints
+├── hooks/               # Custom React hooks
+├── lib/                 # Utilities and configurations
+└── types/               # TypeScript type definitions
+```
+
+### Key Features
+1. **Public Pages**:
+   - Homepage with hero, features, testimonials
+   - Book consultation form (lead generation)
+   - Login/authentication
+
+2. **Protected Dashboard**:
+   - Contact/debtor management
+   - AI agent configuration
+   - Call logs and transcripts
+   - Analytics and reporting
+   - Batch calling campaigns
+   - Compliance monitoring
+
+3. **Authentication**:
+   - JWT-based authentication
+   - Protected routes with ProtectedRoute component
+   - User profile management
+   - Session management
+
+## API Integration
+All API calls are centralized in `src/services/api.ts` with these main modules:
+- `authApi`: Authentication (login, profile, logout)
+- `contactsApi`: Contact/debtor management
+- `agentsApi`: AI agent configuration
+- `callsApi`: Call management and transcripts
+- `dashboardApi`: Dashboard data
+- `analyticsApi`: Reporting and analytics
+- `businessInquiriesApi`: Lead form submissions
+
+## Authentication Flow
+1. User logs in via `/login` with email/password
+2. Backend returns JWT access token
+3. Token stored in localStorage
+4. Token sent in Authorization header for protected requests
+5. `/auth/me` endpoint retrieves user profile
+6. Protected routes redirect to login if no valid token
+
+## Key Business Logic
+- **Debt Collection**: Manage debtors, amounts, payment status
+- **AI Agents**: Configurable AI personalities for different collection strategies
+- **Call Automation**: Automated calling with real-time transcripts
+- **Compliance**: FDCPA and regulatory compliance monitoring
+- **Analytics**: Performance metrics and collection success rates
+
+## Environment Variables
+```
+VITE_API_BASE_URL=https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net
+```
+
+## SEO Strategy
+- Comprehensive meta tags and Open Graph
+- Structured data (JSON-LD) for rich snippets
+- XML sitemap and robots.txt
+- Performance optimization with lazy loading
+- Mobile-first responsive design
+
+## Component Patterns
+- **Compound Components**: Dashboard layout with sidebar + header
+- **Protected Routes**: HOC for authentication checking
+- **API Hooks**: Custom hooks for data fetching
+- **Form Handling**: Controlled components with validation
+- **Modal Management**: Dialog components for actions
+
+## Styling Approach
+- Utility-first CSS with Tailwind
+- Design system via Shadcn/ui components
+- Consistent color palette (blue/purple gradients)
+- Dark/light mode support (theme provider)
+- Responsive breakpoints: sm, md, lg, xl
+
+## Performance Considerations
+- Code splitting with React.lazy()
+- Image optimization (WebP, lazy loading)
+- Bundle size monitoring
+- API response caching with React Query
+- Debounced search inputs
+
+## Security Features
+- JWT token management
+- XSS protection headers
+- CSRF protection
+- Input validation and sanitization
+- Protected API endpoints
+- Session timeout handling
+
+## Development Workflow
+1. Local development: `npm run dev`
+2. Build: `npm run build`
+3. Preview: `npm run preview`
+4. Linting: `npm run lint`
+
+## Key Files to Understand
+- `src/services/api.ts`: All backend integration
+- `src/pages/Dashboard.tsx`: Main dashboard router
+- `src/components/ProtectedRoute.tsx`: Authentication guard
+- `src/components/dashboard/DashboardHeader.tsx`: User management
+- `src/pages/Index.tsx`: Marketing homepage
+- `src/pages/BookCall.tsx`: Lead generation form
+
+## Business Model
+- B2B SaaS platform for collection agencies and businesses
+- Freemium model with usage-based pricing
+- Lead generation through consultation bookings
+- Target market: Collection agencies, fintech, lending institutions
+
+## Compliance Requirements
+- FDCPA (Fair Debt Collection Practices Act)
+- TCPA (Telephone Consumer Protection Act)
+- State-specific collection regulations
+- Data privacy (GDPR considerations)
+- Call recording consent
+
+This codebase follows modern React patterns with TypeScript for type safety, emphasizes user experience with smooth animations and responsive design, and maintains clean separation of concerns between UI components and business logic.
