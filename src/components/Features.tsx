@@ -6,25 +6,25 @@ const Features = () => {
     {
       icon: Phone,
       title: "AI Voice Calls",
-      description: "Natural conversations with debtors using advanced voice AI that adapts tone and approach.",
+      description: "Natural conversations with customers using advanced voice AI that adapts language, tone and approach.",
       gradient: "from-blue-500 to-blue-600"
     },
     {
       icon: MessageSquare,
       title: "WhatsApp & SMS",
-      description: "Automated reminders and payment links sent via the channels your debtors prefer.",
+      description: "Deliver a better customer experience through automated messages, reminders and payment links sent via WhatsApp & SMS.",
       gradient: "from-green-500 to-green-600"
     },
     {
       icon: TrendingUp,
       title: "Dashboard & Reports",
-      description: "Real-time analytics, collection trends, and detailed reporting for complete visibility.",
+      description: "Real-time analytics on key metrics like call volumes, resolution times, and collections, with customizable reports to track performance and make data-driven decisions.",
       gradient: "from-purple-500 to-purple-600"
     },
     {
       icon: Link,
       title: "Integrations",
-      description: "Seamlessly connect with your CRM, accounting software, and communication tools.",
+      description: "Seamlessly integrate with your existing CRM, ERP, and enterprise systems.",
       gradient: "from-indigo-500 to-indigo-600"
     },
     {

@@ -52,30 +52,33 @@ const Hero = () => {
           {/* Left Content */}
           <div className="text-center lg:text-left space-y-6">
             <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-semibold">
-              🤖 AI-Powered Debt Collection
+              🤖 AI-Powered Call Center & Customer Engagement
+
             </div>
             
             <div className="space-y-4">
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                Let AI Collect Your Debts — 
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  The Smart Way
-                </span>
+              We listen, speak and deliver the African way.
+
               </h1>
               
               <p className="text-lg text-gray-600 leading-relaxed">
-                Recover 65% more outstanding payments in half the time. SautiAI handles conversations naturally while you focus on growing your business.
+              Voice AI that speaks your customer’s language, across debt, Customer Experience & outbound campaigns.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
               <div className="text-center">
-                <div className="text-xl font-bold text-blue-600 mb-1">65%</div>
-                <div className="text-xs text-gray-600">Higher Recovery</div>
+                <div className="text-xl font-bold text-blue-600 mb-1">50%</div>
+                <div className="text-xs text-gray-600">Cost Reduction</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-purple-600 mb-1">15 Days</div>
-                <div className="text-xs text-gray-600">Avg Collection</div>
+                <div className="text-xl font-bold text-purple-600 mb-1">80%</div>
+                <div className="text-xs text-gray-600">Inbound Automation</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-bold text-green-600 mb-1">40%</div>
+                <div className="text-xs text-gray-600">Better Contact Rates</div>
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-indigo-600 mb-1">24/7</div>

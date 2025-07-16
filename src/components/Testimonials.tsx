@@ -2,21 +2,21 @@
 const Testimonials = () => {
   const testimonials = [
     {
-      name: "Sarah Chen",
+      name: "Njeri Kamau",
       role: "CFO at TechFlow Solutions",
       company: "TechFlow",
       quote: "DebAI increased our collection rate by 280% in just 3 months. The AI conversations are so natural, our clients actually prefer them to traditional collection calls.",
       avatar: "SC"
     },
     {
-      name: "Marcus Rodriguez",
+      name: "Malik Odhiambo",
       role: "Finance Director",
       company: "GrowthCorp",
       quote: "What used to take our team 40 hours per week now happens automatically. DebAI has transformed our cash flow management completely.",
       avatar: "MR"
     },
     {
-      name: "Emma Thompson",
+      name: "Martin Otieno",
       role: "Business Owner",
       company: "Creative Studios",
       quote: "Finally, a solution that maintains our client relationships while efficiently collecting outstanding payments. The ROI has been incredible.",

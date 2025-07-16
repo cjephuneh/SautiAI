@@ -44,7 +44,7 @@ const HowItWorks = () => {
             How SautiAI Works
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Transform your debt collection process in minutes. Our AI handles everything from initial contact to payment collection with unprecedented efficiency.
+          Sauti AI helps you engage thousands of customers through intelligent voice calls in multiple languages. Here’s how it works:
           </p>
         </div>
 

@@ -22,6 +22,15 @@ const CommunicationTimeline = () => {
       iconColor: "text-blue-600"
     },
     {
+      type: "WHATSAPP",
+      icon: MessageSquare,
+      time: "2h ago",
+      title: "WhatsApp: Please settle your overdue Ksh4,581",
+      status: "sent",
+      bgColor: "bg-green-50",
+      iconColor: "text-green-500"
+    },
+    {
       type: "EMAIL",
       icon: Mail,
       time: "4d ago", 
@@ -66,6 +75,7 @@ const CommunicationTimeline = () => {
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600"
     }
+    
   ];
 
   return (
