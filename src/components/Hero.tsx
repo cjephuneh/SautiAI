@@ -58,14 +58,17 @@ const Hero = () => {
             
             <div className="space-y-4">
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-              We listen, speak and deliver the African way.
-
+              We listen, speak and deliver  -
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                   the African way.
+                </span>
               </h1>
-              
               <p className="text-lg text-gray-600 leading-relaxed">
               Voice AI that speaks your customer’s language, across debt, Customer Experience & outbound campaigns.
               </p>
             </div>
+
+            
 
             <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
               <div className="text-center">
@@ -88,7 +91,7 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Button 
-                onClick={() => document.querySelector('#hero-form')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => window.location.href = "/book-call"}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
               >
@@ -98,6 +101,7 @@ const Hero = () => {
                 variant="outline" 
                 size="lg"
                 className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 text-base font-semibold rounded-lg"
+                onClick={() => window.location.href = "/book-call"}
               >
                 Book a Demo
               </Button>
