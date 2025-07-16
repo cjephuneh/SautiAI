@@ -536,7 +536,7 @@ export const authApi = {
       }
       
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on hhttps://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
+        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
       }
       
       throw error;
