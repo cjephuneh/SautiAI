@@ -5,14 +5,14 @@ const Testimonials = () => {
       name: "Njeri Kamau",
       role: "CFO at TechFlow Solutions",
       company: "TechFlow",
-      quote: "DebAI increased our collection rate by 280% in just 3 months. The AI conversations are so natural, our clients actually prefer them to traditional collection calls.",
+      quote: "SautiAI increased our collection rate by 280% in just 3 months. The AI conversations are so natural, our clients actually prefer them to traditional collection calls.",
       avatar: "SC"
     },
     {
       name: "Malik Odhiambo",
       role: "Finance Director",
       company: "GrowthCorp",
-      quote: "What used to take our team 40 hours per week now happens automatically. DebAI has transformed our cash flow management completely.",
+      quote: "What used to take our team 40 hours per week now happens automatically. SautiAI has transformed our cash flow management completely.",
       avatar: "MR"
     },
     {
@@ -36,7 +36,7 @@ const Testimonials = () => {
             Trusted by Growing Businesses
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            See how companies are transforming their debt collection with DebAI
+            See how companies are transforming their SautiAI collection with SautiAI
           </p>
         </div>
 
