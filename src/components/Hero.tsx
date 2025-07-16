@@ -88,7 +88,7 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Button 
-                onClick={() => document.querySelector('#hero-form')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => window.location.href = "/book-call"}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
               >
@@ -98,6 +98,7 @@ const Hero = () => {
                 variant="outline" 
                 size="lg"
                 className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 text-base font-semibold rounded-lg"
+                onClick={() => window.location.href = "/book-call"}
               >
                 Book a Demo
               </Button>
