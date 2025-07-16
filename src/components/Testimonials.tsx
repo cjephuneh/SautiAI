@@ -25,7 +25,7 @@ const Testimonials = () => {
   ];
 
   const logos = [
-    "TechFlow", "GrowthCorp", "Creative Studios", "InnovateCo", "ScaleUp"
+    "BricklabsAI", "Therabot", "FarmSawa", "ChainRivals", "Hakichain"
   ];
 
   return (
