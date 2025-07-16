@@ -53,7 +53,6 @@ const Hero = () => {
           <div className="text-center lg:text-left space-y-6">
             <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-semibold">
               🤖 AI-Powered Call Center & Customer Engagement
-
             </div>
             
             <div className="space-y-4">

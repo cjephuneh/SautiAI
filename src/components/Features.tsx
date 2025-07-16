@@ -69,7 +69,7 @@ const Features = () => {
         <div className="text-center mt-16">
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Ready to revolutionize your debt collection? 🚀
+              Ready to automate conversations at scale? 🚀
             </h3>
             <p className="text-gray-600 mb-6">
               Join over 5+ businesses already using DebAI to automate their collection process and increase recovery rates.
