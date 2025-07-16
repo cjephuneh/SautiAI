@@ -41,7 +41,7 @@ const Navbar = () => {
               <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 SautiAI
               </span>
-              <span className="text-[10px] text-gray-500 -mt-1">Smart Collections</span>
+              <span className="text-[10px] text-gray-500 -mt-1">Voice Automation</span>
             </div>
           </Link>
 
