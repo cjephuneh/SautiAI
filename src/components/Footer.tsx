@@ -15,7 +15,7 @@ const Footer = () => {
               <span className="text-xl font-bold">SautiAI</span>
             </div>
             <p className="text-gray-300 mb-6 max-w-md leading-relaxed">
-              Revolutionizing debt collection with AI-powered automation. Professional, efficient, and results-driven collection services for modern businesses.
+            Voice AI that speaks your customer’s language, across debt, Customer Experience & outbound campaigns.
             </p>
             <div className="flex gap-3">
               <div className="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">

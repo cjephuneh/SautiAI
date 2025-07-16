@@ -49,7 +49,7 @@ const PhoneMockup = ({
               </span>
             </h3>
             <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-              See how AI can recover your debts automatically in just 15 days
+            Transform your call center; collections, CX, surveys.
             </p>
 
             {/* Form */}
