@@ -103,6 +103,24 @@ const CallLogs = () => {
     }
   }, [autoRefresh, showLiveTranscript, selectedCall]);
 
+  useEffect(() => {
+    if (calls.length > 0) {
+      const validCallId = calls[0].call_id;
+      // Fetch full call details
+      callsApi.getCallById(validCallId.toString()).then(data => {
+        console.log("Full call details:", data);
+      });
+      // Fetch call status
+      callsApi.getCallStatus(validCallId.toString()).then(data => {
+        console.log("Call status:", data);
+      });
+      // Fetch call transcript
+      callsApi.getCallTranscript(validCallId.toString()).then(data => {
+        console.log("Call transcript:", data);
+      });
+    }
+  }, [calls]);
+
   const fetchCalls = async () => {
     setLoading(true);
     setError(null);

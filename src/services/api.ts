@@ -278,11 +278,12 @@ export const callsApi = {
       const response = await api.get(`/calls/${callId}`);
       return response.data;
     } catch (error: any) {
-      console.error("Failed to fetch call by ID:", error);
-      // Return null instead of throwing for 404s
+      // Only log if not a 404
       if (error.response?.status === 404) {
+        // Optionally: console.info(`Call with ID ${callId} not found (404)`);
         return null;
       }
+      console.error("Failed to fetch call by ID:", error);
       return null;
     }
   },
