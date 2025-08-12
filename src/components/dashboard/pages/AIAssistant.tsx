@@ -36,6 +36,10 @@ interface Agent {
   created_at: string;
   is_active: boolean;
   temperature?: number;
+  azure_model?: string;
+  voice_temperature?: number;
+  speaking_rate?: number;
+  audio_enhancement?: boolean;
 }
 
 interface Voice {
@@ -252,6 +256,17 @@ function useVoicePreview() {
   return { play, stop };
 }
 
+const defaultFormData = {
+  name: "",
+  prompt_template: "",
+  voice_id: "",
+  temperature: 0.7,
+  azure_model: "gpt-4o-realtime-preview",
+  voice_temperature: 0.7,
+  speaking_rate: 1.05,
+  audio_enhancement: true
+};
+
 export const AIAssistant = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [voices, setVoices] = useState<Voice[]>([]);
@@ -263,12 +278,7 @@ export const AIAssistant = () => {
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [voicePreviewing, setVoicePreviewing] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    prompt_template: "",
-    voice_id: "",
-    temperature: 0.7
-  });
+  const [formData, setFormData] = useState({ ...defaultFormData });
 
   const { toast } = useToast();
   const { play, stop } = useVoicePreview();
@@ -352,9 +362,13 @@ export const AIAssistant = () => {
         prompt_template: formData.prompt_template,
         voice_id: formData.voice_id,
         temperature: formData.temperature,
+        azure_model: formData.azure_model,
+        voice_temperature: formData.voice_temperature,
+        speaking_rate: formData.speaking_rate,
+        audio_enhancement: formData.audio_enhancement
       });
       setAgents(prev => Array.isArray(prev) ? [...prev, data] : [data]);
-      setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
+      setFormData({ ...defaultFormData });
       setSelectedTemplate("");
       setShowCreateForm(false);
       toast({
@@ -402,7 +416,7 @@ export const AIAssistant = () => {
           : agent
       ) : []);
       setEditingAgent(null);
-      setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
+      setFormData({ ...defaultFormData });
       toast({
         title: "Success",
         description: "Agent updated successfully.",
@@ -434,13 +448,17 @@ export const AIAssistant = () => {
       name: agent.name,
       prompt_template: agent.prompt_template,
       voice_id: agent.voice_id,
-      temperature: agent.temperature || 0.7
+      temperature: agent.temperature || 0.7,
+      azure_model: agent.azure_model || "gpt-4o-realtime-preview",
+      voice_temperature: agent.voice_temperature || 0.7,
+      speaking_rate: agent.speaking_rate || 1.05,
+      audio_enhancement: agent.audio_enhancement ?? true
     });
     setShowCreateForm(true);
   };
 
   const resetForm = () => {
-    setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
+    setFormData({ ...defaultFormData });
     setSelectedTemplate("");
     setEditingAgent(null);
     setShowCreateForm(false);
@@ -623,6 +641,62 @@ export const AIAssistant = () => {
                     <span>Conservative</span>
                     <span>Creative</span>
                   </div>
+                </div>
+                {/* Azure Model */}
+                <div>
+                  <Label htmlFor="azure_model">Azure Model</Label>
+                  <Input
+                    id="azure_model"
+                    value={formData.azure_model}
+                    onChange={e => setFormData(prev => ({ ...prev, azure_model: e.target.value }))}
+                    placeholder="e.g., gpt-4o-realtime-preview"
+                  />
+                </div>
+                {/* Voice Temperature */}
+                <div>
+                  <Label htmlFor="voice_temperature">Voice Temperature</Label>
+                  <input
+                    id="voice_temperature"
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={formData.voice_temperature}
+                    onChange={e => setFormData(prev => ({ ...prev, voice_temperature: parseFloat(e.target.value) }))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Stable</span>
+                    <span>Expressive</span>
+                  </div>
+                </div>
+                {/* Speaking Rate */}
+                <div>
+                  <Label htmlFor="speaking_rate">Speaking Rate</Label>
+                  <input
+                    id="speaking_rate"
+                    type="number"
+                    min={0.5}
+                    max={2}
+                    step={0.01}
+                    value={formData.speaking_rate}
+                    onChange={e => setFormData(prev => ({ ...prev, speaking_rate: parseFloat(e.target.value) }))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Slower</span>
+                    <span>Faster</span>
+                  </div>
+                </div>
+                {/* Audio Enhancement */}
+                <div className="flex items-center gap-2">
+                  <input
+                    id="audio_enhancement"
+                    type="checkbox"
+                    checked={formData.audio_enhancement}
+                    onChange={e => setFormData(prev => ({ ...prev, audio_enhancement: e.target.checked }))}
+                  />
+                  <Label htmlFor="audio_enhancement">Audio Enhancement</Label>
                 </div>
                 {/* Template Selection */}
                 <div>
