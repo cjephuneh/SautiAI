@@ -33,7 +33,8 @@ import {
   Eye,
   RefreshCw,
   Activity,
-  Radio
+  Radio,
+  Sparkles
 } from "lucide-react";
 import { callsApi, dashboardApi } from "@/services/api";
 import { useToast } from "@/components/ui/use-toast";
@@ -77,6 +78,7 @@ const CallLogs = () => {
   const [activeCalls, setActiveCalls] = useState<Call[]>([]);
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [summarizing, setSummarizing] = useState(false);
 
   const { toast } = useToast();
 
@@ -173,20 +175,26 @@ const CallLogs = () => {
 
   const openCallDetails = async (call: Call) => {
     setSelectedCall(call);
-    
+
     // Only try to fetch additional details if we don't already have transcript
     if (!call.transcript && call.call_id) {
       try {
         const callDetails = await callsApi.getCallById(call.call_id.toString());
         if (callDetails) {
           setSelectedCall({ ...call, ...callDetails });
+        } else {
+          // If not found (404), just keep the original call data
+          // Optionally, show a toast or warning here if desired
         }
-      } catch (error) {
-        console.error("Failed to fetch call details:", error);
-        // Don't show error - just continue with what we have
+      } catch (error: any) {
+        // Only log error, do not overwrite selectedCall or show error to user for 404
+        if (error?.response?.status !== 404) {
+          console.error("Failed to fetch call details:", error);
+        }
+        // Do not update selectedCall, just continue with what we have
       }
     }
-    
+
     setShowCallDetails(true);
   };
 
@@ -223,6 +231,30 @@ const CallLogs = () => {
     setAutoRefresh(false);
     setLiveTranscriptData(null);
     setSelectedCall(null);
+  };
+
+  const handleSummarizeCall = async (call: Call) => {
+    setSummarizing(true);
+    try {
+      await callsApi.summarizeCall(call.call_id.toString());
+      toast({
+        title: "Summary requested",
+        description: "The call summary is being generated. Please refresh in a few seconds.",
+      });
+      // Optionally, refetch call details to show the summary
+      const updated = await callsApi.getCallSummary(call.call_id.toString());
+      if (updated && selectedCall) {
+        setSelectedCall({ ...selectedCall, summary: updated.summary });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate summary.",
+        variant: "destructive",
+      });
+    } finally {
+      setSummarizing(false);
+    }
   };
 
   const formatDuration = (duration?: string) => {
@@ -1015,6 +1047,14 @@ const CallLogs = () => {
                   <Button variant="outline" disabled>
                     <Mail className="h-4 w-4 mr-2" />
                     Email
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSummarizeCall(selectedCall)}
+                    disabled={summarizing}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {summarizing ? "Summarizing..." : "Summarize Call"}
                   </Button>
                 </div>
                 

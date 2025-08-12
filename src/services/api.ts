@@ -2,9 +2,9 @@ import axios from 'axios';
 
 // Base API configuration
 const api = axios.create({
-  baseURL: 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/', // From the API spec's server URL
+  baseURL: 'http://localhost:5050', // From the API spec's server URL
 });
-const API_BASE_URL = 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/'; // Base URL for the API
+const API_BASE_URL = 'http://localhost:5050'; // Base URL for the API
 // Mock user ID for now - in a real app this would come from authentication
 const DEFAULT_USER_ID = 1;
 
@@ -38,7 +38,7 @@ export const contactsApi = {
       return response.data;
     } catch (error) {
       console.error("API error in getContact:", error);
-      throw error;
+      throw error; 
     }
   },
   
@@ -183,6 +183,10 @@ export const agentsApi = {
 
 // Voices API
 export const voicesApi = {
+  /**
+   * Get all voices (optionally filter by provider).
+   * Each voice object includes: voice_id, name, provider, gender, language, sample_url (for preview).
+   */
   getVoices: async (provider?: string) => {
     try {
       const url = provider ? `/voices/?provider=${provider}` : '/voices/';
@@ -393,6 +397,28 @@ export const callsApi = {
       console.error("Failed to fetch call status:", error);
       return null;
     }
+  },
+
+  // Summarize a call using Azure OpenAI
+  summarizeCall: async (callId: string) => {
+    try {
+      const response = await api.post(`/calls/${callId}/summarize`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to summarize call:", error);
+      throw error;
+    }
+  },
+
+  // Get stored summary for a call
+  getCallSummary: async (callId: string) => {
+    try {
+      const response = await api.get(`/calls/${callId}/summary`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch call summary:", error);
+      return null;
+    }
   }
 };
 
@@ -432,9 +458,9 @@ export const dashboardApi = {
     }
   },
 
-  getAccountUsage: async () => {
+  getAccountUsage: async (days: number = 7) => {
     try {
-      const response = await api.get(`/dashboard/usage?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/dashboard/usage?user_id=${DEFAULT_USER_ID}&days=${days}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getAccountUsage:", error);

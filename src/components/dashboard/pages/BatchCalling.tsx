@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { contactsApi, agentsApi, callsApi } from "@/services/api";
+import axios from "axios";
 
 interface Contact {
   id: number;
@@ -62,7 +63,7 @@ interface BatchCampaign {
   contact_id: number;
   agent_id?: number;
   channel: 'voice' | 'email' | 'sms' | 'whatsapp';
-  status: 'pending' | 'sending' | 'completed' | 'failed' | 'delivered' | 'read';
+  status: 'pending' | 'sending' | 'calling' | 'completed' | 'failed' | 'delivered' | 'read';
   start_time?: string;
   end_time?: string;
   duration?: number;
@@ -72,12 +73,27 @@ interface BatchCampaign {
   delivery_status?: string;
 }
 
+const batchCallsApi = {
+  startBatchVoiceCampaign: async (campaign_name: string, agent_id: number, contact_ids: number[]) => {
+    const response = await axios.post("http://localhost:5050/batch-calls/start", {
+      campaign_name,
+      agent_id,
+      contact_ids,
+    });
+    return response.data;
+  },
+  getCampaignStatus: async (campaign_id: number) => {
+    const response = await axios.get(`http://localhost:5050/batch-calls/campaign/${campaign_id}/status`);
+    return response.data;
+  },
+};
+
 const BatchCalling = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedContacts, setSelectedContacts] = useState<number[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string>("");
-  const [selectedChannel, setSelectedChannel] = useState<'voice' | 'email' | 'sms' | 'whatsapp'>('voice');
+  const [selectedChannel, setSelectedChannel] = useState<'voice' | 'email' | 'sms' | 'whatsapp' | string>('voice');
   const [batchCampaigns, setBatchCampaigns] = useState<BatchCampaign[]>([]);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -267,6 +283,65 @@ const BatchCalling = () => {
     setIsPaused(false);
     setProgress(0);
 
+    // Voice batch: use /batch-calls/start API
+    if (selectedChannel === "voice") {
+      try {
+        const agentId = parseInt(selectedAgent);
+        const contactIds = selectedContacts;
+        const campaignName = "Batch Voice Campaign"; // You can make this user-editable
+
+        // Call the batch voice API
+        const batchResult = await batchCallsApi.startBatchVoiceCampaign(
+          campaignName,
+          agentId,
+          contactIds
+        );
+
+        // Optionally, poll for campaign status using batchResult.campaign_id
+        // For now, simulate local UI progress
+        setBatchCampaigns(
+          contactIds.map((contactId) => {
+            const contact = contacts.find((c) => c.id === contactId)!;
+            return {
+              id: `batch_${batchResult.campaign_id}_${contactId}`,
+              contact_id: contactId,
+              agent_id: agentId,
+              channel: "voice",
+              status: "pending",
+              contact,
+              message_content: "",
+            };
+          })
+        );
+
+        // Simulate progress (or poll for real status)
+        await processBatchCampaign(
+          contactIds.map((contactId) => {
+            const contact = contacts.find((c) => c.id === contactId)!;
+            return {
+              id: `batch_${batchResult.campaign_id}_${contactId}`,
+              contact_id: contactId,
+              agent_id: agentId,
+              channel: "voice",
+              status: "pending",
+              contact,
+              message_content: "",
+            };
+          })
+        );
+        return;
+      } catch (error) {
+        setIsActive(false);
+        setProgress(0);
+        toast({
+          title: "Error",
+          description: "Failed to start batch voice campaign.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     // Initialize batch campaigns
     const initialCampaigns: BatchCampaign[] = selectedContacts.map(contactId => {
       const contact = contacts.find(c => c.id === contactId)!;
@@ -276,7 +351,7 @@ const BatchCalling = () => {
         id: `batch_${Date.now()}_${contactId}`,
         contact_id: contactId,
         agent_id: selectedAgent ? parseInt(selectedAgent) : undefined,
-        channel: selectedChannel,
+        channel: selectedChannel as 'voice' | 'email' | 'sms' | 'whatsapp',
         status: 'pending',
         contact,
         message_content: messageContent
@@ -309,6 +384,60 @@ const BatchCalling = () => {
   };
 
   const processBatchCampaign = async (campaigns: BatchCampaign[]) => {
+    // For voice batch, skip API call per contact (already handled by batch API)
+    if (selectedChannel === "voice") {
+      for (let i = 0; i < campaigns.length; i++) {
+        if (!isActive || isPaused) break;
+        const campaign = campaigns[i];
+        setCurrentItem(campaign);
+
+        // Simulate status update
+        setBatchCampaigns((prev) =>
+          prev.map((c) =>
+            c.id === campaign.id
+              ? {
+                  ...c,
+                  status: "calling",
+                  start_time: new Date().toISOString(),
+                }
+              : c
+          )
+        );
+
+        // Simulate call duration
+        const processingDuration = Math.floor(Math.random() * 3000) + 1000;
+        await new Promise((resolve) => setTimeout(resolve, processingDuration));
+
+        // Simulate outcome
+        const outcomes = getChannelOutcomes("voice");
+        const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+        const duration = Math.floor(processingDuration / 1000);
+
+        setBatchCampaigns((prev) =>
+          prev.map((c) =>
+            c.id === campaign.id
+              ? {
+                  ...c,
+                  status: randomOutcome.status as any,
+                  end_time: new Date().toISOString(),
+                  duration: duration,
+                  outcome: randomOutcome.outcome,
+                  delivery_status: randomOutcome.delivery_status ?? undefined,
+                }
+              : c
+          )
+        );
+        setProgress(((i + 1) / campaigns.length) * 100);
+      }
+      setIsActive(false);
+      setCurrentItem(null);
+      toast({
+        title: "Campaign Complete",
+        description: `Voice campaign completed for ${campaigns.length} contacts.`,
+      });
+      return;
+    }
+
     for (let i = 0; i < campaigns.length; i++) {
       if (!isActive || isPaused) break;
 
@@ -326,22 +455,19 @@ const BatchCalling = () => {
       ));
 
       try {
-        // Simulate API call based on channel
         let result;
         switch (selectedChannel) {
           case 'voice':
-            result = await callsApi.makeOutboundCall(campaign.contact_id, campaign.agent_id!);
+            // Use contactsApi.initiateCall for batch voice calls
+            result = await contactsApi.initiateCall(campaign.contact_id, campaign.agent_id!);
             break;
           case 'email':
-            // Simulate email API call
             result = await simulateEmailSend(campaign);
             break;
           case 'sms':
-            // Simulate SMS API call
             result = await simulateSMSSend(campaign);
             break;
           case 'whatsapp':
-            // Simulate WhatsApp API call
             result = await simulateWhatsAppSend(campaign);
             break;
         }

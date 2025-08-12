@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -138,8 +138,119 @@ Key Guidelines:
 - Maintain detailed but concise notes for each interaction
 
 Remember: Efficiency doesn't mean sacrificing compliance or respect. Be quick but thorough, direct but professional.`
+  },
+  {
+    id: "collections_fintech",
+    name: "Fintech Collections",
+    description: "For digital lenders and fintech companies",
+    template: `You are a digital collections agent for a fintech lender. Your tone is friendly, tech-savvy, and focused on digital payment options.
+
+Key Guidelines:
+- Greet the customer by name and reference their loan/app
+- Offer digital payment links and explain online repayment options
+- Highlight benefits of timely repayment for credit score
+- Use SMS/WhatsApp for follow-up if call is missed
+- Be concise and solution-oriented
+
+Remember: Your goal is to maximize repayment while maintaining a positive digital experience.`
+  },
+  {
+    id: "utilities",
+    name: "Utilities Collections",
+    description: "For utility companies (water, power, internet)",
+    template: `You are a collections agent for a utility company. Your approach is informative and emphasizes service continuity.
+
+Key Guidelines:
+- Remind the customer of their outstanding bill and due date
+- Explain consequences (service interruption) in a factual, non-threatening way
+- Offer payment plans or extensions if available
+- Provide information on how to pay (USSD, M-Pesa, bank, etc.)
+- Thank the customer for their business
+
+Remember: The goal is to secure payment while preserving the customer relationship.`
+  },
+  {
+    id: "healthcare",
+    name: "Healthcare Collections",
+    description: "For hospitals, clinics, and medical billing",
+    template: `You are a healthcare collections agent. Your tone is compassionate and respectful of sensitive situations.
+
+Key Guidelines:
+- Confirm the patient's identity and reference the medical service
+- Explain the outstanding balance and insurance coverage (if any)
+- Offer payment plans and financial assistance options
+- Avoid pressuring the patient; focus on support
+- Maintain confidentiality and empathy
+
+Remember: The goal is to collect payment while upholding patient dignity and trust.`
+  },
+  {
+    id: "education",
+    name: "Education Fee Collections",
+    description: "For schools, colleges, and universities",
+    template: `You are a collections agent for an educational institution. Your approach is supportive and focused on enabling continued learning.
+
+Key Guidelines:
+- Reference the student's name and program
+- Explain the outstanding tuition/fee balance
+- Offer installment plans or scholarships if available
+- Encourage timely payment to avoid disruption of studies
+- Thank the parent/student for their commitment to education
+
+Remember: The goal is to collect fees while supporting the student's academic journey.`
+  },
+  {
+    id: "b2b",
+    name: "B2B Collections",
+    description: "For business-to-business (B2B) collections",
+    template: `You are a B2B collections agent. Your tone is professional, firm, and focused on maintaining business relationships.
+
+Key Guidelines:
+- Reference the company name and invoice details
+- Confirm receipt of previous communications
+- Discuss payment terms and any disputes
+- Offer to resolve issues or escalate if needed
+- Document all agreements and next steps
+
+Remember: The goal is to collect payment while preserving the business partnership.`
   }
 ];
+
+function useVoicePreview() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const play = (url?: string) => {
+    if (!url || !/\.(mp3|wav|ogg)$/i.test(url)) {
+      // Optionally show a toast or warning here
+      return;
+    }
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      const audio = new Audio(url);
+      audio.onerror = () => {
+        // Optionally show a toast for unsupported format or CORS error
+      };
+      audioRef.current = audio;
+      audio.play().catch(() => {
+        // Optionally show a toast for playback error
+      });
+    } catch (e) {
+      // Optionally show a toast for playback error
+    }
+  };
+
+  const stop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+  };
+
+  return { play, stop };
+}
 
 export const AIAssistant = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -150,7 +261,8 @@ export const AIAssistant = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
-  
+  const [voicePreviewing, setVoicePreviewing] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     prompt_template: "",
@@ -159,6 +271,7 @@ export const AIAssistant = () => {
   });
 
   const { toast } = useToast();
+  const { play, stop } = useVoicePreview();
 
   useEffect(() => {
     fetchAgents();
@@ -169,9 +282,7 @@ export const AIAssistant = () => {
     setLoadingAgents(true);
     try {
       const data = await agentsApi.getAgents();
-      console.log("Fetched agents data:", data); // Debug log
-      
-      // Ensure we always set an array
+      console.log("Fetched agents data:", data);
       if (Array.isArray(data)) {
         setAgents(data);
       } else {
@@ -180,7 +291,7 @@ export const AIAssistant = () => {
       }
     } catch (error) {
       console.error("Failed to fetch agents:", error);
-      setAgents([]); // Ensure we set empty array on error
+      setAgents([]);
       toast({
         title: "Error",
         description: "Failed to load AI agents. Please try again.",
@@ -195,18 +306,11 @@ export const AIAssistant = () => {
     setLoadingVoices(true);
     try {
       const data = await voicesApi.getVoices();
-      console.log("Fetched voices data:", data); // Debug log
-      
-      // Ensure we always set an array
-      if (Array.isArray(data)) {
-        setVoices(data);
-      } else {
-        console.warn("Voices data is not an array:", data);
-        setVoices([]);
-      }
+      let voicesArr = Array.isArray(data) ? data : (data.voices || []);
+      setVoices(voicesArr);
     } catch (error) {
       console.error("Failed to fetch voices:", error);
-      setVoices([]); // Ensure we set empty array on error
+      setVoices([]);
       toast({
         title: "Error",
         description: "Failed to load voice options. Please try again.",
@@ -215,6 +319,20 @@ export const AIAssistant = () => {
     } finally {
       setLoadingVoices(false);
     }
+  };
+
+  const handleVoicePreview = (voice: Voice) => {
+    if (!voice.sample_url || !/\.(mp3|wav|ogg)$/i.test(voice.sample_url)) {
+      toast({
+        title: "Voice preview unavailable",
+        description: "No valid audio sample for this voice.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setVoicePreviewing(voice.voice_id);
+    play(voice.sample_url);
+    setTimeout(() => setVoicePreviewing(null), 4000);
   };
 
   const handleCreateAgent = async () => {
@@ -229,8 +347,12 @@ export const AIAssistant = () => {
 
     setCreatingAgent(true);
     try {
-      const data = await agentsApi.createAgent(formData);
-      // Ensure agents is always an array before spreading
+      const data = await agentsApi.createAgent({
+        name: formData.name,
+        prompt_template: formData.prompt_template,
+        voice_id: formData.voice_id,
+        temperature: formData.temperature,
+      });
       setAgents(prev => Array.isArray(prev) ? [...prev, data] : [data]);
       setFormData({ name: "", prompt_template: "", voice_id: "", temperature: 0.7 });
       setSelectedTemplate("");
@@ -254,7 +376,6 @@ export const AIAssistant = () => {
   const handleDeleteAgent = async (agentId: number) => {
     try {
       await agentsApi.deleteAgent(agentId);
-      // Ensure agents is always an array before filtering
       setAgents(prev => Array.isArray(prev) ? prev.filter(agent => agent.id !== agentId) : []);
       toast({
         title: "Success",
@@ -275,7 +396,6 @@ export const AIAssistant = () => {
 
     try {
       const data = await agentsApi.updateAgentSystemMessage(editingAgent.id, formData.prompt_template);
-      // Ensure agents is always an array before mapping
       setAgents(prev => Array.isArray(prev) ? prev.map(agent => 
         agent.id === editingAgent.id 
           ? { ...agent, prompt_template: formData.prompt_template }
@@ -331,19 +451,19 @@ export const AIAssistant = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Assistant Management</h1>
-          <p className="text-gray-600">Create and manage your AI debt collection agents</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">AI Agent Studio</h1>
+          <p className="text-gray-600 text-lg">Create, preview, and manage AI debt collection agents for any industry</p>
         </div>
         <Button 
           onClick={() => setShowCreateForm(true)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create AI Agent
+          New AI Agent
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Existing Agents */}
         <div className="lg:col-span-2">
           <Card>
@@ -416,14 +536,15 @@ export const AIAssistant = () => {
         {/* Create/Edit Form */}
         <div className="space-y-6">
           {showCreateForm && (
-            <Card>
+            <Card className="shadow-xl border-2 border-blue-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5" />
                   {editingAgent ? "Edit Agent" : "Create New Agent"}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
+                {/* Name */}
                 <div>
                   <Label htmlFor="name">Agent Name</Label>
                   <Input
@@ -434,34 +555,78 @@ export const AIAssistant = () => {
                     disabled={editingAgent !== null}
                   />
                 </div>
-
+                {/* Voice Selection with Preview */}
                 <div>
                   <Label htmlFor="voice">Voice</Label>
-                  <Select 
-                    value={formData.voice_id} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, voice_id: value }))}
-                    disabled={editingAgent !== null}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a voice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(voices) && voices.map((voice) => (
-                        <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                          {voice.name} ({voice.gender})
-                        </SelectItem>
-                      ))}
-                      {(!Array.isArray(voices) || voices.length === 0) && (
-                        <SelectItem value="default" disabled>
-                          No voices available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select 
+                      value={formData.voice_id} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, voice_id: value }))}
+                      disabled={editingAgent !== null}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a voice" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(voices) && voices.map((voice) => (
+                          <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                            {voice.name} ({voice.gender}, {voice.provider})
+                          </SelectItem>
+                        ))}
+                        {(!Array.isArray(voices) || voices.length === 0) && (
+                          <SelectItem value="default" disabled>
+                            No voices available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {formData.voice_id && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={`ml-2 ${voicePreviewing === formData.voice_id ? "animate-pulse" : ""}`}
+                        onClick={() => {
+                          const v = voices.find(v => v.voice_id === formData.voice_id);
+                          if (v) handleVoicePreview(v);
+                        }}
+                        disabled={
+                          !voices.find(v => v.voice_id === formData.voice_id)?.sample_url ||
+                          !/\.(mp3|wav|ogg)$/i.test(voices.find(v => v.voice_id === formData.voice_id)?.sample_url || "")
+                        }
+                        title="Preview Voice"
+                      >
+                        <Volume2 className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </div>
+                  {formData.voice_id && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {voices.find(v => v.voice_id === formData.voice_id)?.language} • {voices.find(v => v.voice_id === formData.voice_id)?.provider}
+                    </p>
+                  )}
                 </div>
-
+                {/* Temperature */}
                 <div>
-                  <Label htmlFor="template">Template</Label>
+                  <Label htmlFor="temperature">Creativity (Temperature)</Label>
+                  <input
+                    id="temperature"
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={formData.temperature}
+                    onChange={e => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Conservative</span>
+                    <span>Creative</span>
+                  </div>
+                </div>
+                {/* Template Selection */}
+                <div>
+                  <Label htmlFor="template">Prompt Template</Label>
                   <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
                     <SelectTrigger>
                       <SelectValue placeholder="Choose a template" />
@@ -474,8 +639,11 @@ export const AIAssistant = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select a template or write your own custom prompt below.
+                  </p>
                 </div>
-
+                {/* Prompt Textarea */}
                 <div>
                   <Label htmlFor="prompt">Custom Prompt</Label>
                   <Textarea
@@ -486,7 +654,7 @@ export const AIAssistant = () => {
                     rows={8}
                   />
                 </div>
-
+                {/* Actions */}
                 <div className="flex gap-2">
                   <Button 
                     onClick={editingAgent ? handleUpdateAgent : handleCreateAgent}
@@ -511,7 +679,7 @@ export const AIAssistant = () => {
             <CardHeader>
               <CardTitle>Template Library</CardTitle>
               <CardDescription>
-                Pre-built prompts for different collection styles
+                Pre-built prompts for different industries and collection styles
               </CardDescription>
             </CardHeader>
             <CardContent>

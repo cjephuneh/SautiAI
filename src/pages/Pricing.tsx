@@ -58,11 +58,12 @@ const Pricing = () => {
     }
   };
 
+  // Prices converted to KES (example rates, adjust as needed)
   const plans = [
     {
       name: "Starter",
       description: "Perfect for small businesses getting started",
-      price: { monthly: 49, annual: 490 },
+      price: { monthly: 6500, annual: 65000 }, // KES
       features: [
         "Up to 100 contacts",
         "5 AI calling hours/month",
@@ -75,7 +76,7 @@ const Pricing = () => {
     {
       name: "Professional",
       description: "Ideal for growing collection agencies",
-      price: { monthly: 149, annual: 1490 },
+      price: { monthly: 19500, annual: 195000 }, // KES
       features: [
         "Up to 1,000 contacts",
         "25 AI calling hours/month",
@@ -90,7 +91,7 @@ const Pricing = () => {
     {
       name: "Enterprise",
       description: "For large organizations with complex needs",
-      price: { monthly: 399, annual: 3990 },
+      price: { monthly: 52000, annual: 520000 }, // KES
       features: [
         "Unlimited contacts",
         "100 AI calling hours/month",
@@ -191,7 +192,7 @@ const Pricing = () => {
                     
                     <div className="mb-6">
                       <span className="text-4xl font-bold text-gray-900">
-                        ${plan.price[billingCycle]}
+                        KES {plan.price[billingCycle].toLocaleString()}
                       </span>
                       <span className="text-gray-500">
                         /{billingCycle === 'monthly' ? 'month' : 'year'}

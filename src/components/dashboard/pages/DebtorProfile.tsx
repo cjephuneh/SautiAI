@@ -325,7 +325,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Amount Owed</p>
-                <p className="text-2xl font-bold text-red-600">${debtor.debt_amount.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-red-600">Ksh{debtor.debt_amount.toLocaleString()}</p>
               </div>
               <DollarSign className="h-8 w-8 text-red-600" />
             </div>

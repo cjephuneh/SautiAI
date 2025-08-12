@@ -32,8 +32,8 @@ export const Sidebar = ({ currentPage, onPageChange, collapsed, onToggleCollapse
     { id: 'phone-numbers' as DashboardPage, label: 'Phone Numbers', icon: Phone },
     { id: 'ai-assistant' as DashboardPage, label: 'AI Assistant', icon: Bot },
     { id: 'integrations' as DashboardPage, label: 'Integrations', icon: Settings },
-    { id: 'messages' as DashboardPage, label: 'Messages', icon: MessageSquare },
-    { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
+    // { id: 'messages' as DashboardPage, label: 'Messages', icon: MessageSquare },
+    // { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
   ];
 
   return (

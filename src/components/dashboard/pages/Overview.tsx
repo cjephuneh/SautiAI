@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,9 @@ export const Overview = () => {
   const [liveTranscriptCall, setLiveTranscriptCall] = useState<any>(null);
   const [showLiveTranscript, setShowLiveTranscript] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [recentCalls, setRecentCalls] = useState<any[]>([]);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -61,12 +64,12 @@ export const Overview = () => {
     setError(null);
     
     try {
-      const [summary, calls, logs, performance, usage] = await Promise.allSettled([
+      const [summary, activeCallsRes, collectionPerf, usageRes, callsRes] = await Promise.allSettled([
         dashboardApi.getSummary(),
         dashboardApi.getActiveCalls(),
-        callsApi.getCalls(DEFAULT_USER_ID),
         analyticsApi.getCollectionPerformance(),
-        dashboardApi.getAccountUsage()
+        dashboardApi.getAccountUsage(),
+        callsApi.getCalls(1)
       ]);
 
       if (summary.status === 'fulfilled') {
@@ -76,32 +79,35 @@ export const Overview = () => {
         setDashboardData(null);
       }
 
-      if (calls.status === 'fulfilled') {
-        setActiveCalls(Array.isArray(calls.value) ? calls.value : []);
+      if (activeCallsRes.status === 'fulfilled') {
+        setActiveCalls(Array.isArray(activeCallsRes.value) ? activeCallsRes.value : []);
       } else {
-        console.error("Failed to fetch active calls:", calls.reason);
+        console.error("Failed to fetch active calls:", activeCallsRes.reason);
         setActiveCalls([]);
       }
 
-      if (logs.status === 'fulfilled') {
-        setCallLogs(Array.isArray(logs.value) ? logs.value.slice(0, 5) : []);
+      if (collectionPerf.status === 'fulfilled') {
+        setPerformanceData(collectionPerf.value);
       } else {
-        console.error("Failed to fetch call logs:", logs.reason);
-        setCallLogs([]);
-      }
-
-      if (performance.status === 'fulfilled') {
-        setPerformanceData(performance.value);
-      } else {
-        console.error("Failed to fetch performance data:", performance.reason);
+        console.error("Failed to fetch performance data:", collectionPerf.reason);
         setPerformanceData(null);
       }
 
-      if (usage.status === 'fulfilled') {
-        setAccountUsage(usage.value);
+      if (usageRes.status === 'fulfilled') {
+        setAccountUsage(usageRes.value);
       } else {
-        console.error("Failed to fetch account usage:", usage.reason);
+        console.error("Failed to fetch account usage:", usageRes.reason);
         setAccountUsage(null);
+      }
+
+      if (callsRes.status === 'fulfilled') {
+        const callsArr = Array.isArray(callsRes.value) ? callsRes.value : [];
+        setRecentCalls(callsArr.slice(0, 5));
+        setCallLogs(callsArr.slice(0, 5));
+      } else {
+        console.error("Failed to fetch call logs:", callsRes.reason);
+        setRecentCalls([]);
+        setCallLogs([]);
       }
 
     } catch (error) {
@@ -125,6 +131,15 @@ export const Overview = () => {
     setLiveTranscriptCall(call);
     setShowLiveTranscript(true);
     setAutoRefresh(true);
+  };
+
+  const handlePlayRecording = (url: string) => {
+    setAudioUrl(url);
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {});
+      }
+    }, 100); // slight delay to ensure ref is set
   };
 
   const getStatusColor = (status: string) => {
@@ -533,7 +548,7 @@ export const Overview = () => {
             <CardDescription>Latest call activity and transcripts</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            {callLogs.length === 0 ? (
+            {recentCalls.length === 0 ? (
               <p className="text-center text-gray-500 py-4">No recent calls</p>
             ) : (
               <div className="overflow-x-auto">
@@ -547,7 +562,7 @@ export const Overview = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {callLogs.map((call) => (
+                    {recentCalls.map((call) => (
                       <TableRow 
                         key={call.id || call.call_id} 
                         className="cursor-pointer hover:bg-gray-50"
@@ -572,7 +587,11 @@ export const Overview = () => {
                               </Button>
                             )}
                             {call.recording_url && (
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handlePlayRecording(call.recording_url)}
+                              >
                                 <Play className="h-3 w-3" />
                               </Button>
                             )}
@@ -582,6 +601,14 @@ export const Overview = () => {
                     ))}
                   </TableBody>
                 </Table>
+                {/* Audio player (hidden, but will play when Play is clicked) */}
+                <audio
+                  ref={audioRef}
+                  src={audioUrl || undefined}
+                  style={{ display: "none" }}
+                  onEnded={() => setAudioUrl(null)}
+                  controls
+                />
               </div>
             )}
           </CardContent>
