@@ -32,13 +32,13 @@ const Index = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "SautiAI - AI-Powered Debt Collection Platform",
-    "description": "Transform your debt collection with AI. Recover 65% more outstanding payments with automated calls and smart collection strategies.",
+    "name": "SautiAI - AI-Powered Call Centre Platform",
+    "description": "Transform your Call Centre with AI. Recover 65% more outstanding payments with automated calls and smart collection strategies.",
     "url": "https://sautiai.com",
     "mainEntity": {
       "@type": "Organization",
       "name": "SautiAI",
-      "description": "AI-powered debt collection platform"
+      "description": "AI-powered Call Centre platform"
     },
     "breadcrumb": {
       "@type": "BreadcrumbList",
@@ -56,9 +56,9 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="SautiAI - AI-Powered Debt Collection Platform | Recover 65% More Outstanding Payments"
-        description="Transform your debt collection with SautiAI's AI-powered platform. Automate calls, increase recovery rates by 65%, and streamline your collection process. Book a free demo today."
-        keywords="debt collection, AI debt collection, automated collections, payment recovery, debt management software, collection automation, SautiAI, fintech, debt recovery AI, automated debt collection"
+        title="SautiAI - AI-Powered Call Centre Platform | Recover 65% More Outstanding Payments"
+        description="Transform your Call Centre with SautiAI's AI-powered platform. Automate calls, increase recovery rates by 65%, and streamline your collection process. Book a free demo today."
+        keywords="Call Centre, AI Call Centre, automated collections, payment recovery, debt management software, collection automation, SautiAI, fintech, debt recovery AI, automated Call Centre"
         url="https://sautiai.com"
         structuredData={structuredData}
       />

@@ -79,11 +79,13 @@ const CallLogs = () => {
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
+  const [callsWithTranscripts, setCallsWithTranscripts] = useState<any[]>([]);
 
   const { toast } = useToast();
 
   useEffect(() => {
     fetchCalls();
+    fetchCallsWithTranscripts();
   }, [statusFilter, outcomeFilter]);
 
   useEffect(() => {
@@ -156,6 +158,15 @@ const CallLogs = () => {
       setCalls([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCallsWithTranscripts = async () => {
+    try {
+      const list = await callsApi.listCallsWithTranscripts();
+      setCallsWithTranscripts(Array.isArray(list) ? list : []);
+    } catch (e) {
+      setCallsWithTranscripts([]);
     }
   };
 
@@ -538,6 +549,78 @@ const CallLogs = () => {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Calls with Transcripts */}
+      {!error && !loading && (
+        <Card className="border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              Calls with Transcripts
+            </CardTitle>
+            <CardDescription>
+              Quick access to calls that have transcript and recording available
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {callsWithTranscripts.length === 0 ? (
+              <div className="text-sm text-gray-500">No transcripts available yet.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {callsWithTranscripts.map((c) => (
+                  <div key={c.call_id} className="p-4 border rounded-lg bg-white shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-gray-900">{c.contact_name}</p>
+                        <p className="text-xs text-gray-500">Agent: {c.agent_name}</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800">{c.transcript_lines || 0} lines</Badge>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-600">{new Date(c.start_time).toLocaleString()}</div>
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => {
+                        setShowTranscription(true);
+                        setSelectedCall({
+                        call_id: c.call_id,
+                        contact_name: c.contact_name,
+                        agent_name: c.agent_name,
+                        call_type: 'outbound',
+                        status: 'completed',
+                        start_time: c.start_time,
+                        phone_number: '',
+                      } as any);
+                      }}>
+                        <FileText className="h-4 w-4 mr-1" /> View
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const resp = await callsApi.downloadFormattedTranscript(String(c.call_id));
+                            const blob = new Blob([resp?.content || ''], { type: resp?.content_type || 'text/plain' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = resp?.filename || `call_${c.call_id}_transcript.txt`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          } catch (err) {
+                            toast({ title: 'Error', description: 'Failed to download transcript', variant: 'destructive' });
+                          }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Download className="h-4 w-4 mr-1" /> Download
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {!error && !loading && calls.length > 0 && (

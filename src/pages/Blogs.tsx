@@ -28,28 +28,28 @@ const Blogs = () => {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "SautiAI Blog",
-    "description": "Explore insights, tips, and strategies for AI-powered debt collection and business growth.",
+    "description": "Explore insights, tips, and strategies for AI-powered Call Centre and business growth.",
     "url": "https://sautiai.com/blogs"
   };
 
   const blogPosts = [
     {
-      title: "How AI is Revolutionizing Debt Collection",
-      description: "Discover how artificial intelligence is transforming the debt collection industry with automation and smart strategies.",
+      title: "How AI is Revolutionizing Call Centre",
+      description: "Discover how artificial intelligence is transforming the Call Centre industry with automation and smart strategies.",
       date: "2024-01-15",
       author: "SautiAI Team",
       url: "/blogs/ai-debt-collection"
     },
     {
       title: "Top 5 Strategies to Improve Recovery Rates",
-      description: "Learn the best practices for increasing recovery rates and optimizing your debt collection process.",
+      description: "Learn the best practices for increasing recovery rates and optimizing your Call Centre process.",
       date: "2024-01-10",
       author: "SautiAI Experts",
       url: "/blogs/improve-recovery-rates"
     },
     {
-      title: "Compliance in Debt Collection: What You Need to Know",
-      description: "Understand the importance of compliance in debt collection and how SautiAI ensures regulatory adherence.",
+      title: "Compliance in Call Centre: What You Need to Know",
+      description: "Understand the importance of compliance in Call Centre and how SautiAI ensures regulatory adherence.",
       date: "2024-01-05",
       author: "SautiAI Legal Team",
       url: "/blogs/debt-collection-compliance"
@@ -59,9 +59,9 @@ const Blogs = () => {
   return (
     <>
       <SEOHead
-        title="Blogs - SautiAI | Insights on AI Debt Collection"
-        description="Explore insights, tips, and strategies for AI-powered debt collection and business growth. Stay updated with the latest trends and innovations."
-        keywords="AI debt collection blogs, debt recovery tips, compliance strategies, business growth, SautiAI insights"
+        title="Blogs - SautiAI | Insights on AI Call Centre"
+        description="Explore insights, tips, and strategies for AI-powered Call Centre and business growth. Stay updated with the latest trends and innovations."
+        keywords="AI Call Centre blogs, debt recovery tips, compliance strategies, business growth, SautiAI insights"
         url="https://sautiai.com/blogs"
         structuredData={structuredData}
       />
@@ -85,7 +85,7 @@ const Blogs = () => {
               </h1>
               
               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Stay updated with the latest trends, tips, and strategies for AI-powered debt collection and business growth.
+                Stay updated with the latest trends, tips, and strategies for AI-powered Call Centre and business growth.
               </p>
             </div>
 

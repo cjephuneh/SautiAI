@@ -164,8 +164,8 @@ const BookCall = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Service",
-    "name": "Free AI Debt Collection Consultation",
-    "description": "Schedule a 30-minute call with our AI debt collection experts. We'll show you how to recover 65% more outstanding payments.",
+    "name": "Free AI Call Centre Consultation",
+    "description": "Schedule a 30-minute call with our AI Call Centre experts. We'll show you how to recover 65% more outstanding payments.",
     "provider": {
       "@type": "Organization",
       "name": "SautiAI"
@@ -181,9 +181,9 @@ const BookCall = () => {
   return (
     <>
       <SEOHead
-        title="Book Free AI Debt Collection Consultation | SautiAI Demo"
-        description="Schedule a 30-minute call with our AI debt collection experts. We'll show you how to recover 65% more outstanding payments. Book your free demo today."
-        keywords="book demo, debt collection consultation, AI debt collection demo, free consultation, SautiAI demo, debt recovery consultation"
+        title="Book Free AI Call Centre Consultation | SautiAI Demo"
+        description="Schedule a 30-minute call with our AI Call Centre experts. We'll show you how to recover 65% more outstanding payments. Book your free demo today."
+        keywords="book demo, Call Centre consultation, AI Call Centre demo, free consultation, SautiAI demo, debt recovery consultation"
         url="https://sautiai.com/book-call"
         structuredData={structuredData}
       />
@@ -202,12 +202,12 @@ const BookCall = () => {
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
                 Let's Discuss Your 
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                  Debt Collection Goals
+                  Call Centre Goals
                 </span>
               </h1>
               
               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Schedule a 30-minute call with our AI debt collection experts. We'll show you how to recover 65% more outstanding payments.
+                Schedule a 30-minute call with our AI Call Centre experts. We'll show you how to recover 65% more outstanding payments.
               </p>
             </div>
 
@@ -222,7 +222,7 @@ const BookCall = () => {
                       {
                         icon: "🤖",
                         title: "AI Strategy Review",
-                        description: "Personalized analysis of your current debt collection process"
+                        description: "Personalized analysis of your current Call Centre process"
                       },
                       {
                         icon: "📊",
@@ -394,7 +394,7 @@ const BookCall = () => {
                       <textarea
                         value={formData.message}
                         onChange={(e) => handleInputChange('message', e.target.value)}
-                        placeholder="Describe your current debt collection process and challenges..."
+                        placeholder="Describe your current Call Centre process and challenges..."
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       />

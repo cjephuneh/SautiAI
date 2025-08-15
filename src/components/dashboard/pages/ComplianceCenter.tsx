@@ -44,7 +44,7 @@ export const ComplianceCenter = () => {
     {
       id: "fdcpa_002", 
       name: "Disclosure Requirements",
-      description: "Required debt collection disclosure in initial communication",
+      description: "Required Call Centre disclosure in initial communication",
       status: "compliant",
       lastCheck: "2024-01-27 14:20",
       violations: 0,

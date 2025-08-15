@@ -108,7 +108,7 @@ export const PredictiveAnalytics = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Predictive Analytics</h1>
-          <p className="text-gray-600">AI-powered insights and predictions for debt collection optimization</p>
+          <p className="text-gray-600">AI-powered insights and predictions for Call Centre optimization</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="bg-white shadow-sm">

@@ -13,12 +13,17 @@ interface TranscriptModalProps {
 }
 
 interface TranscriptData {
-  transcript: string;
-  summary: string;
-  sentiment: string;
-  confidence_score: number;
+  transcript?: string;
+  summary?: string;
+  sentiment?: string;
+  confidence_score?: number;
   recording_url?: string;
   call_details?: any;
+  contact?: { name?: string; phone_number?: string };
+  agent?: { name?: string; voice_id?: string };
+  has_recording?: boolean;
+  has_transcript?: boolean;
+  transcript_length?: number;
 }
 
 export const TranscriptModal = ({ open, onOpenChange, callId }: TranscriptModalProps) => {
@@ -37,8 +42,14 @@ export const TranscriptModal = ({ open, onOpenChange, callId }: TranscriptModalP
     
     setLoading(true);
     try {
-      const data = await callsApi.getCallTranscript(callId);
-      setTranscript(data);
+      // Prefer richer new endpoint if available
+      const bundle = await callsApi.getRecordingAndTranscript(callId.toString());
+      if (bundle) {
+        setTranscript(bundle);
+      } else {
+        const data = await callsApi.getCallTranscript(callId.toString());
+        setTranscript(data);
+      }
     } catch (error) {
       console.error("Failed to fetch transcript:", error);
       toast({
@@ -78,18 +89,28 @@ export const TranscriptModal = ({ open, onOpenChange, callId }: TranscriptModalP
           </div>
         ) : transcript ? (
           <div className="space-y-6">
-            {/* Call Summary */}
+            {/* Header Info */}
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <Badge className={`${getSentimentColor(transcript.sentiment)} border`}>
-                  {transcript.sentiment?.toUpperCase() || 'UNKNOWN'}
+                <Badge className={`${getSentimentColor(transcript?.sentiment || '')} border`}>
+                  {transcript?.sentiment?.toUpperCase() || 'UNKNOWN'}
                 </Badge>
                 <span className="text-sm text-gray-600">
-                  Confidence: {formatConfidenceScore(transcript.confidence_score || 0)}
+                  Confidence: {formatConfidenceScore(transcript?.confidence_score || 0)}
                 </span>
+                {transcript?.agent?.name && (
+                  <span className="text-sm text-gray-600">
+                    Agent: <span className="font-medium">{transcript.agent.name}</span>
+                  </span>
+                )}
+                {transcript?.contact?.name && (
+                  <span className="text-sm text-gray-600">
+                    Contact: <span className="font-medium">{transcript.contact.name}</span>
+                  </span>
+                )}
               </div>
 
-              {transcript.summary && (
+              {transcript?.summary && (
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Call Summary</h4>
                   <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
@@ -103,8 +124,8 @@ export const TranscriptModal = ({ open, onOpenChange, callId }: TranscriptModalP
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">Full Transcript</h4>
               <div className="bg-white border rounded-lg p-4 max-h-96 overflow-y-auto">
-                {transcript.transcript ? (
-                  <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
+                {transcript?.transcript ? (
+                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-6">
                     {transcript.transcript}
                   </pre>
                 ) : (
@@ -114,7 +135,7 @@ export const TranscriptModal = ({ open, onOpenChange, callId }: TranscriptModalP
             </div>
 
             {/* Audio Recording */}
-            {transcript.recording_url && (
+            {transcript?.recording_url && (
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Audio Recording</h4>
                 <audio controls className="w-full">
@@ -127,11 +148,31 @@ export const TranscriptModal = ({ open, onOpenChange, callId }: TranscriptModalP
             {/* Actions */}
             <div className="flex justify-between pt-4">
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    if (!callId) return;
+                    try {
+                      const resp = await callsApi.downloadFormattedTranscript(callId.toString());
+                      const content = resp?.content || '';
+                      const filename = resp?.filename || `call_${callId}_transcript.txt`;
+                      const blob = new Blob([content], { type: resp?.content_type || 'text/plain' });
+                      const link = document.createElement('a');
+                      link.href = URL.createObjectURL(blob);
+                      link.download = filename;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    } catch (e) {
+                      toast({ title: 'Error', description: 'Failed to download transcript', variant: 'destructive' });
+                    }
+                  }}
+                >
                   <Download className="mr-2 h-4 w-4" />
-                  Download PDF
+                  Download Transcript
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" disabled>
                   <Mail className="mr-2 h-4 w-4" />
                   Email Transcript
                 </Button>

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "DebtAI Collection API",
-    "description": "Comprehensive debt collection management system with AI-powered voice calls",
+    "description": "Comprehensive Call Centre management system with AI-powered voice calls",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -302,7 +302,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Friendly Collector\",\n  \"prompt_template\": \"You are a friendly debt collection agent named James. Your goal is to help customers pay their debts while maintaining a positive relationship. Be empathetic and solution-focused.\",\n  \"voice_id\": \"ash\",\n  \"temperature\": 0.8\n}"
+              "raw": "{\n  \"name\": \"Friendly Collector\",\n  \"prompt_template\": \"You are a friendly Call Centre agent named James. Your goal is to help customers pay their debts while maintaining a positive relationship. Be empathetic and solution-focused.\",\n  \"voice_id\": \"ash\",\n  \"temperature\": 0.8\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/agents/?user_id={{user_id}}",
@@ -384,7 +384,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"prompt_template\": \"You are Sarah, an empathetic debt collection specialist. Your approach is warm and understanding. You focus on finding solutions that work for both the creditor and the debtor.\"\n}"
+              "raw": "{\n  \"prompt_template\": \"You are Sarah, an empathetic Call Centre specialist. Your approach is warm and understanding. You focus on finding solutions that work for both the creditor and the debtor.\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/agents/1/system-message",

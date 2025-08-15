@@ -84,7 +84,7 @@ const Login = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               SautiAI
             </h1>
-            <p className="text-gray-500 text-sm">Smart Debt Collection Platform</p>
+            <p className="text-gray-500 text-sm">Smart Call Centre Platform</p>
           </div>
 
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8">
@@ -168,7 +168,7 @@ const Login = () => {
             </form>
 
             {/* Enhanced Demo Credentials */}
-            <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100">
+            {/* <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-blue-600" />
                 <p className="text-sm font-medium text-blue-900">Quick Demo Access</p>
@@ -178,7 +178,7 @@ const Login = () => {
                 <p className="text-xs text-blue-700">🔑 Password: secret123</p>
               </div>
               <p className="text-xs text-blue-600 mt-2 italic">Use these credentials for instant access</p>
-            </div>
+            </div> */}
 
             {/* Security Features */}
             <div className="mt-6 flex items-center justify-center gap-6 text-xs text-gray-500">

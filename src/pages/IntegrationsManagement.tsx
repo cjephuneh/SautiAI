@@ -81,7 +81,7 @@ const IntegrationsManagement = () => {
               <DialogHeader>
                 <DialogTitle>Add New Integration</DialogTitle>
                 <DialogDescription>
-                  Choose a data source to connect with your debt collection system
+                  Choose a data source to connect with your Call Centre system
                 </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 mt-4">

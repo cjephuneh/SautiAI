@@ -20,8 +20,8 @@ const FAQ = () => {
       answer: "Most clients see their first successful collections within 24-48 hours of setup. Our AI works 24/7, so it's constantly engaging with debtors across different time zones and schedules."
     },
     {
-      question: "Is SautiAI compliant with debt collection regulations?",
-      answer: "Absolutely. SautiAI is fully compliant with FDCPA, TCPA, and other relevant regulations. Our AI is trained on current compliance requirements and automatically follows all legal guidelines for debt collection communications."
+      question: "Is SautiAI compliant with Call Centre regulations?",
+      answer: "Absolutely. SautiAI is fully compliant with FDCPA, TCPA, and other relevant regulations. Our AI is trained on current compliance requirements and automatically follows all legal guidelines for Call Centre communications."
     },
     {
       question: "Can I customize how the AI communicates with my debtors?",

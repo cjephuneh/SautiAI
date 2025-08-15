@@ -20,7 +20,7 @@ const Integrations = () => {
         { 
           name: "HubSpot", 
           logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png", 
-          description: "Automate debt collection workflows seamlessly",
+          description: "Automate Call Centre workflows seamlessly",
           color: "bg-orange-500"
         },
         { 

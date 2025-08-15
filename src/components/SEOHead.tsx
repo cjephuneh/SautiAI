@@ -11,9 +11,9 @@ interface SEOHeadProps {
 }
 
 const SEOHead = ({
-  title = "SautiAI - AI-Powered Debt Collection Platform",
-  description = "Transform your debt collection with SautiAI's AI-powered platform. Automate calls, increase recovery rates by 65%, and streamline your collection process.",
-  keywords = "debt collection, AI debt collection, automated collections, payment recovery, debt management software",
+  title = "SautiAI - AI-Powered Call Centre Platform",
+  description = "Transform your Call Centre with SautiAI's AI-powered platform. Automate calls, increase recovery rates by 65%, and streamline your collection process.",
+  keywords = "Call Centre, AI Call Centre, automated collections, payment recovery, debt management software",
   image = "https://sautiai.com/og-image.png",
   url = "https://sautiai.com",
   type = "website",

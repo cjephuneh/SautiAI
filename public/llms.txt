@@ -1,8 +1,8 @@
-# SautiAI - AI-Powered Debt Collection Platform
+# SautiAI - AI-Powered Call Centre Platform
 # This file provides information about the codebase for Large Language Models
 
 ## Project Overview
-SautiAI is an AI-powered debt collection platform that helps businesses recover outstanding payments through automated calls, SMS, and smart collection strategies. The platform increases recovery rates by 65% using artificial intelligence.
+SautiAI is an AI-powered Call Centre platform that helps businesses recover outstanding payments through automated calls, SMS, and smart collection strategies. The platform increases recovery rates by 65% using artificial intelligence.
 
 ## Domain
 - Primary: https://sautiai.com
@@ -77,7 +77,7 @@ All API calls are centralized in `src/services/api.ts` with these main modules:
 6. Protected routes redirect to login if no valid token
 
 ## Key Business Logic
-- **Debt Collection**: Manage debtors, amounts, payment status
+- **Call Centre**: Manage debtors, amounts, payment status
 - **AI Agents**: Configurable AI personalities for different collection strategies
 - **Call Automation**: Automated calling with real-time transcripts
 - **Compliance**: FDCPA and regulatory compliance monitoring
@@ -145,7 +145,7 @@ VITE_API_BASE_URL=https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites
 - Target market: Collection agencies, fintech, lending institutions
 
 ## Compliance Requirements
-- FDCPA (Fair Debt Collection Practices Act)
+- FDCPA (Fair Call Centre Practices Act)
 - TCPA (Telephone Consumer Protection Act)
 - State-specific collection regulations
 - Data privacy (GDPR considerations)

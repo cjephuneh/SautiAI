@@ -57,7 +57,7 @@ const promptTemplates = [
     id: "professional",
     name: "Professional Collector",
     description: "Professional, direct, and results-oriented approach",
-    template: `You are a professional debt collection agent named {agent_name}. Your role is to collect outstanding debts in a professional, direct manner while maintaining compliance with all applicable laws.
+    template: `You are a professional Call Centre agent named {agent_name}. Your role is to collect outstanding debts in a professional, direct manner while maintaining compliance with all applicable laws.
 
 Key Guidelines:
 - Always identify yourself and your company at the beginning of each call
@@ -73,8 +73,8 @@ Remember: You must comply with FDCPA regulations and treat all debtors with resp
   {
     id: "empathetic",
     name: "Empathetic Collector",
-    description: "Understanding and supportive approach to debt collection",
-    template: `You are an empathetic debt collection agent named {agent_name}. Your approach focuses on understanding the debtor's situation while working together to find a solution.
+    description: "Understanding and supportive approach to Call Centre",
+    template: `You are an empathetic Call Centre agent named {agent_name}. Your approach focuses on understanding the debtor's situation while working together to find a solution.
 
 Key Guidelines:
 - Start with a warm, understanding tone
@@ -92,7 +92,7 @@ Remember: Your goal is to collect the debt while building a positive relationshi
     id: "legal_focused",
     name: "Legal & Compliance Focused",
     description: "Strict adherence to legal requirements and formal communication",
-    template: `You are a legally-focused debt collection agent named {agent_name}. Your primary concern is strict compliance with all debt collection laws and regulations.
+    template: `You are a legally-focused Call Centre agent named {agent_name}. Your primary concern is strict compliance with all Call Centre laws and regulations.
 
 Key Guidelines:
 - Begin every call with required legal disclosures
@@ -111,7 +111,7 @@ Remember: Legal compliance is your top priority. When in doubt, err on the side 
     id: "solution_oriented",
     name: "Solution-Oriented Collector",
     description: "Focus on finding creative solutions and win-win outcomes",
-    template: `You are a solution-oriented debt collection agent named {agent_name}. Your specialty is finding creative solutions that work for both the creditor and debtor.
+    template: `You are a solution-oriented Call Centre agent named {agent_name}. Your specialty is finding creative solutions that work for both the creditor and debtor.
 
 Key Guidelines:
 - Approach each call as a problem-solving session
@@ -129,7 +129,7 @@ Remember: Every debtor's situation is unique. Your job is to find the path that 
     id: "high_volume",
     name: "High-Volume Efficiency",
     description: "Optimized for handling large volumes of calls efficiently",
-    template: `You are an efficient debt collection agent named {agent_name}. You're optimized for handling high volumes of calls while maintaining effectiveness.
+    template: `You are an efficient Call Centre agent named {agent_name}. You're optimized for handling high volumes of calls while maintaining effectiveness.
 
 Key Guidelines:
 - Keep calls concise and focused on key objectives
@@ -470,7 +470,7 @@ export const AIAssistant = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">AI Agent Studio</h1>
-          <p className="text-gray-600 text-lg">Create, preview, and manage AI debt collection agents for any industry</p>
+          <p className="text-gray-600 text-lg">Create, preview, and manage AI Call Centre agents for any industry</p>
         </div>
         <Button 
           onClick={() => setShowCreateForm(true)}
@@ -523,7 +523,7 @@ export const AIAssistant = () => {
                             Voice: {Array.isArray(voices) ? voices.find(v => v.voice_id === agent.voice_id)?.name || "Unknown" : "Unknown"}
                           </p>
                           <p className="text-sm text-gray-500 line-clamp-2">
-                            {agent.prompt_template.substring(0, 150)}...
+                            {(agent?.prompt_template?.substring(0, 150) || "No prompt configured") + (agent?.prompt_template ? "..." : "")}
                           </p>
                         </div>
                         <div className="flex gap-2 ml-4">

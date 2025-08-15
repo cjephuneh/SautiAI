@@ -104,6 +104,7 @@ const BatchCalling = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentItem, setCurrentItem] = useState<BatchCampaign | null>(null);
+  const [defaultAgentId, setDefaultAgentId] = useState<number | null>(Number(localStorage.getItem('default_agent_id') || '') || null);
   
   // Message content states with default values
   const [emailSubject, setEmailSubject] = useState("Payment Reminder - {name}");
@@ -117,6 +118,12 @@ const BatchCalling = () => {
     fetchContacts();
     fetchAgents();
   }, []);
+
+  useEffect(() => {
+    // Sync default agent if changed elsewhere
+    const id = Number(localStorage.getItem('default_agent_id') || '') || null;
+    setDefaultAgentId(id);
+  }, [selectedChannel]);
 
   const fetchContacts = async () => {
     try {
@@ -410,7 +417,7 @@ const BatchCalling = () => {
 
         // Simulate outcome
         const outcomes = getChannelOutcomes("voice");
-        const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+        const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)] as { status: string; outcome: string; delivery_status?: string };
         const duration = Math.floor(processingDuration / 1000);
 
         setBatchCampaigns((prev) =>
@@ -478,7 +485,7 @@ const BatchCalling = () => {
 
         // Simulate outcomes based on channel
         const outcomes = getChannelOutcomes(selectedChannel);
-        const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+        const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)] as { status: string; outcome: string; delivery_status?: string };
         const duration = selectedChannel === 'voice' ? Math.floor(processingDuration / 1000) : undefined;
 
         // Update campaign result
@@ -709,6 +716,32 @@ const BatchCalling = () => {
                       ))}
                     </SelectContent>
                   </Select>
+
+                  {defaultAgentId && (
+                    <div className="mt-2 p-2 rounded-md bg-blue-50 border border-blue-200 text-sm flex items-center justify-between">
+                      <span>
+                        Default agent: <strong>{agents.find(a => a.id === defaultAgentId)?.name || `#${defaultAgentId}`}</strong>
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedAgent(String(defaultAgentId))}
+                          disabled={isActive}
+                        >
+                          Use default
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { localStorage.removeItem('default_agent_id'); setDefaultAgentId(null); }}
+                          disabled={isActive}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

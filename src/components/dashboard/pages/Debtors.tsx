@@ -32,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SelectAgentModal } from "../modals/SelectAgentModal";
 
 interface DebtorsProps {
   onSelectDebtor: (id: string) => void;
@@ -67,6 +68,9 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [initiatingCall, setInitiatingCall] = useState<string | null>(null);
   const [agents, setAgents] = useState<any[]>([]);
+  const [showSelectAgentModal, setShowSelectAgentModal] = useState(false);
+  const [debtorIdForCall, setDebtorIdForCall] = useState<string | null>(null);
+  const [debtorNameForCall, setDebtorNameForCall] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -217,54 +221,25 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
   };
 
   const handleInitiateCall = async (debtorId: string, debtorName: string) => {
-    console.log("Available agents:", agents); // Debug log
-    
-    if (!agents || agents.length === 0) {
-      toast({
-        title: "No Agents Available",
-        description: "Please create an AI agent first before initiating calls.",
-        variant: "destructive",
-      });
-      return;
-    }
+    setDebtorIdForCall(debtorId);
+    setDebtorNameForCall(debtorName);
+    // Always open modal; it will preselect default agent and allow clearing
+    setShowSelectAgentModal(true);
+  };
 
-    // Find the first valid agent with an id
-    const selectedAgent = agents.find(agent => agent && agent.id);
-    
-    if (!selectedAgent) {
-      toast({
-        title: "Invalid Agent Configuration",
-        description: "No valid agents found. Please check your agent configuration.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!confirm(`Initiate AI call to ${debtorName}? Agent "${selectedAgent.name || 'Unknown Agent'}" will handle the call.`)) {
-      return;
-    }
-
-    setInitiatingCall(debtorId);
-    
+  const handleAgentSelectedAndCall = async (agentId: number) => {
+    if (!debtorIdForCall || !debtorNameForCall) return;
+    setInitiatingCall(debtorIdForCall);
     try {
-      const callResult = await callsApi.makeOutboundCall(
-        Number(debtorId), 
-        selectedAgent.id
-      );
-      
+      const callResult = await callsApi.makeOutboundCall(Number(debtorIdForCall), agentId);
       toast({
         title: "Call Initiated",
-        description: `AI agent "${selectedAgent.name || 'Agent'}" is now calling ${debtorName}.`,
+        description: `AI agent is now calling ${debtorNameForCall}.`,
       });
-      
-      // You can redirect to call monitoring page or show call details
       console.log("Call initiated:", callResult);
-      
     } catch (error: any) {
       console.error("Failed to initiate call:", error);
-      
       let errorMessage = "Failed to initiate call. Please try again.";
-      
       if (error.response?.status === 404) {
         errorMessage = "Contact or agent not found. Please refresh the page and try again.";
       } else if (error.response?.status === 400) {
@@ -272,14 +247,12 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: errorMessage, variant: "destructive" });
     } finally {
       setInitiatingCall(null);
+      setShowSelectAgentModal(false);
+      setDebtorIdForCall(null);
+      setDebtorNameForCall(null);
     }
   };
 
@@ -527,12 +500,8 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
                                 e.stopPropagation();
                                 handleInitiateCall(debtor.id.toString(), debtor.name);
                               }}
-                              disabled={initiatingCall === debtor.id.toString() || !agents || agents.length === 0}
-                              title={
-                                !agents || agents.length === 0 
-                                  ? "No AI agents available" 
-                                  : "Initiate AI Call"
-                              }
+                              disabled={initiatingCall === debtor.id.toString()}
+                              title={"Initiate AI Call"}
                             >
                               {initiatingCall === debtor.id.toString() ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -620,6 +589,15 @@ export const Debtors = ({ onSelectDebtor }: DebtorsProps) => {
         onOpenChange={setShowEditDebtorModal} 
         debtorId={selectedDebtorForEdit}
         onSuccess={fetchDebtors}
+      />
+
+      {/* Select Agent Modal for calling */}
+      <SelectAgentModal
+        open={showSelectAgentModal}
+        onOpenChange={setShowSelectAgentModal}
+        onAgentSelected={handleAgentSelectedAndCall}
+        allowRememberChoice
+        defaultAgentId={Number(localStorage.getItem('default_agent_id') || '') || null}
       />
     </div>
   );

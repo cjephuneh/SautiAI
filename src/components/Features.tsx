@@ -40,7 +40,7 @@ const Features = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
-            Powerful Features for Modern Debt Collection
+            Powerful Features for Modern Call Centre
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             DebAI combines cutting-edge AI technology with proven collection strategies to maximize recovery rates while maintaining professional relationships.

@@ -91,7 +91,7 @@ export const Contacts = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Contact Management</h2>
-          <p className="text-gray-600">Manage your debt collection contacts and their information</p>
+          <p className="text-gray-600">Manage your Call Centre contacts and their information</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="h-4 w-4 mr-2" />

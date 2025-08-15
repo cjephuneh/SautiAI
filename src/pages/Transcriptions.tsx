@@ -30,7 +30,7 @@ const Transcriptions = () => {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "AI Call Transcriptions - SautiAI",
-    "description": "Automatic call transcription and analysis for debt collection calls with compliance monitoring and sentiment analysis.",
+    "description": "Automatic call transcription and analysis for Call Centre calls with compliance monitoring and sentiment analysis.",
     "url": "https://sautiai.com/transcriptions"
   };
 
@@ -38,7 +38,7 @@ const Transcriptions = () => {
     {
       icon: <FileText className="w-8 h-8 text-blue-600" />,
       title: "Real-Time Transcription",
-      description: "Get instant, accurate transcriptions of all debt collection calls with 99.5% accuracy."
+      description: "Get instant, accurate transcriptions of all Call Centre calls with 99.5% accuracy."
     },
     {
       icon: <Search className="w-8 h-8 text-purple-600" />,
@@ -60,9 +60,9 @@ const Transcriptions = () => {
   return (
     <>
       <SEOHead
-        title="AI Call Transcriptions - SautiAI Debt Collection Platform"
-        description="Automatic call transcription and analysis for debt collection calls. Real-time transcription with compliance monitoring and sentiment analysis."
-        keywords="call transcription, debt collection transcripts, AI transcription, compliance monitoring, call analysis"
+        title="AI Call Transcriptions - SautiAI Call Centre Platform"
+        description="Automatic call transcription and analysis for Call Centre calls. Real-time transcription with compliance monitoring and sentiment analysis."
+        keywords="call transcription, Call Centre transcripts, AI transcription, compliance monitoring, call analysis"
         url="https://sautiai.com/transcriptions"
         structuredData={structuredData}
       />
@@ -86,7 +86,7 @@ const Transcriptions = () => {
               </h1>
               
               <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                Get real-time, accurate transcriptions of all your debt collection calls with automatic compliance monitoring and sentiment analysis.
+                Get real-time, accurate transcriptions of all your Call Centre calls with automatic compliance monitoring and sentiment analysis.
               </p>
             </div>
 

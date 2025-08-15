@@ -50,8 +50,8 @@ const Pricing = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Service",
-    "name": "SautiAI Debt Collection Plans",
-    "description": "AI-powered debt collection pricing plans for businesses of all sizes",
+    "name": "SautiAI Call Centre Plans",
+    "description": "AI-powered Call Centre pricing plans for businesses of all sizes",
     "provider": {
       "@type": "Organization",
       "name": "SautiAI"
@@ -109,9 +109,9 @@ const Pricing = () => {
   return (
     <>
       <SEOHead
-        title="Pricing Plans - SautiAI AI Debt Collection Platform"
-        description="Choose the perfect SautiAI plan for your debt collection needs. Flexible pricing for businesses of all sizes with 65% higher recovery rates."
-        keywords="debt collection pricing, AI collection plans, SautiAI pricing, debt recovery software cost"
+        title="Pricing Plans - SautiAI AI Call Centre Platform"
+        description="Choose the perfect SautiAI plan for your Call Centre needs. Flexible pricing for businesses of all sizes with 65% higher recovery rates."
+        keywords="Call Centre pricing, AI collection plans, SautiAI pricing, debt recovery software cost"
         url="https://sautiai.com/pricing"
         structuredData={structuredData}
       />

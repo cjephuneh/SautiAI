@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 // Base API configuration
+const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 'http://localhost:5050';
 const api = axios.create({
-  baseURL: 'http://localhost:5050', // From the API spec's server URL
+  baseURL: API_BASE_URL,
 });
-const API_BASE_URL = 'http://localhost:5050'; // Base URL for the API
 // Mock user ID for now - in a real app this would come from authentication
 const DEFAULT_USER_ID = 1;
 
@@ -20,7 +20,7 @@ export const contactsApi = {
       
       // If it's a network error or server is down, provide more specific error
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
       }
       
       // If it's a 404, the endpoint might not exist
@@ -34,7 +34,7 @@ export const contactsApi = {
   
   getContact: async (contactId: number) => {
     try {
-      const response = await api.get(`/contacts/${contactId}`);
+      const response = await api.get(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`);
       return response.data;
     } catch (error) {
       console.error("API error in getContact:", error);
@@ -54,7 +54,7 @@ export const contactsApi = {
   
   updateContact: async (contactId: number, contactData: any) => {
     try {
-      const response = await api.put(`/contacts/${contactId}`, contactData);
+      const response = await api.put(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`, contactData);
       return response.data;
     } catch (error) {
       console.error("API error in updateContact:", error);
@@ -64,7 +64,7 @@ export const contactsApi = {
   
   deleteContact: async (contactId: number) => {
     try {
-      const response = await api.delete(`/contacts/${contactId}`);
+      const response = await api.delete(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`);
       return response.data;
     } catch (error) {
       console.error("API error in deleteContact:", error);
@@ -137,7 +137,7 @@ export const agentsApi = {
       
       // If it's a network error or server is down, provide more specific error
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
       }
       
       // If it's a 404, the endpoint might not exist
@@ -146,6 +146,47 @@ export const agentsApi = {
       }
       
       throw error;
+    }
+  },
+
+  // Returns only agents that are configured and available for calls
+  getAvailableAgentsForCalls: async () => {
+    const fallbackFromAllAgents = async () => {
+      try {
+        const agents = await agentsApi.getAgents();
+        const normalized = Array.isArray(agents) ? agents : [];
+        return normalized.filter((a: any) => (a?.is_active !== false) && !!a?.prompt_template && !!a?.voice_id);
+      } catch {
+        return [];
+      }
+    };
+
+    try {
+      const response = await api.get(`/agents/available-for-calls?user_id=${DEFAULT_USER_ID}`);
+      const data = response.data;
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.available_agents)) return data.available_agents;
+      return [];
+    } catch (err: any) {
+      // Suppress noisy console errors for known 422 routing issue and fallback silently
+      if (err?.response?.status === 422) {
+        return await fallbackFromAllAgents();
+      }
+      // Try trailing slash once for servers that differentiate
+      try {
+        const response = await api.get(`/agents/available-for-calls/?user_id=${DEFAULT_USER_ID}`);
+        const data = response.data;
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.available_agents)) return data.available_agents;
+        return await fallbackFromAllAgents();
+      } catch (e: any) {
+        if (e?.response?.status === 422) {
+          return await fallbackFromAllAgents();
+        }
+        // Last resort: warn once, then fallback
+        console.warn("getAvailableAgentsForCalls failed, using fallback from /agents", e?.message || e);
+        return await fallbackFromAllAgents();
+      }
     }
   },
   
@@ -162,7 +203,7 @@ export const agentsApi = {
   
   updateAgentSystemMessage: async (agentId: number, promptTemplate: string) => {
     try {
-      const response = await api.put(`/agents/${agentId}/system-message`, { prompt_template: promptTemplate });
+      const response = await api.put(`/agents/${agentId}/system-message?user_id=${DEFAULT_USER_ID}`, { prompt_template: promptTemplate });
       return response.data;
     } catch (error) {
       console.error("API error in updateAgentSystemMessage:", error);
@@ -172,7 +213,7 @@ export const agentsApi = {
   
   deleteAgent: async (agentId: number) => {
     try {
-      const response = await api.delete(`/agents/${agentId}`);
+      const response = await api.delete(`/agents/${agentId}?user_id=${DEFAULT_USER_ID}`);
       return response.data;
     } catch (error) {
       console.error("API error in deleteAgent:", error);
@@ -344,6 +385,43 @@ export const callsApi = {
       console.error("Failed to fetch call transcript:", error);
       // Return null instead of throwing for 404s
       return null;
+    }
+  },
+
+  // New: Get recording and transcript bundle
+  getRecordingAndTranscript: async (callId: string) => {
+    try {
+      const response = await api.get(`/calls/${callId}/recording`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Failed to fetch recording & transcript:", error);
+      return null;
+    }
+  },
+
+  // New: Download formatted transcript (returns filename and content as text)
+  downloadFormattedTranscript: async (callId: string) => {
+    try {
+      const response = await api.post(`/calls/${callId}/download-transcript`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to download formatted transcript:", error);
+      throw error;
+    }
+  },
+
+  // New: List calls that have transcripts
+  listCallsWithTranscripts: async () => {
+    try {
+      const response = await api.get(`/calls/with-transcripts`);
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.calls_with_transcripts)) {
+        return response.data.calls_with_transcripts;
+      }
+      return [];
+    } catch (error) {
+      console.error("Failed to list calls with transcripts:", error);
+      return [];
     }
   },
 
@@ -522,7 +600,7 @@ export const businessInquiriesApi = {
       }
       
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
       }
       
       throw error;
@@ -563,7 +641,7 @@ export const authApi = {
       }
       
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
       }
       
       throw error;
@@ -619,7 +697,7 @@ export const authApi = {
       }
       
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error("Cannot connect to server. Please ensure the API server is running on https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net/");
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
       }
       
       throw error;

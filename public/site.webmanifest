@@ -1,7 +1,7 @@
 {
-  "name": "SautiAI - AI-Powered Debt Collection Platform",
+  "name": "SautiAI - AI-Powered Call Centre Platform",
   "short_name": "SautiAI",
-  "description": "Transform your debt collection with AI. Recover 65% more outstanding payments.",
+  "description": "Transform your Call Centre with AI. Recover 65% more outstanding payments.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { contactsApi, agentsApi, callsApi } from "@/services/api";
 import { useToast } from "@/components/ui/use-toast";
+import { SelectAgentModal } from "../modals/SelectAgentModal";
 
 interface DebtorProfileProps {
   debtorId: string | null;
@@ -64,6 +65,7 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
   const [loading, setLoading] = useState(true);
   const [agents, setAgents] = useState<any[]>([]);
   const [initiatingCall, setInitiatingCall] = useState(false);
+  const [showSelectAgentModal, setShowSelectAgentModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -129,55 +131,25 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
   };
 
   const handleInitiateCall = async () => {
-    console.log("Available agents:", agents); // Debug log
-    
-    if (!agents || agents.length === 0) {
-      toast({
-        title: "No Agents Available",
-        description: "Please create an AI agent first before initiating calls.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!debtor) return;
-
-    // Find the first valid agent with an id
-    const selectedAgent = agents.find(agent => agent && agent.id);
-    
-    if (!selectedAgent) {
-      toast({
-        title: "Invalid Agent Configuration",
-        description: "No valid agents found. Please check your agent configuration.",
-        variant: "destructive",
-      });
+    const savedAgentId = localStorage.getItem('default_agent_id');
+    if (savedAgentId) {
+      await handleAgentSelectedAndCall(Number(savedAgentId));
       return;
     }
-    
-    if (!confirm(`Initiate AI call to ${debtor.name}? Agent "${selectedAgent.name || 'Unknown Agent'}" will handle the call.`)) {
-      return;
-    }
+    setShowSelectAgentModal(true);
+  };
 
+  const handleAgentSelectedAndCall = async (agentId: number) => {
+    if (!debtor) return;
     setInitiatingCall(true);
-    
     try {
-      const callResult = await callsApi.makeOutboundCall(
-        Number(debtorId), 
-        selectedAgent.id
-      );
-      
-      toast({
-        title: "Call Initiated",
-        description: `AI agent "${selectedAgent.name || 'Agent'}" is now calling ${debtor.name}.`,
-      });
-      
+      const callResult = await callsApi.makeOutboundCall(Number(debtorId), agentId);
+      toast({ title: "Call Initiated", description: `AI agent is now calling ${debtor.name}.` });
       console.log("Call initiated:", callResult);
-      
     } catch (error: any) {
       console.error("Failed to initiate call:", error);
-      
       let errorMessage = "Failed to initiate call. Please try again.";
-      
       if (error.response?.status === 404) {
         errorMessage = "Contact or agent not found. Please refresh the page and try again.";
       } else if (error.response?.status === 400) {
@@ -185,14 +157,10 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: errorMessage, variant: "destructive" });
     } finally {
       setInitiatingCall(false);
+      setShowSelectAgentModal(false);
     }
   };
 
@@ -564,6 +532,14 @@ export const DebtorProfile = ({ debtorId, onBack }: DebtorProfileProps) => {
           </Card>
         </div>
       </div>
+
+      <SelectAgentModal
+        open={showSelectAgentModal}
+        onOpenChange={setShowSelectAgentModal}
+        onAgentSelected={handleAgentSelectedAndCall}
+        allowRememberChoice
+        defaultAgentId={Number(localStorage.getItem('default_agent_id') || '') || null}
+      />
     </div>
   );
 };

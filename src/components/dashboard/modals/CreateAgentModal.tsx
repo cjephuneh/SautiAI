@@ -132,7 +132,7 @@ export const CreateAgentModal = ({ open, onOpenChange, onSuccess, voices }: Crea
               id="prompt"
               value={formData.prompt_template}
               onChange={(e) => handleInputChange("prompt_template", e.target.value)}
-              placeholder="You are a friendly debt collection agent. Your goal is to help customers pay their debts while maintaining a positive relationship..."
+              placeholder="You are a friendly Call Centre agent. Your goal is to help customers pay their debts while maintaining a positive relationship..."
               rows={6}
               required
             />
