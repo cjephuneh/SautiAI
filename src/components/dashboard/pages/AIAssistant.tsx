@@ -224,7 +224,7 @@ function useVoicePreview() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const play = (url?: string) => {
-    if (!url || !/\.(mp3|wav|ogg)$/i.test(url)) {
+    if (!url) {
       // Optionally show a toast or warning here
       return;
     }
@@ -286,6 +286,7 @@ export const AIAssistant = () => {
   useEffect(() => {
     fetchAgents();
     fetchVoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAgents = async () => {
@@ -316,7 +317,7 @@ export const AIAssistant = () => {
     setLoadingVoices(true);
     try {
       const data = await voicesApi.getVoices();
-      let voicesArr = Array.isArray(data) ? data : (data.voices || []);
+      const voicesArr = Array.isArray(data) ? data : (data.voices || []);
       setVoices(voicesArr);
     } catch (error) {
       console.error("Failed to fetch voices:", error);
@@ -332,7 +333,7 @@ export const AIAssistant = () => {
   };
 
   const handleVoicePreview = (voice: Voice) => {
-    if (!voice.sample_url || !/\.(mp3|wav|ogg)$/i.test(voice.sample_url)) {
+    if (!voice.sample_url) {
       toast({
         title: "Voice preview unavailable",
         description: "No valid audio sample for this voice.",
@@ -588,7 +589,7 @@ export const AIAssistant = () => {
                       <SelectContent>
                         {Array.isArray(voices) && voices.map((voice) => (
                           <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                            {voice.name} ({voice.gender}, {voice.provider})
+                            {voice.name} ({voice.language}, {voice.provider})
                           </SelectItem>
                         ))}
                         {(!Array.isArray(voices) || voices.length === 0) && (
@@ -608,10 +609,7 @@ export const AIAssistant = () => {
                           const v = voices.find(v => v.voice_id === formData.voice_id);
                           if (v) handleVoicePreview(v);
                         }}
-                        disabled={
-                          !voices.find(v => v.voice_id === formData.voice_id)?.sample_url ||
-                          !/\.(mp3|wav|ogg)$/i.test(voices.find(v => v.voice_id === formData.voice_id)?.sample_url || "")
-                        }
+                        disabled={!voices.find(v => v.voice_id === formData.voice_id)?.sample_url}
                         title="Preview Voice"
                       >
                         <Volume2 className="h-5 w-5" />
@@ -636,6 +634,7 @@ export const AIAssistant = () => {
                     value={formData.temperature}
                     onChange={e => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
                     className="w-full"
+                    title="Creativity (Temperature)"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>Conservative</span>
@@ -664,6 +663,7 @@ export const AIAssistant = () => {
                     value={formData.voice_temperature}
                     onChange={e => setFormData(prev => ({ ...prev, voice_temperature: parseFloat(e.target.value) }))}
                     className="w-full"
+                    title="Voice Temperature"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>Stable</span>
@@ -682,6 +682,7 @@ export const AIAssistant = () => {
                     value={formData.speaking_rate}
                     onChange={e => setFormData(prev => ({ ...prev, speaking_rate: parseFloat(e.target.value) }))}
                     className="w-full"
+                    title="Speaking Rate"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>Slower</span>
@@ -695,6 +696,7 @@ export const AIAssistant = () => {
                     type="checkbox"
                     checked={formData.audio_enhancement}
                     onChange={e => setFormData(prev => ({ ...prev, audio_enhancement: e.target.checked }))}
+                    title="Audio Enhancement"
                   />
                   <Label htmlFor="audio_enhancement">Audio Enhancement</Label>
                 </div>
