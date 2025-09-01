@@ -1,4 +1,7 @@
 #!/bin/bash
-cd /home/site/wwwroot
+
+# Install dependencies
 npm install --production
+
+# Start the server
 node server.js
