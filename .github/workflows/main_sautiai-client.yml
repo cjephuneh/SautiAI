@@ -30,6 +30,9 @@ jobs:
       - name: Build Vite app
         run: npm run build
 
+      - name: Install production dependencies
+        run: npm ci --production
+
       - name: Prepare deployment package
         run: |
           mkdir -p deploy-package
@@ -43,6 +46,7 @@ jobs:
           cp .npmrc deploy-package/
           cp startup.sh deploy-package/
           cp startup-command.txt deploy-package/
+          cp -r node_modules deploy-package/
 
       - name: Upload production-ready files
         uses: actions/upload-artifact@v4
