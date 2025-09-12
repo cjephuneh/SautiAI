@@ -20,12 +20,14 @@ import CallLogs from "@/components/dashboard/pages/CallLogs";
 import PhoneNumbers from "@/components/dashboard/pages/PhoneNumbers";
 import Integrations from "@/components/dashboard/pages/Integrations";
 import BatchCalling from "@/components/dashboard/pages/BatchCalling";
+import Calendar from "@/components/dashboard/pages/Calendar";
 
 export type DashboardPage = 
   | 'overview' 
   | 'debtors' 
   | 'debtor-profile' 
   | 'call-logs'
+  | 'calendar'
   | 'batch-calling'
   | 'phone-numbers'
   | 'ai-assistant' 
@@ -60,6 +62,8 @@ const Dashboard = () => {
         return <DebtorProfile debtorId={selectedDebtorId} onBack={() => setCurrentPage('debtors')} />;
       case 'call-logs':
         return <CallLogs />;
+      case 'calendar':
+        return <Calendar />;
       case 'batch-calling':
         return <BatchCalling />;
       case 'phone-numbers':

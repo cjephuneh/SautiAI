@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Phone,
-  Zap
+  Zap,
+  Calendar as CalendarIcon
 } from "lucide-react";
 import type { DashboardPage } from "@/pages/Dashboard";
 
@@ -26,14 +27,15 @@ interface SidebarProps {
 export const Sidebar = ({ currentPage, onPageChange, collapsed, onToggleCollapse }: SidebarProps) => {
   const menuItems = [
     { id: 'overview' as DashboardPage, label: 'Overview', icon: LayoutDashboard },
-    { id: 'debtors' as DashboardPage, label: 'Debtors', icon: Users },
+    { id: 'debtors' as DashboardPage, label: 'Users', icon: Users },
     { id: 'call-logs' as DashboardPage, label: 'Call Logs', icon: PhoneCall },
+    { id: 'calendar' as DashboardPage, label: 'Calendar', icon: CalendarIcon },
     { id: 'ai-assistant' as DashboardPage, label: 'AI Assistant', icon: Bot },
     { id: 'batch-calling' as DashboardPage, label: 'Batch Communications', icon: Zap },
     { id: 'phone-numbers' as DashboardPage, label: 'Phone Numbers', icon: Phone },
     { id: 'integrations' as DashboardPage, label: 'Integrations', icon: Settings },
-    // { id: 'messages' as DashboardPage, label: 'Messages', icon: MessageSquare },
-    // { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
+    { id: 'messages' as DashboardPage, label: 'Messages', icon: MessageSquare },
+    { id: 'analytics' as DashboardPage, label: 'Analytics', icon: BarChart3 },
   ];
 
   return (
