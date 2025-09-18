@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 'http://127.0.0.1:5050';
+const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net';
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
