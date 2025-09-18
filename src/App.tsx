@@ -13,6 +13,7 @@ import Pricing from "./pages/Pricing";
 import Transcriptions from "./pages/Transcriptions";
 import Blogs from "./pages/Blogs";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { FloatingHelpButton } from "./components/ui/help-button";
 import { authApi } from "./services/api";
 
 const queryClient = new QueryClient();
@@ -32,11 +33,11 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/book-call" element={<BookCall />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/transcriptions" element={<Transcriptions />} />
-              <Route path="/blogs" element={<Blogs />} />
+              <Route path="/" element={<><Index /><FloatingHelpButton /></>} />
+              <Route path="/book-call" element={<><BookCall /><FloatingHelpButton /></>} />
+              <Route path="/pricing" element={<><Pricing /><FloatingHelpButton /></>} />
+              <Route path="/transcriptions" element={<><Transcriptions /><FloatingHelpButton /></>} />
+              <Route path="/blogs" element={<><Blogs /><FloatingHelpButton /></>} />
               <Route path="/login" element={<Login />} />
               
               {/* Protected routes */}

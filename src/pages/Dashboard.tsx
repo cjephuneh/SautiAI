@@ -21,6 +21,9 @@ import PhoneNumbers from "@/components/dashboard/pages/PhoneNumbers";
 import Integrations from "@/components/dashboard/pages/Integrations";
 import BatchCalling from "@/components/dashboard/pages/BatchCalling";
 import Calendar from "@/components/dashboard/pages/Calendar";
+import { Voices } from "@/components/dashboard/pages/Voices";
+import { AgentCreation } from "@/components/dashboard/pages/AgentCreation";
+import { FloatingHelpButton } from "@/components/ui/help-button";
 
 export type DashboardPage = 
   | 'overview' 
@@ -31,6 +34,8 @@ export type DashboardPage =
   | 'batch-calling'
   | 'phone-numbers'
   | 'ai-assistant' 
+  | 'voices'
+  | 'agent-creation'
   | 'integrations'
   | 'call-center'
   | 'calls'
@@ -70,6 +75,10 @@ const Dashboard = () => {
         return <PhoneNumbers />;
       case 'ai-assistant':
         return <AIAssistant />;
+      case 'voices':
+        return <Voices />;
+      case 'agent-creation':
+        return <AgentCreation />;
       case 'integrations':
         return <Integrations />;
       case 'call-center':
@@ -118,6 +127,9 @@ const Dashboard = () => {
           {renderPage()}
         </main>
       </div>
+      
+      {/* Floating Help Button */}
+      <FloatingHelpButton />
     </div>
   );
 };

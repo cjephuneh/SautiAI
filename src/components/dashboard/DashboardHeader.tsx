@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, Menu, LogOut, User, Settings, ChevronDown } from "lucide-react";
+import { Bell, Search, Menu, LogOut, User, Settings, ChevronDown, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { NotificationsModal } from "@/components/dashboard/modals/NotificationsModal";
+import { HelpModal } from "@/components/ui/help-modal";
 import { authApi } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { 
@@ -33,6 +34,7 @@ const pageNames = {
 
 export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeaderProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const navigate = useNavigate();
@@ -113,6 +115,16 @@ export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeade
               className="pl-10 w-80 bg-gray-50 border-gray-200"
             />
           </div>
+
+          {/* Help */}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setHelpOpen(true)}
+            className="hidden md:flex"
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Button>
 
           {/* Notifications */}
           <div className="relative">
@@ -252,6 +264,11 @@ export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeade
       <NotificationsModal 
         open={notificationsOpen} 
         onOpenChange={setNotificationsOpen} 
+      />
+      
+      <HelpModal 
+        open={helpOpen} 
+        onOpenChange={setHelpOpen} 
       />
     </>
   );

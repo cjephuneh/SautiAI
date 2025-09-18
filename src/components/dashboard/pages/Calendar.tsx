@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Phone, Users } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Phone, Users, AlertCircle, CheckCircle, XCircle, Pause, DollarSign, UserX, CalendarDays } from "lucide-react";
 import { callsApi, contactsApi } from "@/services/api";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -33,6 +33,8 @@ interface ScheduledCall {
   date: string; // YYYY-MM-DD
   time?: string; // HH:mm
   notes?: string;
+  status?: 'scheduled' | 'completed' | 'failed' | 'postponed' | 'payment_pending' | 'unavailable' | 'busy';
+  reason?: string; // Reason for status (e.g., "User wasn't available", "Payment due tomorrow", "User is busy")
 }
 
 type ViewMode = 'day' | 'week' | 'month';
@@ -55,6 +57,43 @@ const getEndOfWeek = (d: Date) => {
 
 const toISODate = (d: Date) => d.toISOString().slice(0, 10);
 
+// Helper functions for call status
+const getStatusIcon = (status?: string) => {
+  switch (status) {
+    case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
+    case 'failed': return <XCircle className="h-4 w-4 text-red-600" />;
+    case 'postponed': return <Pause className="h-4 w-4 text-yellow-600" />;
+    case 'payment_pending': return <DollarSign className="h-4 w-4 text-blue-600" />;
+    case 'unavailable': return <UserX className="h-4 w-4 text-gray-600" />;
+    case 'busy': return <AlertCircle className="h-4 w-4 text-orange-600" />;
+    default: return <CalendarDays className="h-4 w-4 text-blue-600" />;
+  }
+};
+
+const getStatusColor = (status?: string) => {
+  switch (status) {
+    case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+    case 'failed': return 'bg-red-100 text-red-800 border-red-200';
+    case 'postponed': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'payment_pending': return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'unavailable': return 'bg-gray-100 text-gray-800 border-gray-200';
+    case 'busy': return 'bg-orange-100 text-orange-800 border-orange-200';
+    default: return 'bg-blue-100 text-blue-800 border-blue-200';
+  }
+};
+
+const getStatusLabel = (status?: string) => {
+  switch (status) {
+    case 'completed': return 'Completed';
+    case 'failed': return 'Failed';
+    case 'postponed': return 'Postponed';
+    case 'payment_pending': return 'Payment Due';
+    case 'unavailable': return 'Unavailable';
+    case 'busy': return 'Busy';
+    default: return 'Scheduled';
+  }
+};
+
 export const Calendar = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -66,6 +105,8 @@ export const Calendar = () => {
   const [scheduleTime, setScheduleTime] = useState<string>("09:00");
   const [scheduleContactId, setScheduleContactId] = useState<string>("");
   const [scheduleNotes, setScheduleNotes] = useState<string>("");
+  const [scheduleStatus, setScheduleStatus] = useState<string>("scheduled");
+  const [scheduleReason, setScheduleReason] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -83,7 +124,78 @@ export const Calendar = () => {
     // Load scheduled from localStorage
     const raw = localStorage.getItem('scheduled_calls');
     if (raw) {
-      try { setScheduled(JSON.parse(raw)); } catch {}
+      try { 
+        const parsed = JSON.parse(raw);
+        setScheduled(parsed);
+      } catch {}
+    } else {
+      // Add sample scheduled calls for demonstration
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const dayAfter = new Date(today);
+      dayAfter.setDate(dayAfter.getDate() + 2);
+      
+      const sampleScheduled: ScheduledCall[] = [
+        {
+          id: 'sample_1',
+          contact_id: 1,
+          contact_name: 'John Doe',
+          phone_number: '+1234567890',
+          date: toISODate(today),
+          time: '10:00',
+          status: 'completed',
+          reason: 'Call completed successfully',
+          notes: 'Payment received'
+        },
+        {
+          id: 'sample_2',
+          contact_id: 2,
+          contact_name: 'Jane Smith',
+          phone_number: '+1234567891',
+          date: toISODate(today),
+          time: '14:00',
+          status: 'unavailable',
+          reason: 'User wasn\'t available',
+          notes: 'No answer after 3 attempts'
+        },
+        {
+          id: 'sample_3',
+          contact_id: 3,
+          contact_name: 'Bob Johnson',
+          phone_number: '+1234567892',
+          date: toISODate(tomorrow),
+          time: '09:00',
+          status: 'payment_pending',
+          reason: 'Payment due tomorrow',
+          notes: 'Follow up on payment'
+        },
+        {
+          id: 'sample_4',
+          contact_id: 4,
+          contact_name: 'Alice Brown',
+          phone_number: '+1234567893',
+          date: toISODate(tomorrow),
+          time: '11:00',
+          status: 'busy',
+          reason: 'User is busy',
+          notes: 'Will call back later'
+        },
+        {
+          id: 'sample_5',
+          contact_id: 5,
+          contact_name: 'Charlie Wilson',
+          phone_number: '+1234567894',
+          date: toISODate(dayAfter),
+          time: '15:00',
+          status: 'scheduled',
+          reason: '',
+          notes: 'Initial contact attempt'
+        }
+      ];
+      
+      setScheduled(sampleScheduled);
+      localStorage.setItem('scheduled_calls', JSON.stringify(sampleScheduled));
     }
   }, []);
 
@@ -155,8 +267,23 @@ export const Calendar = () => {
     const completed = callsInRange.filter(c => c.status === 'completed').length;
     const failed = callsInRange.filter(c => c.status === 'failed').length;
     const initiated = callsInRange.filter(c => c.status === 'initiated' || c.status === 'calling' || c.status === 'in_progress').length;
+    
+    // Scheduled calls breakdown by status
+    const scheduledCompleted = scheduledInRange.filter(s => s.status === 'completed').length;
+    const scheduledFailed = scheduledInRange.filter(s => s.status === 'failed').length;
+    const scheduledUnavailable = scheduledInRange.filter(s => s.status === 'unavailable').length;
+    const scheduledPaymentDue = scheduledInRange.filter(s => s.status === 'payment_pending').length;
+    const scheduledBusy = scheduledInRange.filter(s => s.status === 'busy').length;
+    const scheduledPending = scheduledInRange.filter(s => !s.status || s.status === 'scheduled').length;
+    
     return {
       scheduled: scheduledInRange.length,
+      scheduledCompleted,
+      scheduledFailed,
+      scheduledUnavailable,
+      scheduledPaymentDue,
+      scheduledBusy,
+      scheduledPending,
       completed,
       failed,
       initiated,
@@ -169,6 +296,8 @@ export const Calendar = () => {
     setScheduleTime("09:00");
     setScheduleContactId(contacts[0]?.id ? String(contacts[0].id) : "");
     setScheduleNotes("");
+    setScheduleStatus("scheduled");
+    setScheduleReason("");
     setOpenScheduleModal(true);
   };
 
@@ -186,7 +315,9 @@ export const Calendar = () => {
       phone_number: contact.phone_number,
       date: scheduleDate,
       time: scheduleTime,
-      notes: scheduleNotes
+      notes: scheduleNotes,
+      status: scheduleStatus as any,
+      reason: scheduleReason
     };
     const next = [newItem, ...scheduled];
     saveScheduled(next);
@@ -196,6 +327,11 @@ export const Calendar = () => {
 
   const handleRemoveSchedule = (id: string) => {
     const next = scheduled.filter(s => s.id !== id);
+    saveScheduled(next);
+  };
+
+  const handleUpdateSchedule = (id: string, updates: Partial<ScheduledCall>) => {
+    const next = scheduled.map(s => s.id === id ? { ...s, ...updates } : s);
     saveScheduled(next);
   };
 
@@ -214,7 +350,16 @@ export const Calendar = () => {
             <div className="flex items-center justify-between">
               <span className={`text-sm ${inMonth ? 'text-gray-900' : 'text-gray-400'}`}>{day.getDate()}</span>
               {daySchedules.length > 0 && (
-                <Badge className="bg-blue-100 text-blue-800">{daySchedules.length} sched</Badge>
+                <div className="flex gap-1 flex-wrap">
+                  {daySchedules.slice(0, 4).map(s => (
+                    <div key={s.id} className="flex items-center gap-1 p-1 rounded bg-white shadow-sm border">
+                      {getStatusIcon(s.status)}
+                    </div>
+                  ))}
+                  {daySchedules.length > 4 && (
+                    <span className="text-xs text-gray-500 bg-gray-100 px-1 py-1 rounded">+{daySchedules.length - 4}</span>
+                  )}
+                </div>
               )}
             </div>
             {dayCalls.length > 0 && (
@@ -309,13 +454,59 @@ export const Calendar = () => {
                   ) : (
                     <div className="space-y-2">
                       {eventsForSelected.scheduled.map(s => (
-                        <div key={s.id} className="p-3 border rounded flex items-center justify-between">
-                          <div>
-                            <div className="font-medium">{s.contact_name}</div>
-                            <div className="text-xs text-gray-500">{s.date}{s.time ? ` ${s.time}` : ''}</div>
-                            {s.notes && <div className="text-xs text-gray-600 mt-1">{s.notes}</div>}
+                        <div key={s.id} className="p-3 border rounded">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="font-medium">{s.contact_name}</div>
+                              <Badge className={`text-xs ${getStatusColor(s.status)}`}>
+                                {getStatusLabel(s.status)}
+                              </Badge>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="outline" size="sm" onClick={() => handleRemoveSchedule(s.id)}>Remove</Button>
+                            </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => handleRemoveSchedule(s.id)}>Remove</Button>
+                          <div className="flex gap-1 mb-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs"
+                              onClick={() => handleUpdateSchedule(s.id, { status: 'completed', reason: 'Call completed successfully' })}
+                            >
+                              ✓ Complete
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs"
+                              onClick={() => handleUpdateSchedule(s.id, { status: 'unavailable', reason: 'User wasn\'t available' })}
+                            >
+                              ✗ Unavailable
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs"
+                              onClick={() => handleUpdateSchedule(s.id, { status: 'payment_pending', reason: 'Payment due tomorrow' })}
+                            >
+                              $ Payment Due
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs"
+                              onClick={() => handleUpdateSchedule(s.id, { status: 'busy', reason: 'User is busy' })}
+                            >
+                              ⚠ Busy
+                            </Button>
+                          </div>
+                          <div className="text-xs text-gray-500 mb-1">{s.date}{s.time ? ` ${s.time}` : ''}</div>
+                          {s.reason && (
+                            <div className="text-xs text-gray-600 mb-1 p-2 bg-gray-50 rounded">
+                              <strong>Reason:</strong> {s.reason}
+                            </div>
+                          )}
+                          {s.notes && <div className="text-xs text-gray-600">{s.notes}</div>}
                         </div>
                       ))}
                     </div>
@@ -356,11 +547,49 @@ export const Calendar = () => {
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm text-gray-600">Scheduled</span>
+                <span className="text-sm text-gray-600">Scheduled (total)</span>
                 <span className="text-lg font-semibold text-blue-600">{summary.scheduled}</span>
               </div>
+              
+              {summary.scheduledPending > 0 && (
+                <div className="flex items-center justify-between p-2 bg-blue-50 rounded">
+                  <span className="text-xs text-gray-600">Pending</span>
+                  <span className="text-sm font-semibold text-blue-600">{summary.scheduledPending}</span>
+                </div>
+              )}
+              
+              {summary.scheduledCompleted > 0 && (
+                <div className="flex items-center justify-between p-2 bg-green-50 rounded">
+                  <span className="text-xs text-gray-600">Completed</span>
+                  <span className="text-sm font-semibold text-green-600">{summary.scheduledCompleted}</span>
+                </div>
+              )}
+              
+              {summary.scheduledUnavailable > 0 && (
+                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-xs text-gray-600">Unavailable</span>
+                  <span className="text-sm font-semibold text-gray-600">{summary.scheduledUnavailable}</span>
+                </div>
+              )}
+              
+              {summary.scheduledPaymentDue > 0 && (
+                <div className="flex items-center justify-between p-2 bg-blue-50 rounded">
+                  <span className="text-xs text-gray-600">Payment Due</span>
+                  <span className="text-sm font-semibold text-blue-600">{summary.scheduledPaymentDue}</span>
+                </div>
+              )}
+              
+              {summary.scheduledBusy > 0 && (
+                <div className="flex items-center justify-between p-2 bg-orange-50 rounded">
+                  <span className="text-xs text-gray-600">Busy</span>
+                  <span className="text-sm font-semibold text-orange-600">{summary.scheduledBusy}</span>
+                </div>
+              )}
+              
+              <Separator />
+              
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm text-gray-600">Calls (total)</span>
+                <span className="text-sm text-gray-600">Actual Calls</span>
                 <span className="text-lg font-semibold text-gray-900">{summary.totalCalls}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
@@ -413,6 +642,31 @@ export const Calendar = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-600">Status</label>
+              <Select value={scheduleStatus} onValueChange={setScheduleStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="postponed">Postponed</SelectItem>
+                  <SelectItem value="payment_pending">Payment Due</SelectItem>
+                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                  <SelectItem value="busy">Busy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-600">Reason</label>
+              <Input 
+                value={scheduleReason} 
+                onChange={(e) => setScheduleReason(e.target.value)} 
+                placeholder="e.g., User wasn't available, Payment due tomorrow, User is busy"
+              />
             </div>
             <div>
               <label className="text-sm text-gray-600">Notes</label>
