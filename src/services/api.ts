@@ -1,9 +1,14 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net';
+const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 
+  (import.meta.env.DEV ? '/api' : 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net');
 const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false, // Set to true if your backend supports credentials
 });
 // Mock user ID for now - in a real app this would come from authentication
 const DEFAULT_USER_ID = 1;
