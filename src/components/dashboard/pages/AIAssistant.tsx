@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   Bot,
   Plus,
@@ -22,7 +23,9 @@ import {
   CheckCircle,
   AlertTriangle,
   Copy,
-  Sparkles
+  Sparkles,
+  Eye,
+  X
 } from "lucide-react";
 import { agentsApi, voicesApi } from "@/services/api";
 import { useToast } from "@/components/ui/use-toast";
@@ -277,6 +280,8 @@ export const AIAssistant = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [voicePreviewing, setVoicePreviewing] = useState<string | null>(null);
+  const [viewingAgent, setViewingAgent] = useState<Agent | null>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
 
   const [formData, setFormData] = useState({ ...defaultFormData });
 
@@ -443,6 +448,11 @@ export const AIAssistant = () => {
     }
   };
 
+  const handleViewAgent = (agent: Agent) => {
+    setViewingAgent(agent);
+    setShowViewDialog(true);
+  };
+
   const handleEditAgent = (agent: Agent) => {
     setEditingAgent(agent);
     setFormData({
@@ -531,7 +541,16 @@ export const AIAssistant = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleViewAgent(agent)}
+                            title="View Agent Details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => handleEditAgent(agent)}
+                            title="Edit Agent"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -539,6 +558,7 @@ export const AIAssistant = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDeleteAgent(agent.id)}
+                            title="Delete Agent"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -780,6 +800,112 @@ export const AIAssistant = () => {
           </Card>
         </div>
       </div>
+
+      {/* View Agent Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              Agent Details
+            </DialogTitle>
+            <DialogDescription>
+              View detailed information about this AI agent
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewingAgent && (
+            <div className="space-y-6">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Agent Name</Label>
+                  <p className="text-lg font-semibold">{viewingAgent.name}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Status</Label>
+                  <div className="mt-1">
+                    <Badge variant={viewingAgent.is_active ? "default" : "secondary"}>
+                      {viewingAgent.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Voice</Label>
+                  <p className="text-sm">
+                    {Array.isArray(voices) ? voices.find(v => v.voice_id === viewingAgent.voice_id)?.name || "Unknown" : "Unknown"}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Created</Label>
+                  <p className="text-sm">{new Date(viewingAgent.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Advanced Settings */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Advanced Settings</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Temperature</Label>
+                    <p className="text-sm">{viewingAgent.temperature || 0.7}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Azure Model</Label>
+                    <p className="text-sm">{viewingAgent.azure_model || "gpt-4o-realtime-preview"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Voice Temperature</Label>
+                    <p className="text-sm">{viewingAgent.voice_temperature || 0.7}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Speaking Rate</Label>
+                    <p className="text-sm">{viewingAgent.speaking_rate || 1.05}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Audio Enhancement</Label>
+                    <p className="text-sm">{viewingAgent.audio_enhancement ? "Enabled" : "Disabled"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Prompt Template */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Prompt Template</h3>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <pre className="text-sm whitespace-pre-wrap font-mono">
+                    {viewingAgent.prompt_template || "No prompt template configured"}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowViewDialog(false)}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowViewDialog(false);
+                    handleEditAgent(viewingAgent);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Agent
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

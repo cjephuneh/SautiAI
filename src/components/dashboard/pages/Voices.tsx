@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Play, Pause, Volume2, Search, Filter } from "lucide-react";
 import { voicesApi } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
+import { VoicePlayground } from "./VoicePlayground";
 
 interface Voice {
   voice_id: string;
@@ -20,6 +22,7 @@ interface Voice {
 
 function useVoicePreview() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const play = (url?: string) => {
     if (!url) {
@@ -42,14 +45,23 @@ function useVoicePreview() {
           description: "Unable to play this audio sample.",
           variant: "destructive",
         });
+        setIsPlaying(false);
+      };
+      audio.onended = () => {
+        setIsPlaying(false);
+      };
+      audio.onpause = () => {
+        setIsPlaying(false);
       };
       audioRef.current = audio;
+      setIsPlaying(true);
       audio.play().catch(() => {
         toast({
           title: "Playback error",
           description: "Unable to play this audio sample.",
           variant: "destructive",
         });
+        setIsPlaying(false);
       });
     } catch (e) {
       toast({
@@ -57,6 +69,7 @@ function useVoicePreview() {
         description: "Unable to play this audio sample.",
         variant: "destructive",
       });
+      setIsPlaying(false);
     }
   };
 
@@ -65,9 +78,10 @@ function useVoicePreview() {
       audioRef.current.pause();
       audioRef.current = null;
     }
+    setIsPlaying(false);
   };
 
-  return { play, stop };
+  return { play, stop, isPlaying };
 }
 
 export const Voices = () => {
@@ -78,10 +92,17 @@ export const Voices = () => {
   const [selectedProvider, setSelectedProvider] = useState<string>("voicelab");
   const [selectedGender, setSelectedGender] = useState<string>("all");
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
-  const { play, stop } = useVoicePreview();
+  const [isPlaygroundOpen, setIsPlaygroundOpen] = useState(false);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>("");
+  const { play, stop, isPlaying } = useVoicePreview();
 
   const providers = ["voicelab"];
   const genders = ["all", "male", "female", "neutral"];
+
+  const handleTestVoice = (voiceId: string) => {
+    setSelectedVoiceId(voiceId);
+    setIsPlaygroundOpen(true);
+  };
 
   useEffect(() => {
     fetchVoices();
@@ -133,18 +154,13 @@ export const Voices = () => {
   };
 
   const handleVoicePreview = (voice: Voice) => {
-    if (playingVoiceId === voice.voice_id) {
+    if (playingVoiceId === voice.voice_id && isPlaying) {
       stop();
       setPlayingVoiceId(null);
     } else {
       stop(); // Stop any currently playing voice
       setPlayingVoiceId(voice.voice_id);
       play(voice.sample_url);
-      
-      // Reset playing state after audio duration (estimate 4 seconds)
-      setTimeout(() => {
-        setPlayingVoiceId(null);
-      }, 4000);
     }
   };
 
@@ -269,7 +285,7 @@ export const Voices = () => {
                   className="h-8 w-8 p-0 hover:bg-gray-100"
                   onClick={() => handleVoicePreview(voice)}
                 >
-                  {playingVoiceId === voice.voice_id ? (
+                  {playingVoiceId === voice.voice_id && isPlaying ? (
                     <Pause className="h-4 w-4" />
                   ) : (
                     <Play className="h-4 w-4" />
@@ -312,6 +328,36 @@ export const Voices = () => {
                     className="text-sm"
                     defaultValue={`This is a sample voice from Sautiai happy to help you. ${voice.name}`}
                   />
+                </div>
+
+                <div className="pt-2">
+                  <Dialog open={isPlaygroundOpen && selectedVoiceId === voice.voice_id} onOpenChange={setIsPlaygroundOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleTestVoice(voice.voice_id)}
+                        className="w-full"
+                      >
+                        🎙️ Test Voice
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+                      <DialogHeader className="px-6 py-4 border-b">
+                        <DialogTitle>Voice Playground - {voice.name}</DialogTitle>
+                        <DialogDescription>
+                          Interactive voice testing environment. Test voice interactions, record audio, and chat with the AI assistant.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex-1 overflow-hidden">
+                        <VoicePlayground
+                          voiceId={selectedVoiceId}
+                          voiceName={voice.name}
+                          onClose={() => setIsPlaygroundOpen(false)}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </CardContent>
