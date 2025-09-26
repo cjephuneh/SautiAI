@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 
 interface VoicePlaygroundProps {
   voiceId: string;

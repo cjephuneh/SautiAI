@@ -1,8 +1,13 @@
 import axios from 'axios';
+import { getCurrentUserId, clearUserCache } from './userContext';
 
 // Base API configuration
-const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 
+const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.DEV ? '/api' : 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net');
+
+console.log('Environment:', import.meta.env.MODE);
+console.log('API Base URL:', API_BASE_URL);
+console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,14 +15,14 @@ const api = axios.create({
   },
   withCredentials: false, // Set to true if your backend supports credentials
 });
-// Mock user ID for now - in a real app this would come from authentication
-const DEFAULT_USER_ID = 1;
 
 // Contacts API
 export const contactsApi = {
   getContacts: async () => {
     try {
-      const response = await api.get(`/contacts/?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/contacts/?user_id=${userId}`);
       console.log("Raw API response:", response.data); // Debug log
       return response.data;
     } catch (error: any) {
@@ -39,7 +44,9 @@ export const contactsApi = {
   
   getContact: async (contactId: number) => {
     try {
-      const response = await api.get(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/contacts/${contactId}?user_id=${userId}`);
       return response.data;
     } catch (error) {
       console.error("API error in getContact:", error);
@@ -49,7 +56,9 @@ export const contactsApi = {
   
   createContact: async (contactData: any) => {
     try {
-      const response = await api.post(`/contacts/?user_id=${DEFAULT_USER_ID}`, contactData);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.post(`/contacts/?user_id=${userId}`, contactData);
       return response.data;
     } catch (error) {
       console.error("API error in createContact:", error);
@@ -59,7 +68,9 @@ export const contactsApi = {
   
   updateContact: async (contactId: number, contactData: any) => {
     try {
-      const response = await api.put(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`, contactData);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.put(`/contacts/${contactId}?user_id=${userId}`, contactData);
       return response.data;
     } catch (error) {
       console.error("API error in updateContact:", error);
@@ -69,7 +80,9 @@ export const contactsApi = {
   
   deleteContact: async (contactId: number) => {
     try {
-      const response = await api.delete(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.delete(`/contacts/${contactId}?user_id=${userId}`);
       return response.data;
     } catch (error) {
       console.error("API error in deleteContact:", error);
@@ -82,7 +95,9 @@ export const contactsApi = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await api.post(`/contacts/upload-csv?user_id=${DEFAULT_USER_ID}`, formData, {
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.post(`/contacts/upload-csv?user_id=${userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -109,7 +124,9 @@ export const contactsApi = {
   
   initiateCall: async (contactId: number, agentId: number) => {
     try {
-      const response = await api.post(`/contacts/${contactId}/call?agent_id=${agentId}&user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.post(`/contacts/${contactId}/call?agent_id=${agentId}&user_id=${userId}`);
       return response.data;
     } catch (error) {
       console.error("API error in initiateCall:", error);
@@ -122,7 +139,9 @@ export const contactsApi = {
 export const agentsApi = {
   getAgents: async () => {
     try {
-      const response = await api.get(`/agents/?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/agents/?user_id=${userId}`);
       console.log("Raw agents API response:", response.data); // Debug log
       
       // Handle different response structures
@@ -167,7 +186,9 @@ export const agentsApi = {
     };
 
     try {
-      const response = await api.get(`/agents/available-for-calls?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/agents/available-for-calls?user_id=${userId}`);
       const data = response.data;
       if (Array.isArray(data)) return data;
       if (data && Array.isArray(data.available_agents)) return data.available_agents;
@@ -179,7 +200,9 @@ export const agentsApi = {
       }
       // Try trailing slash once for servers that differentiate
       try {
-        const response = await api.get(`/agents/available-for-calls/?user_id=${DEFAULT_USER_ID}`);
+        const userId = await getCurrentUserId();
+        if (!userId) throw new Error('User not authenticated');
+        const response = await api.get(`/agents/available-for-calls/?user_id=${userId}`);
         const data = response.data;
         if (Array.isArray(data)) return data;
         if (data && Array.isArray(data.available_agents)) return data.available_agents;
@@ -197,7 +220,9 @@ export const agentsApi = {
   
   createAgent: async (agentData: any) => {
     try {
-      const response = await api.post(`/agents/?user_id=${DEFAULT_USER_ID}`, agentData);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.post(`/agents/?user_id=${userId}`, agentData);
       console.log("Agent created:", response.data); // Debug log
       return response.data;
     } catch (error) {
@@ -208,7 +233,9 @@ export const agentsApi = {
   
   updateAgentSystemMessage: async (agentId: number, promptTemplate: string) => {
     try {
-      const response = await api.put(`/agents/${agentId}/system-message?user_id=${DEFAULT_USER_ID}`, { prompt_template: promptTemplate });
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.put(`/agents/${agentId}/system-message?user_id=${userId}`, { prompt_template: promptTemplate });
       return response.data;
     } catch (error) {
       console.error("API error in updateAgentSystemMessage:", error);
@@ -218,7 +245,9 @@ export const agentsApi = {
   
   deleteAgent: async (agentId: number) => {
     try {
-      const response = await api.delete(`/agents/${agentId}?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.delete(`/agents/${agentId}?user_id=${userId}`);
       return response.data;
     } catch (error) {
       console.error("API error in deleteAgent:", error);
@@ -265,9 +294,11 @@ export const voicesApi = {
 // Calls API
 export const callsApi = {
   // Get all calls for a user
-  getCalls: async (userId: number = 1) => {
+  getCalls: async (userId?: number) => {
     try {
-      const response = await api.get(`/calls/?user_id=${userId}`);
+      const currentUserId = userId || await getCurrentUserId();
+      if (!currentUserId) throw new Error('User not authenticated');
+      const response = await api.get(`/calls/?user_id=${currentUserId}`);
       
       // Handle different response structures
       if (Array.isArray(response.data)) {
@@ -287,9 +318,11 @@ export const callsApi = {
   },
 
   // Get calls with filters
-  getCallsWithFilters: async (userId: number = 1, filters: { call_type?: string, status?: string } = {}) => {
+  getCallsWithFilters: async (userId?: number, filters: { call_type?: string, status?: string } = {}) => {
     try {
-      const params = new URLSearchParams({ user_id: userId.toString() });
+      const currentUserId = userId || await getCurrentUserId();
+      if (!currentUserId) throw new Error('User not authenticated');
+      const params = new URLSearchParams({ user_id: currentUserId.toString() });
       
       if (filters.call_type) {
         params.append('call_type', filters.call_type);
@@ -335,9 +368,11 @@ export const callsApi = {
   },
 
   // Create outbound call
-  makeOutboundCall: async (contactId: number, agentId: number, userId: number = 1) => {
+  makeOutboundCall: async (contactId: number, agentId: number, userId?: number) => {
     try {
-      const response = await api.post(`/calls/outbound?user_id=${userId}`, {
+      const currentUserId = userId || await getCurrentUserId();
+      if (!currentUserId) throw new Error('User not authenticated');
+      const response = await api.post(`/calls/outbound?user_id=${currentUserId}`, {
         contact_id: contactId,
         agent_id: agentId,
         call_type: 'outbound'
@@ -510,7 +545,9 @@ export const callsApi = {
 export const dashboardApi = {
   getSummary: async (date?: string) => {
     try {
-      const params = new URLSearchParams({ user_id: DEFAULT_USER_ID.toString() });
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const params = new URLSearchParams({ user_id: userId.toString() });
       if (date) {
         params.append('date', date);
       }
@@ -524,7 +561,9 @@ export const dashboardApi = {
 
   getActiveCalls: async () => {
     try {
-      const response = await api.get(`/dashboard/active-calls?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/dashboard/active-calls?user_id=${userId}`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error("API error in getActiveCalls:", error);
@@ -534,7 +573,9 @@ export const dashboardApi = {
 
   getCallLogs: async () => {
     try {
-      const response = await api.get(`/dashboard/call-logs?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/dashboard/call-logs?user_id=${userId}`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error("API error in getCallLogs:", error);
@@ -544,7 +585,9 @@ export const dashboardApi = {
 
   getAccountUsage: async (days: number = 7) => {
     try {
-      const response = await api.get(`/dashboard/usage?user_id=${DEFAULT_USER_ID}&days=${days}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/dashboard/usage?user_id=${userId}&days=${days}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getAccountUsage:", error);
@@ -557,7 +600,9 @@ export const dashboardApi = {
 export const analyticsApi = {
   getCollectionPerformance: async (startDate?: string, endDate?: string) => {
     try {
-      let url = `/analytics/collection-performance?user_id=${DEFAULT_USER_ID}`;
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      let url = `/analytics/collection-performance?user_id=${userId}`;
       if (startDate && endDate) {
         url += `&start_date=${startDate}&end_date=${endDate}`;
       }
@@ -571,7 +616,9 @@ export const analyticsApi = {
 
   getDebtRecoveryAnalytics: async () => {
     try {
-      const response = await api.get(`/analytics/debt-recovery?user_id=${DEFAULT_USER_ID}`);
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('User not authenticated');
+      const response = await api.get(`/analytics/debt-recovery?user_id=${userId}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getDebtRecoveryAnalytics:", error);
@@ -622,10 +669,15 @@ export const authApi = {
         password: password
       };
       
+      console.log('Login request data:', loginData);
+      console.log('API base URL:', API_BASE_URL);
+      
       const response = await api.post('/auth/login', loginData, {
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
+        timeout: 10000,
       });
       
       // Store token in localStorage
@@ -641,9 +693,18 @@ export const authApi = {
       return response.data;
     } catch (error: any) {
       console.error("API error in login:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      console.error("Error headers:", error.response?.headers);
       
       if (error.response?.status === 401) {
         throw new Error("Invalid email or password");
+      }
+      
+      if (error.response?.status === 422) {
+        const errorDetails = error.response?.data?.detail || "Validation error";
+        console.error("Validation error details:", errorDetails);
+        throw new Error(`Validation error: ${JSON.stringify(errorDetails)}`);
       }
       
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
@@ -658,6 +719,7 @@ export const authApi = {
     localStorage.removeItem('access_token');
     localStorage.removeItem('token_type');
     delete api.defaults.headers.common['Authorization'];
+    clearUserCache(); // Clear user profile cache on logout
   },
   
   getStoredToken: () => {

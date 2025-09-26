@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { dashboardApi, analyticsApi, contactsApi, callsApi } from "@/services/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-const DEFAULT_USER_ID = 12345; // Changed from string to number
+// User ID is now dynamically retrieved from authentication
 
 export const Overview = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);
