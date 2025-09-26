@@ -68,15 +68,19 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
     const connectToPlayground = async () => {
       try {
         // Connect to the actual playground SocketIO server
-        const socket = io('http://localhost:5004', {
-          transports: ['polling', 'websocket'],
-          timeout: 20000,
+        const playgroundUrl = import.meta.env.VITE_PLAYGROUND_URL || 'http://localhost:5004';
+        const socket = io(playgroundUrl, {
+          transports: ['polling'], // Start with polling only for stability
+          timeout: 30000,
           autoConnect: true,
           reconnection: true,
-          reconnectionAttempts: 10,
-          reconnectionDelay: 2000,
-          forceNew: true, // Force new connection
-          upgrade: true, // Allow transport upgrades
+          reconnectionAttempts: 15,
+          reconnectionDelay: 3000,
+          reconnectionDelayMax: 10000,
+          forceNew: false, // Don't force new connection
+          upgrade: false, // Disable automatic upgrade to websocket
+          rememberUpgrade: false,
+          randomizationFactor: 0.5,
         });
 
         socketRef.current = socket;
@@ -126,11 +130,27 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
         socket.on('disconnect', (reason) => {
           console.log('❌ Disconnected from playground:', reason);
           setIsConnected(false);
+          
+          // Handle different disconnect reasons
           if (reason === 'io server disconnect') {
-            // Server initiated disconnect, try to reconnect
             toast({
               title: "Server Disconnected",
               description: "Voice playground server disconnected. Attempting to reconnect...",
+            });
+          } else if (reason === 'io client disconnect') {
+            // Client initiated disconnect - don't show error toast
+            console.log('Client initiated disconnect');
+          } else if (reason === 'transport close') {
+            toast({
+              title: "Connection Lost",
+              description: "Network connection lost. Attempting to reconnect...",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Connection Lost",
+              description: `Disconnected: ${reason}. Attempting to reconnect...`,
+              variant: "destructive",
             });
           }
         });
