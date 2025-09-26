@@ -12,8 +12,10 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
   withCredentials: false, // Set to true if your backend supports credentials
+  timeout: 10000,
 });
 
 // Contacts API
@@ -676,8 +678,15 @@ export const authApi = {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         timeout: 10000,
+        transformRequest: [(data) => {
+          console.log('Transform request data:', data);
+          return JSON.stringify(data);
+        }],
       });
       
       // Store token in localStorage
