@@ -674,20 +674,36 @@ export const authApi = {
       console.log('Login request data:', loginData);
       console.log('API base URL:', API_BASE_URL);
       
-      const response = await api.post('/auth/login', loginData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-        timeout: 10000,
-        transformRequest: [(data) => {
-          console.log('Transform request data:', data);
-          return JSON.stringify(data);
-        }],
-      });
+      // Try JSON first
+      let response;
+      try {
+        response = await api.post('/auth/login', loginData, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          timeout: 10000,
+        });
+      } catch (jsonError: any) {
+        console.log('JSON request failed, trying form data:', jsonError.response?.status);
+        
+        // If JSON fails with 422, try form data
+        if (jsonError.response?.status === 422) {
+          const formData = new FormData();
+          formData.append('email', email);
+          formData.append('password', password);
+          
+          response = await api.post('/auth/login', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Accept': 'application/json',
+            },
+            timeout: 10000,
+          });
+        } else {
+          throw jsonError;
+        }
+      }
       
       // Store token in localStorage
       if (response.data.access_token) {
