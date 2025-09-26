@@ -617,14 +617,13 @@ export const businessInquiriesApi = {
 export const authApi = {
   login: async (email: string, password: string) => {
     try {
-      const loginData = {
-        email: email,
-        password: password
-      };
+      const formData = new URLSearchParams();
+      formData.append('email', email);
+      formData.append('password', password);
       
-      const response = await api.post('/auth/login', loginData, {
+      const response = await api.post('/auth/login', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
       
