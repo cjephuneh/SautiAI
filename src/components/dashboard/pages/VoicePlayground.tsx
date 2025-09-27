@@ -45,16 +45,16 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
     }
     
     const voiceMapping: { [key: string]: string } = {
-      'alloy': 'sw-KE-ZuriNeural',      // Female Swahili (Kenya)
-      'echo': 'sw-KE-RafikiNeural',     // Male Swahili (Kenya)
-      'shimmer': 'en-KE-AsiliaNeural',  // Female English (Kenya)
-      'sage': 'en-KE-ChilembaNeural',   // Male English (Kenya)
-      'coral': 'sw-TZ-RehemaNeural',    // Female Swahili (Tanzania)
-      'verse': 'sw-TZ-DaudiNeural',     // Male Swahili (Tanzania)
-      'ash': 'en-TZ-ElimuNeural',       // Male English (Tanzania)
+      'alloy': 'en-US-AriaNeural',      // Female English (US)
+      'echo': 'en-US-GuyNeural',        // Male English (US)
+      'shimmer': 'en-US-JennyNeural',   // Female English (US)
+      'sage': 'en-US-BrianNeural',      // Male English (US)
+      'coral': 'en-US-AvaNeural',       // Female English (US)
+      'verse': 'en-US-DavisNeural',     // Male English (US)
+      'ash': 'en-US-EmmaNeural',        // Female English (US)
     };
     
-    return voiceMapping[voiceId] || 'sw-KE-ZuriNeural'; // Default to Zuri
+    return voiceMapping[voiceId] || 'en-US-AriaNeural'; // Default to Aria
   };
 
   // Connect to the real playground backend
