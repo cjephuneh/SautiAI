@@ -75,7 +75,7 @@ interface BatchCampaign {
 
 const batchCallsApi = {
   startBatchVoiceCampaign: async (campaign_name: string, agent_id: number, contact_ids: number[]) => {
-    const response = await axios.post("Call Centrelocalhost:5050/batch-calls/start", {
+    const response = await axios.post("http://localhost:5050/batch-calls/start", {
       campaign_name,
       agent_id,
       contact_ids,
@@ -83,7 +83,7 @@ const batchCallsApi = {
     return response.data;
   },
   getCampaignStatus: async (campaign_id: number) => {
-    const response = await axios.get(`Call Centrelocalhost:5050/batch-calls/campaign/${campaign_id}/status`);
+    const response = await axios.get(`http://localhost:5050/batch-calls/campaign/${campaign_id}/status`);
     return response.data;
   },
 };

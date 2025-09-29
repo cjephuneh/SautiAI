@@ -7,7 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
 
   server: {
-    host: '127.0.0.1',
+    host: '0.0.0.0',
     proxy: {
       '/api': {
         target: 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net',

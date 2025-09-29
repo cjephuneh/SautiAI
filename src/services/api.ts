@@ -1,15 +1,19 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL: string = (import.meta as any)?.env?.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? '/api' : 'https://debtai-fefaf5dtbgd8aqg6.canadacentral-01.azurewebsites.net');
+const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050';
+console.log('🔍 API_BASE_URL:', API_BASE_URL);
+console.log('🔍 VITE_API_BASE_URL env:', import.meta.env.VITE_API_BASE_URL);
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
   withCredentials: false, // Set to true if your backend supports credentials
 });
+
+// Helper function to add JSON content type header
+const jsonHeaders = {
+  'Content-Type': 'application/json',
+};
+
 // Mock user ID for now - in a real app this would come from authentication
 const DEFAULT_USER_ID = 1;
 
@@ -49,7 +53,9 @@ export const contactsApi = {
   
   createContact: async (contactData: any) => {
     try {
-      const response = await api.post(`/contacts/?user_id=${DEFAULT_USER_ID}`, contactData);
+      const response = await api.post(`/contacts/?user_id=${DEFAULT_USER_ID}`, contactData, {
+        headers: jsonHeaders,
+      });
       return response.data;
     } catch (error) {
       console.error("API error in createContact:", error);
@@ -59,7 +65,9 @@ export const contactsApi = {
   
   updateContact: async (contactId: number, contactData: any) => {
     try {
-      const response = await api.put(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`, contactData);
+      const response = await api.put(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`, contactData, {
+        headers: jsonHeaders,
+      });
       return response.data;
     } catch (error) {
       console.error("API error in updateContact:", error);
@@ -240,16 +248,23 @@ export const voicesApi = {
       
       // Handle different response structures
       let voicesData = response.data;
+      let voicesArray;
       if (Array.isArray(voicesData)) {
-        return voicesData;
+        voicesArray = voicesData;
       } else if (voicesData && Array.isArray(voicesData.voices)) {
-        return voicesData.voices;
+        voicesArray = voicesData.voices;
       } else if (voicesData && Array.isArray(voicesData.data)) {
-        return voicesData.data;
+        voicesArray = voicesData.data;
       } else {
         console.warn("Unexpected voices response structure:", voicesData);
         return [];
       }
+      
+      // Update sample URLs to point to main API server
+      return voicesArray.map((voice: any) => ({
+        ...voice,
+        sample_url: `${API_BASE_URL}/voices/${voice.voice_id}/sample`
+      }));
     } catch (error) {
       console.error("API error in getVoices:", error);
       return []; // Return empty array on error
