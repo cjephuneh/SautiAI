@@ -815,7 +815,7 @@ export const authApi = {
 export const integrationsApi = {
   getIntegrations: async () => {
     try {
-      const response = await api.get('/integrations');
+      const response = await api.get(`/integrations?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getIntegrations:", error);
@@ -825,7 +825,7 @@ export const integrationsApi = {
   
   connectIntegration: async (integrationId: number) => {
     try {
-      const response = await api.post(`/integrations/${integrationId}/connect`);
+      const response = await api.post(`/integrations/${integrationId}/connect?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in connectIntegration:", error);
@@ -838,7 +838,7 @@ export const integrationsApi = {
 export const phoneNumbersApi = {
   getPhoneNumbers: async () => {
     try {
-      const response = await api.get('/phone-numbers');
+      const response = await api.get(`/phone-numbers?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getPhoneNumbers:", error);
@@ -848,7 +848,7 @@ export const phoneNumbersApi = {
   
   createPhoneNumber: async (phoneData: any) => {
     try {
-      const response = await api.post('/phone-numbers', phoneData);
+      const response = await api.post(`/phone-numbers?user_id=${getCurrentUserId()}`, phoneData);
       return response.data;
     } catch (error: any) {
       console.error("API error in createPhoneNumber:", error);
