@@ -20,6 +20,7 @@ import type { DashboardPage } from "@/pages/Dashboard";
 interface DashboardHeaderProps {
   currentPage: DashboardPage;
   onToggleSidebar: () => void;
+  onNavigateToSettings?: () => void;
 }
 
 const pageNames = {
@@ -32,7 +33,7 @@ const pageNames = {
   settings: 'Settings & Configuration'
 };
 
-export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ currentPage, onToggleSidebar, onNavigateToSettings }: DashboardHeaderProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const navigate = useNavigate();
@@ -211,7 +212,7 @@ export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeade
               <div className="space-y-1">
                 <DropdownMenuItem 
                   className="cursor-pointer"
-                  onClick={() => navigate('/dashboard/settings')}
+                  onClick={() => onNavigateToSettings?.()}
                 >
                   <Settings className="h-4 w-4 mr-2" />
                   Settings & Profile

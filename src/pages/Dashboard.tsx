@@ -121,6 +121,7 @@ const Dashboard = () => {
         <DashboardHeader 
           currentPage={currentPage}
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onNavigateToSettings={() => setCurrentPage('settings')}
         />
         
         <main className="p-6">
