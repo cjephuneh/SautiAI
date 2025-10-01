@@ -29,18 +29,6 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     console.error('useAuth: Context is undefined. Make sure the component is wrapped in AuthProvider.');
-    // During HMR or development, return a default context to prevent crashes
-    if (import.meta.hot || import.meta.env.DEV) {
-      console.warn('useAuth: Development/HMR detected, returning default context');
-      return {
-        user: null,
-        isLoading: true,
-        isAuthenticated: false,
-        login: async () => {},
-        logout: () => {},
-        refreshUser: async () => {}
-      };
-    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -56,14 +44,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!user;
   
-  // Prevent multiple initializations during HMR
-  useEffect(() => {
-    if (isProviderInitialized && import.meta.hot) {
-      console.warn('AuthProvider: HMR detected, skipping re-initialization');
-      return;
-    }
-    isProviderInitialized = true;
-  }, []);
 
   const logout = useCallback(() => {
     authApi.logout();
@@ -117,6 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setIsLoading(false);
           return;
         }
+        
         
         if (authApi.isAuthenticated()) {
           try {
