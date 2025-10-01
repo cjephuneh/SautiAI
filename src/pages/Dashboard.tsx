@@ -34,14 +34,13 @@ export type DashboardPage =
   | 'phone-numbers'
   | 'ai-assistant' 
   | 'voices'
-  | 'agent-creation'
+  | 'agents'
   | 'integrations'
   | 'call-center'
   | 'calls'
   | 'collections'
   | 'teams' 
   | 'analytics'
-  | 'agent-dashboard'
   | 'payment-processing'
   | 'compliance-center'
   | 'predictive-analytics'
@@ -76,7 +75,7 @@ const Dashboard = () => {
         return <AIAssistant />;
       case 'voices':
         return <Voices />;
-      case 'agent-creation':
+      case 'agents':
         return <Agents />;
       case 'integrations':
         return <Integrations />;
@@ -90,8 +89,6 @@ const Dashboard = () => {
         return <Teams />;
       case 'analytics':
         return <Analytics />;
-      case 'agent-dashboard':
-        return <Agents />;
       case 'payment-processing':
         return <PaymentProcessing />;
       case 'compliance-center':

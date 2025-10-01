@@ -34,7 +34,7 @@ export const Sidebar = ({ currentPage, onPageChange, collapsed, onToggleCollapse
     { id: 'calendar' as DashboardPage, label: 'Calendar', icon: CalendarIcon },
     { id: 'ai-assistant' as DashboardPage, label: 'AI Assistant', icon: Bot },
     { id: 'voices' as DashboardPage, label: 'Voices', icon: Volume2 },
-    { id: 'agent-creation' as DashboardPage, label: 'Agent Setup', icon: Settings2 },
+    { id: 'agents' as DashboardPage, label: 'AI Agents', icon: Settings2 },
     { id: 'batch-calling' as DashboardPage, label: 'Batch Communications', icon: Zap },
     { id: 'phone-numbers' as DashboardPage, label: 'Phone Numbers', icon: Phone },
     { id: 'integrations' as DashboardPage, label: 'Integrations', icon: Settings },
