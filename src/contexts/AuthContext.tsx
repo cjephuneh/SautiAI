@@ -29,6 +29,18 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     console.error('useAuth: Context is undefined. Make sure the component is wrapped in AuthProvider.');
+    // During HMR, return a default context to prevent crashes
+    if (import.meta.hot) {
+      console.warn('useAuth: HMR detected, returning default context');
+      return {
+        user: null,
+        isLoading: true,
+        isAuthenticated: false,
+        login: async () => {},
+        logout: () => {},
+        refreshUser: async () => {}
+      };
+    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -97,9 +109,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
         
+        // Skip initialization during HMR if already done
+        if (import.meta.hot && isProviderInitialized) {
+          console.log('AuthContext: HMR detected, skipping re-initialization');
+          return;
+        }
+        
         console.log('AuthContext: Initializing authentication...');
         setIsLoading(true);
         setHasInitialized(true);
+        isProviderInitialized = true;
         
         // If user is already loaded, don't re-fetch
         if (user) {
