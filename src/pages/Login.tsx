@@ -25,19 +25,28 @@ const Login = () => {
     };
   }, []);
 
+  // Early return if we're not on the login page
+  const currentPath = window.location.pathname;
+  if (currentPath !== '/login') {
+    console.log('Login: Not on login page, redirecting to current path:', currentPath);
+    navigate(currentPath, { replace: true });
+    return null;
+  }
+
   useEffect(() => {
     // Only redirect if user is on the login page and authenticated
     // Don't redirect if they're already on a dashboard page
     if (isAuthenticated && !isLoading && !hasRedirectedRef.current && isMountedRef.current) {
       const currentPath = window.location.pathname;
       const isOnLoginPage = currentPath === '/login';
+      const isOnDashboardPage = currentPath.startsWith('/dashboard');
       
-      if (isOnLoginPage) {
+      if (isOnLoginPage && !isOnDashboardPage) {
         hasRedirectedRef.current = true;
         console.log('Login: Redirecting to dashboard because already authenticated');
         navigate('/dashboard', { replace: true });
       } else {
-        console.log('Login: User authenticated but not on login page, skipping redirect');
+        console.log('Login: User authenticated but not on login page, skipping redirect. Current path:', currentPath);
       }
     }
   }, [isAuthenticated, isLoading, navigate]);
