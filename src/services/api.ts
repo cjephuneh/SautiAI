@@ -1,9 +1,11 @@
 import axios from 'axios';
+import { apiConfig } from '@/config/api';
 
-// Base API configuration
-const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050';
+// Base API configuration with intelligent environment detection
+const API_BASE_URL = apiConfig.baseUrl;
 console.log('🔍 API_BASE_URL:', API_BASE_URL);
-console.log('🔍 VITE_API_BASE_URL env:', import.meta.env.VITE_API_BASE_URL);
+console.log('🔍 Environment:', apiConfig.isDevelopment ? 'Development' : 'Production');
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: false, // Set to true if your backend supports credentials
@@ -14,14 +16,34 @@ const jsonHeaders = {
   'Content-Type': 'application/json',
 };
 
-// Mock user ID for now - in a real app this would come from authentication
-const DEFAULT_USER_ID = 1;
+// Get current user ID from authentication context
+const getCurrentUserId = (): number => {
+  // Try to get user ID from localStorage first (for backward compatibility)
+  const storedUserId = localStorage.getItem('user_id');
+  if (storedUserId) {
+    const userId = parseInt(storedUserId, 10);
+    console.log('🔍 Using stored user ID:', userId);
+    return userId;
+  }
+  
+  // Check if user is authenticated but no user ID stored
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    console.warn('⚠️ User is authenticated but no user ID found. This may cause data mixing issues.');
+    console.warn('⚠️ This could result in users seeing other users data!');
+  }
+  
+  // Fallback to default if no user is authenticated
+  console.warn('No user ID found, using default. User may not be properly authenticated.');
+  console.warn('⚠️ CRITICAL: This will cause data mixing between users!');
+  return 1;
+};
 
 // Contacts API
 export const contactsApi = {
   getContacts: async () => {
     try {
-      const response = await api.get(`/contacts/?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/contacts/?user_id=${getCurrentUserId()}`);
       console.log("Raw API response:", response.data); // Debug log
       return response.data;
     } catch (error: any) {
@@ -43,7 +65,7 @@ export const contactsApi = {
   
   getContact: async (contactId: number) => {
     try {
-      const response = await api.get(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/contacts/${contactId}?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error) {
       console.error("API error in getContact:", error);
@@ -53,7 +75,7 @@ export const contactsApi = {
   
   createContact: async (contactData: any) => {
     try {
-      const response = await api.post(`/contacts/?user_id=${DEFAULT_USER_ID}`, contactData, {
+      const response = await api.post(`/contacts/?user_id=${getCurrentUserId()}`, contactData, {
         headers: jsonHeaders,
       });
       return response.data;
@@ -65,7 +87,7 @@ export const contactsApi = {
   
   updateContact: async (contactId: number, contactData: any) => {
     try {
-      const response = await api.put(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`, contactData, {
+      const response = await api.put(`/contacts/${contactId}?user_id=${getCurrentUserId()}`, contactData, {
         headers: jsonHeaders,
       });
       return response.data;
@@ -77,7 +99,7 @@ export const contactsApi = {
   
   deleteContact: async (contactId: number) => {
     try {
-      const response = await api.delete(`/contacts/${contactId}?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.delete(`/contacts/${contactId}?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error) {
       console.error("API error in deleteContact:", error);
@@ -90,7 +112,7 @@ export const contactsApi = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await api.post(`/contacts/upload-csv?user_id=${DEFAULT_USER_ID}`, formData, {
+      const response = await api.post(`/contacts/upload-csv?user_id=${getCurrentUserId()}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -117,7 +139,7 @@ export const contactsApi = {
   
   initiateCall: async (contactId: number, agentId: number) => {
     try {
-      const response = await api.post(`/contacts/${contactId}/call?agent_id=${agentId}&user_id=${DEFAULT_USER_ID}`);
+      const response = await api.post(`/contacts/${contactId}/call?agent_id=${agentId}&user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error) {
       console.error("API error in initiateCall:", error);
@@ -130,7 +152,7 @@ export const contactsApi = {
 export const agentsApi = {
   getAgents: async () => {
     try {
-      const response = await api.get(`/agents/?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/agents/?user_id=${getCurrentUserId()}`);
       console.log("Raw agents API response:", response.data); // Debug log
       
       // Handle different response structures
@@ -175,7 +197,7 @@ export const agentsApi = {
     };
 
     try {
-      const response = await api.get(`/agents/available-for-calls?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/agents/available-for-calls?user_id=${getCurrentUserId()}`);
       const data = response.data;
       if (Array.isArray(data)) return data;
       if (data && Array.isArray(data.available_agents)) return data.available_agents;
@@ -187,7 +209,7 @@ export const agentsApi = {
       }
       // Try trailing slash once for servers that differentiate
       try {
-        const response = await api.get(`/agents/available-for-calls/?user_id=${DEFAULT_USER_ID}`);
+        const response = await api.get(`/agents/available-for-calls/?user_id=${getCurrentUserId()}`);
         const data = response.data;
         if (Array.isArray(data)) return data;
         if (data && Array.isArray(data.available_agents)) return data.available_agents;
@@ -205,7 +227,7 @@ export const agentsApi = {
   
   createAgent: async (agentData: any) => {
     try {
-      const response = await api.post(`/agents/?user_id=${DEFAULT_USER_ID}`, agentData);
+      const response = await api.post(`/agents/?user_id=${getCurrentUserId()}`, agentData);
       console.log("Agent created:", response.data); // Debug log
       return response.data;
     } catch (error) {
@@ -216,7 +238,7 @@ export const agentsApi = {
   
   updateAgentSystemMessage: async (agentId: number, promptTemplate: string) => {
     try {
-      const response = await api.put(`/agents/${agentId}/system-message?user_id=${DEFAULT_USER_ID}`, { prompt_template: promptTemplate });
+      const response = await api.put(`/agents/${agentId}/system-message?user_id=${getCurrentUserId()}`, { prompt_template: promptTemplate });
       return response.data;
     } catch (error) {
       console.error("API error in updateAgentSystemMessage:", error);
@@ -226,7 +248,7 @@ export const agentsApi = {
   
   deleteAgent: async (agentId: number) => {
     try {
-      const response = await api.delete(`/agents/${agentId}?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.delete(`/agents/${agentId}?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error) {
       console.error("API error in deleteAgent:", error);
@@ -280,7 +302,7 @@ export const voicesApi = {
 // Calls API
 export const callsApi = {
   // Get all calls for a user
-  getCalls: async (userId: number = 1) => {
+  getCalls: async (userId: number = getCurrentUserId()) => {
     try {
       const response = await api.get(`/calls/?user_id=${userId}`);
       
@@ -302,7 +324,7 @@ export const callsApi = {
   },
 
   // Get calls with filters
-  getCallsWithFilters: async (userId: number = 1, filters: { call_type?: string, status?: string } = {}) => {
+  getCallsWithFilters: async (userId: number = getCurrentUserId(), filters: { call_type?: string, status?: string } = {}) => {
     try {
       const params = new URLSearchParams({ user_id: userId.toString() });
       
@@ -433,10 +455,11 @@ export const callsApi = {
   // New: List calls that have transcripts
   listCallsWithTranscripts: async () => {
     try {
-      const response = await api.get(`/calls/with-transcripts`);
+      // Use the regular calls endpoint with user_id parameter
+      const response = await api.get(`/calls/?user_id=${getCurrentUserId()}`);
       if (Array.isArray(response.data)) return response.data;
-      if (response.data && Array.isArray(response.data.calls_with_transcripts)) {
-        return response.data.calls_with_transcripts;
+      if (response.data && Array.isArray(response.data.calls)) {
+        return response.data.calls;
       }
       return [];
     } catch (error) {
@@ -525,7 +548,7 @@ export const callsApi = {
 export const dashboardApi = {
   getSummary: async (date?: string) => {
     try {
-      const params = new URLSearchParams({ user_id: DEFAULT_USER_ID.toString() });
+      const params = new URLSearchParams({ user_id: getCurrentUserId().toString() });
       if (date) {
         params.append('date', date);
       }
@@ -539,7 +562,7 @@ export const dashboardApi = {
 
   getActiveCalls: async () => {
     try {
-      const response = await api.get(`/dashboard/active-calls?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/dashboard/active-calls?user_id=${getCurrentUserId()}`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error("API error in getActiveCalls:", error);
@@ -549,7 +572,7 @@ export const dashboardApi = {
 
   getCallLogs: async () => {
     try {
-      const response = await api.get(`/dashboard/call-logs?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/dashboard/call-logs?user_id=${getCurrentUserId()}`);
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
       console.error("API error in getCallLogs:", error);
@@ -559,7 +582,7 @@ export const dashboardApi = {
 
   getAccountUsage: async (days: number = 7) => {
     try {
-      const response = await api.get(`/dashboard/usage?user_id=${DEFAULT_USER_ID}&days=${days}`);
+      const response = await api.get(`/dashboard/usage?user_id=${getCurrentUserId()}&days=${days}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getAccountUsage:", error);
@@ -572,7 +595,7 @@ export const dashboardApi = {
 export const analyticsApi = {
   getCollectionPerformance: async (startDate?: string, endDate?: string) => {
     try {
-      let url = `/analytics/collection-performance?user_id=${DEFAULT_USER_ID}`;
+      let url = `/analytics/collection-performance?user_id=${getCurrentUserId()}`;
       if (startDate && endDate) {
         url += `&start_date=${startDate}&end_date=${endDate}`;
       }
@@ -586,7 +609,7 @@ export const analyticsApi = {
 
   getDebtRecoveryAnalytics: async () => {
     try {
-      const response = await api.get(`/analytics/debt-recovery?user_id=${DEFAULT_USER_ID}`);
+      const response = await api.get(`/analytics/debt-recovery?user_id=${getCurrentUserId()}`);
       return response.data;
     } catch (error: any) {
       console.error("API error in getDebtRecoveryAnalytics:", error);
@@ -642,10 +665,15 @@ export const authApi = {
         },
       });
       
-      // Store token in localStorage
+      // Store token and user info in localStorage
       if (response.data.access_token) {
         localStorage.setItem('access_token', response.data.access_token);
         localStorage.setItem('token_type', response.data.token_type || 'bearer');
+        
+        // Store user ID if provided
+        if (response.data.user_id) {
+          localStorage.setItem('user_id', response.data.user_id.toString());
+        }
         
         // Set default authorization header for future requests
         api.defaults.headers.common['Authorization'] = `${response.data.token_type || 'Bearer'} ${response.data.access_token}`;
@@ -668,9 +696,42 @@ export const authApi = {
     }
   },
   
+  register: async (email: string, phone_number: string, password: string, name: string) => {
+    try {
+      const formData = new URLSearchParams();
+      formData.append('email', email);
+      formData.append('phone_number', phone_number);
+      formData.append('password', password);
+      formData.append('name', name);
+      
+      const response = await api.post('/auth/register', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      
+      console.log("Registration successful:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in register:", error);
+      
+      if (error.response?.status === 400) {
+        const errorMessage = error.response.data?.detail || "Registration failed";
+        throw new Error(errorMessage);
+      }
+      
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
+      }
+      
+      throw error;
+    }
+  },
+  
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('token_type');
+    localStorage.removeItem('user_id');
     delete api.defaults.headers.common['Authorization'];
   },
   
@@ -693,33 +754,104 @@ export const authApi = {
   },
 
   getProfile: async () => {
-    try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        throw new Error('No access token found');
-      }
+    // Prevent multiple simultaneous calls
+    if ((authApi as any)._profilePromise) {
+      console.log('getProfile: Reusing existing profile request');
+      return (authApi as any)._profilePromise;
+    }
 
-      const response = await api.get('/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
+    const profilePromise = (async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          console.error('getProfile: No access token found');
+          throw new Error('No access token found');
         }
-      });
-      
-      console.log("Profile data:", response.data);
+
+        console.log('getProfile: Fetching profile with token');
+        const response = await api.get('/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        console.log("getProfile: Profile data received:", response.data);
+        
+        // Store user ID from profile
+        if (response.data.id) {
+          localStorage.setItem('user_id', response.data.id.toString());
+        }
+        
+        return response.data;
+      } catch (error: any) {
+        console.error("getProfile: API error:", error);
+        
+        if (error.response?.status === 401) {
+          // Token is invalid, clear all auth data
+          console.log('getProfile: 401 error, clearing auth data');
+          authApi.logout();
+          throw new Error("Session expired. Please login again.");
+        }
+        
+        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+          console.error('getProfile: Network error, keeping auth state for retry');
+          throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
+        }
+        
+        throw error;
+      } finally {
+        // Clear the promise after completion
+        delete (authApi as any)._profilePromise;
+      }
+    })();
+
+    // Store the promise to prevent duplicate calls
+    (authApi as any)._profilePromise = profilePromise;
+    return profilePromise;
+  }
+};
+
+// Integrations API
+export const integrationsApi = {
+  getIntegrations: async () => {
+    try {
+      const response = await api.get('/integrations');
       return response.data;
     } catch (error: any) {
-      console.error("API error in getProfile:", error);
-      
-      if (error.response?.status === 401) {
-        // Token is invalid, logout user
-        authApi.logout();
-        throw new Error("Session expired. Please login again.");
-      }
-      
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
-      }
-      
+      console.error("API error in getIntegrations:", error);
+      throw error;
+    }
+  },
+  
+  connectIntegration: async (integrationId: number) => {
+    try {
+      const response = await api.post(`/integrations/${integrationId}/connect`);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in connectIntegration:", error);
+      throw error;
+    }
+  }
+};
+
+// Phone Numbers API
+export const phoneNumbersApi = {
+  getPhoneNumbers: async () => {
+    try {
+      const response = await api.get('/phone-numbers');
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in getPhoneNumbers:", error);
+      throw error;
+    }
+  },
+  
+  createPhoneNumber: async (phoneData: any) => {
+    try {
+      const response = await api.post('/phone-numbers', phoneData);
+      return response.data;
+    } catch (error: any) {
+      console.error("API error in createPhoneNumber:", error);
       throw error;
     }
   }
@@ -733,7 +865,9 @@ export default {
   dashboard: dashboardApi,
   analytics: analyticsApi,
   businessInquiries: businessInquiriesApi,
-  auth: authApi
+  auth: authApi,
+  integrations: integrationsApi,
+  phoneNumbers: phoneNumbersApi
 };
 
 

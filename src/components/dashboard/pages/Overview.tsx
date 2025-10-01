@@ -27,10 +27,10 @@ import {
 import { cn } from "@/lib/utils";
 import { dashboardApi, analyticsApi, contactsApi, callsApi } from "@/services/api";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-
-// User ID is now dynamically retrieved from authentication
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Overview = () => {
+  const { user, isLoading: authLoading } = useAuth();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [activeCalls, setActiveCalls] = useState<any[]>([]);
   const [callLogs, setCallLogs] = useState<any[]>([]);
@@ -46,8 +46,12 @@ export const Overview = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    // Only fetch dashboard data after user is loaded
+    if (!authLoading && user) {
+      console.log('Overview: User loaded, fetching dashboard data for user:', user.id);
+      fetchDashboardData();
+    }
+  }, [authLoading, user]);
 
   useEffect(() => {
     if (autoRefresh) {
@@ -69,7 +73,7 @@ export const Overview = () => {
         dashboardApi.getActiveCalls(),
         analyticsApi.getCollectionPerformance(),
         dashboardApi.getAccountUsage(),
-        callsApi.getCalls(1)
+        callsApi.getCalls()
       ]);
 
       if (summary.status === 'fulfilled') {
@@ -152,7 +156,10 @@ export const Overview = () => {
     }
   };
 
-  const formatDuration = (seconds: number) => {
+  const formatDuration = (seconds: number | null | undefined) => {
+    if (seconds === null || seconds === undefined || isNaN(seconds)) {
+      return '--:--';
+    }
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -245,12 +252,23 @@ export const Overview = () => {
     }
   ];
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600">{authLoading ? 'Loading user data...' : 'Loading dashboard...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-600">User not authenticated</p>
         </div>
       </div>
     );
@@ -578,7 +596,7 @@ export const Overview = () => {
                             {call.status.toUpperCase()}
                           </Badge>
                         </TableCell>
-                        <TableCell>{formatDuration(call.duration || 0)}</TableCell>
+                        <TableCell>{formatDuration(call.duration)}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
                             {call.transcript && (

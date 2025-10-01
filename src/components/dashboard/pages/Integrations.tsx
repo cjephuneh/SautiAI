@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { integrationsApi } from "@/services/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,126 +69,12 @@ const Integrations = () => {
   const fetchIntegrations = async () => {
     setLoading(true);
     try {
-      // Mock data - replace with actual API call
-      const mockIntegrations: Integration[] = [
-        {
-          id: "1",
-          name: "Salesforce CRM",
-          description: "Sync contacts and manage leads in Salesforce",
-          category: "CRM",
-          provider: "salesforce",
-          status: "connected",
-          icon: Database,
-          color: "text-blue-600 bg-blue-100",
-          features: ["Contact Sync", "Lead Management", "Opportunity Tracking"],
-          last_sync: "2024-01-27T10:30:00Z",
-          config: { instance_url: "https://mycompany.salesforce.com" },
-          api_key: "sk_test_***************"
-        },
-        {
-          id: "2",
-          name: "Google Calendar",
-          description: "Schedule callbacks and manage appointments",
-          category: "Calendar",
-          provider: "google",
-          status: "connected",
-          icon: Calendar,
-          color: "text-green-600 bg-green-100",
-          features: ["Event Creation", "Callback Scheduling", "Availability Check"],
-          last_sync: "2024-01-27T09:15:00Z",
-          config: { calendar_id: "primary" }
-        },
-        {
-          id: "3",
-          name: "Microsoft Outlook",
-          description: "Email automation and calendar integration",
-          category: "Email",
-          provider: "microsoft",
-          status: "disconnected",
-          icon: Mail,
-          color: "text-purple-600 bg-purple-100",
-          features: ["Email Templates", "Auto-responses", "Calendar Sync"],
-          last_sync: "",
-          config: {}
-        },
-        {
-          id: "4",
-          name: "Stripe",
-          description: "Payment processing and invoicing",
-          category: "Payments",
-          provider: "stripe",
-          status: "connected",
-          icon: CreditCard,
-          color: "text-indigo-600 bg-indigo-100",
-          features: ["Payment Links", "Subscription Management", "Invoice Generation"],
-          last_sync: "2024-01-27T08:45:00Z",
-          config: { publishable_key: "pk_test_***************" },
-          api_key: "sk_test_***************"
-        },
-        {
-          id: "5",
-          name: "Slack",
-          description: "Team notifications and alerts",
-          category: "Communication",
-          provider: "slack",
-          status: "error",
-          icon: MessageSquare,
-          color: "text-pink-600 bg-pink-100",
-          features: ["Call Notifications", "Daily Reports", "Team Alerts"],
-          last_sync: "2024-01-26T18:20:00Z",
-          config: { channel: "#collections" },
-          webhook_url: "https://hooks.slack.com/services/***"
-        },
-        {
-          id: "6",
-          name: "Twilio",
-          description: "SMS and voice communication",
-          category: "Communication",
-          provider: "twilio",
-          status: "connected",
-          icon: Phone,
-          color: "text-red-600 bg-red-100",
-          features: ["SMS Campaigns", "Voice Calls", "Phone Number Management"],
-          last_sync: "2024-01-27T11:00:00Z",
-          config: { account_sid: "AC***************" },
-          api_key: "SK***************"
-        },
-        {
-          id: "7",
-          name: "HubSpot",
-          description: "Marketing automation and CRM",
-          category: "CRM",
-          provider: "hubspot",
-          status: "pending",
-          icon: Users,
-          color: "text-orange-600 bg-orange-100",
-          features: ["Contact Management", "Deal Tracking", "Email Marketing"],
-          last_sync: "",
-          config: {}
-        },
-        {
-          id: "8",
-          name: "Zapier",
-          description: "Workflow automation and app connections",
-          category: "Automation",
-          provider: "zapier",
-          status: "disconnected",
-          icon: Zap,
-          color: "text-yellow-600 bg-yellow-100",
-          features: ["Workflow Automation", "App Connections", "Trigger Events"],
-          last_sync: "",
-          config: {}
-        }
-      ];
-      
-      setIntegrations(mockIntegrations);
+      const data = await integrationsApi.getIntegrations();
+      setIntegrations(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch integrations:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load integrations.",
-        variant: "destructive",
-      });
+      // Show empty state for new users
+      setIntegrations([]);
     } finally {
       setLoading(false);
     }
