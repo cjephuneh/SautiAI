@@ -20,18 +20,13 @@ const Login = () => {
 
   useEffect(() => {
     isMountedRef.current = true;
+    // Clear session data when on login page to prevent conflicts
+    localStorage.removeItem('sautiai_session');
     return () => {
       isMountedRef.current = false;
     };
   }, []);
 
-  // Early return if we're not on the login page
-  const currentPath = window.location.pathname;
-  if (currentPath !== '/login') {
-    console.log('Login: Not on login page, redirecting to current path:', currentPath);
-    navigate(currentPath, { replace: true });
-    return null;
-  }
 
   useEffect(() => {
     // Only redirect if user is on the login page and authenticated
