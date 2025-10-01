@@ -135,9 +135,9 @@ export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeade
 
                 {/* User Avatar */}
                 <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-sm font-semibold">
-                    {getUserInitials()}
-                  </span>
+                    <span className="text-white text-sm font-semibold">
+                      {getUserInitials()}
+                    </span>
                 </div>
 
                 <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -209,14 +209,12 @@ export const DashboardHeader = ({ currentPage, onToggleSidebar }: DashboardHeade
 
               {/* Menu Items */}
               <div className="space-y-1">
-                <DropdownMenuItem className="cursor-pointer">
-                  <User className="h-4 w-4 mr-2" />
-                  Profile Settings
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/dashboard/settings')}
+                >
                   <Settings className="h-4 w-4 mr-2" />
-                  Account Settings
+                  Settings & Profile
                 </DropdownMenuItem>
               </div>
 
