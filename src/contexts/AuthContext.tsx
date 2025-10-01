@@ -41,6 +41,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const isAuthenticated = !!user;
   
@@ -48,6 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(() => {
     authApi.logout();
     setUser(null);
+    setHasInitialized(false);
     // Clear session data
     localStorage.removeItem('sautiai_session');
   }, []);
@@ -60,6 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Get user profile after successful login
       const profile = await authApi.getProfile();
       setUser(profile);
+      setHasInitialized(false); // Reset for next initialization
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -88,8 +91,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     const initializeAuth = async () => {
       try {
+        // Prevent multiple initializations
+        if (hasInitialized) {
+          console.log('AuthContext: Already initialized, skipping');
+          return;
+        }
+        
         console.log('AuthContext: Initializing authentication...');
         setIsLoading(true);
+        setHasInitialized(true);
         
         // If user is already loaded, don't re-fetch
         if (user) {
