@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
@@ -9,6 +11,18 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    // Redirect authenticated users to dashboard
+    if (isAuthenticated && !isLoading) {
+      console.log('Index: User is authenticated, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
   useEffect(() => {
     // Send page view to Google Tag Manager
     if (typeof window !== 'undefined' && window.gtag) {
