@@ -149,13 +149,9 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
         });
 
         socket.on('disconnect', () => {
-          console.log('❌ Disconnected from playground');
+          console.log('🔌 Voice session ended');
           setIsConnected(false);
-          toast({
-            title: "Disconnected",
-            description: "Lost connection to voice playground",
-            variant: "destructive",
-          });
+          // Don't show error toast for normal disconnections
         });
 
         socket.on('connect_error', (error) => {
@@ -169,30 +165,27 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
         });
 
         socket.on('disconnect', (reason) => {
-          console.log('❌ Disconnected from playground:', reason);
+          console.log('🔌 Voice session ended:', reason);
           setIsConnected(false);
           
-          // Handle different disconnect reasons
+          // Only show error toasts for unexpected disconnections
           if (reason === 'io server disconnect') {
             toast({
-              title: "Server Disconnected",
-              description: "Voice playground server disconnected. Attempting to reconnect...",
+              title: "Session Ended",
+              description: "Voice session completed successfully",
             });
           } else if (reason === 'io client disconnect') {
-            // Client initiated disconnect - don't show error toast
-            console.log('Client initiated disconnect');
+            // Client initiated disconnect - show success message
+            console.log('✅ Voice session ended by user');
           } else if (reason === 'transport close') {
             toast({
               title: "Connection Lost",
-              description: "Network connection lost. Attempting to reconnect...",
+              description: "Network connection lost. Please try again.",
               variant: "destructive",
             });
           } else {
-            toast({
-              title: "Connection Lost",
-              description: `Disconnected: ${reason}. Attempting to reconnect...`,
-              variant: "destructive",
-            });
+            // Other disconnections - show neutral message
+            console.log('🔌 Voice session ended');
           }
         });
 
@@ -249,6 +242,7 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
 
         return () => {
           if (socket) {
+            console.log('🔌 Ending voice session...');
             socket.emit('stop_voice_session');
             socket.disconnect();
           }
