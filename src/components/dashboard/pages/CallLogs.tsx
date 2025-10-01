@@ -131,7 +131,7 @@ const CallLogs = () => {
       const filters: any = {};
       if (statusFilter !== "all") filters.status = statusFilter;
       
-      const data = await callsApi.getCallsWithFilters(1, filters);
+      const data = await callsApi.getCallsWithFilters(undefined, filters);
       console.log("Fetched calls data:", data);
       
       if (Array.isArray(data)) {

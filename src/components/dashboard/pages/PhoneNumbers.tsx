@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { phoneNumbersApi } from "@/services/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,57 +68,12 @@ const PhoneNumbers = () => {
   const fetchPhoneNumbers = async () => {
     setLoading(true);
     try {
-      // Mock data - replace with actual API call
-      const mockData: PhoneNumber[] = [
-        {
-          id: "1",
-          number: "+1234567890",
-          country_code: "+1",
-          provider: "twilio",
-          type: "local",
-          status: "active",
-          capabilities: ["voice", "sms"],
-          monthly_cost: 15.00,
-          usage_count: 234,
-          last_used: "2024-01-27T10:30:00Z",
-          created_at: "2024-01-01T00:00:00Z"
-        },
-        {
-          id: "2",
-          number: "+1800555123",
-          country_code: "+1",
-          provider: "twilio",
-          type: "toll_free",
-          status: "active",
-          capabilities: ["voice", "sms", "mms"],
-          monthly_cost: 25.00,
-          usage_count: 156,
-          last_used: "2024-01-26T15:45:00Z",
-          created_at: "2024-01-05T00:00:00Z"
-        },
-        {
-          id: "3",
-          number: "+447700900123",
-          country_code: "+44",
-          provider: "vonage",
-          type: "international",
-          status: "inactive",
-          capabilities: ["voice"],
-          monthly_cost: 35.00,
-          usage_count: 45,
-          last_used: "2024-01-20T09:15:00Z",
-          created_at: "2024-01-10T00:00:00Z"
-        }
-      ];
-      
-      setPhoneNumbers(mockData);
+      const data = await phoneNumbersApi.getPhoneNumbers();
+      setPhoneNumbers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch phone numbers:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load phone numbers.",
-        variant: "destructive",
-      });
+      // Show empty state for new users
+      setPhoneNumbers([]);
     } finally {
       setLoading(false);
     }

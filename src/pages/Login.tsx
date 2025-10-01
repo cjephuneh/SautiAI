@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Lock, Eye, EyeOff, Sparkles, Shield, Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { authApi } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { Logo } from "@/components/ui/Logo";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,15 +13,26 @@ const Login = () => {
     password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const hasRedirectedRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    // Redirect to dashboard if already authenticated
-    if (authApi.isAuthenticated()) {
-      navigate('/dashboard');
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // Redirect to dashboard if already authenticated (only once)
+    if (isAuthenticated && !isLoading && !hasRedirectedRef.current && isMountedRef.current) {
+      hasRedirectedRef.current = true;
+      console.log('Login: Redirecting to dashboard because already authenticated');
+      navigate('/dashboard', { replace: true });
     }
-  }, [navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,30 +46,38 @@ const Login = () => {
       return;
     }
 
-    setIsLoading(true);
-    
     try {
-      const response = await authApi.login(formData.email, formData.password);
+      await login(formData.email, formData.password);
+      
+      if (!isMountedRef.current) return;
+      
+      // Clear any stale session data from before login
+      localStorage.removeItem('sautiai_session');
       
       toast({
         title: "Login Successful! 🎉",
         description: "Welcome back! Redirecting to dashboard...",
       });
       
+      // Mark that we're about to redirect
+      hasRedirectedRef.current = true;
+      
       // Redirect to dashboard after successful login
       setTimeout(() => {
-        navigate('/dashboard');
+        if (isMountedRef.current) {
+          navigate('/dashboard', { replace: true });
+        }
       }, 1000);
       
     } catch (error: any) {
       console.error("Failed to login:", error);
+      if (!isMountedRef.current) return;
+      
       toast({
         title: "Login Failed",
         description: error.message || "Failed to login. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -78,8 +98,8 @@ const Login = () => {
         <div className="w-full max-w-md">
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl mb-4">
-              <Sparkles className="w-8 h-8 text-white" />
+            <div className="flex justify-center mb-4">
+              <Logo size="xl" showText={false} />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               SautiAI
@@ -158,7 +178,7 @@ const Login = () => {
                   Don't have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate('/signup')}
                     className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-all"
                   >
                     Sign up for free

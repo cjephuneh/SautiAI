@@ -135,11 +135,10 @@ export const QuickCampaignModal = ({ open, onOpenChange }: QuickCampaignModalPro
       const whatsappConfig = JSON.parse(localStorage.getItem('whatsapp_config') || '{}');
       const twilioConfig = JSON.parse(localStorage.getItem('twilio_config') || '{}');
 
-      // Mock debtor data for demo
-      const mockDebtors = [
-        { phone: '+1234567890', name: 'John Smith', amount: 1250 },
-        { phone: '+1987654321', name: 'Jane Doe', amount: 890 }
-      ];
+      // Fetch actual debtor data from API
+      const response = await fetch('/api/debtors');
+      const debtors = response.ok ? await response.json() : [];
+      const mockDebtors = Array.isArray(debtors) ? debtors : [];
 
       let results = [];
 

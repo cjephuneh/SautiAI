@@ -21,56 +21,11 @@ interface NotificationsModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    title: 'Payment Received',
-    message: 'John Smith made a payment of KSh 500 for account #12345',
-    type: 'payment',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-    read: false,
-    priority: 'high'
-  },
-  {
-    id: '2',
-    title: 'Missed Call Alert',
-    message: 'Automated call to Sarah Johnson failed - number disconnected',
-    type: 'call',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-    read: false,
-    priority: 'medium'
-  },
-  {
-    id: '3',
-    title: 'WhatsApp Message Sent',
-    message: 'Payment reminder sent to Mike Davis via WhatsApp',
-    type: 'message',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4 hours ago
-    read: true,
-    priority: 'low'
-  },
-  {
-    id: '4',
-    title: 'Compliance Alert',
-    message: 'Account #67890 requires immediate attention - TCPA violation risk',
-    type: 'alert',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6 hours ago
-    read: false,
-    priority: 'high'
-  },
-  {
-    id: '5',
-    title: 'System Update',
-    message: 'SautiAI system maintenance scheduled for tonight at 2 AM EAT',
-    type: 'system',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8 hours ago
-    read: true,
-    priority: 'low'
-  }
-];
+// No mock data - notifications will be fetched from API
 
 export const NotificationsModal = ({ open, onOpenChange }: NotificationsModalProps) => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {

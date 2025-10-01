@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { authApi } from '@/services/api';
+import React, { useRef, useEffect } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -8,16 +8,57 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hasCheckedSession = useRef(false);
+  
+  // Add error boundary for useAuth
+  let isAuthenticated = false;
+  let isLoading = true;
+  
+  try {
+    const auth = useAuth();
+    isAuthenticated = auth.isAuthenticated;
+    isLoading = auth.isLoading;
+  } catch (error) {
+    console.error('ProtectedRoute: Auth context error:', error);
+    // If auth context is not available, redirect to login
+    return <Navigate to="/login" replace />;
+  }
 
+  // Check session and redirect only once
   useEffect(() => {
-    // Initialize authentication and check if user is logged in
-    authApi.initializeAuth();
-    setIsAuthenticated(authApi.isAuthenticated());
-  }, []);
+    if (isAuthenticated && !isLoading && location.pathname === '/dashboard' && !hasCheckedSession.current) {
+      hasCheckedSession.current = true;
+      const lastPage = localStorage.getItem('sautiai_session');
+      if (lastPage) {
+        try {
+          const sessionData = JSON.parse(lastPage);
+          const savedPage = sessionData.currentPage;
+          
+          // Only restore if it's a valid dashboard page (not login/signup/public pages)
+          const isValidDashboardPage = savedPage && 
+                                       savedPage.startsWith('/dashboard') && 
+                                       savedPage !== '/dashboard' &&
+                                       !['/login', '/signup', '/', '/pricing', '/book-call'].includes(savedPage);
+          
+          if (isValidDashboardPage) {
+            console.log('ProtectedRoute: Restoring last session page:', savedPage);
+            navigate(savedPage, { replace: true });
+          } else if (savedPage) {
+            console.log('ProtectedRoute: Ignoring invalid session page:', savedPage);
+          }
+        } catch (error) {
+          console.error('ProtectedRoute: Failed to parse session data:', error);
+          localStorage.removeItem('sautiai_session');
+        }
+      }
+    }
+  }, [isAuthenticated, isLoading, location.pathname, navigate]);
 
   // Show loading while checking authentication
-  if (isAuthenticated === null) {
+  if (isLoading) {
+    console.log('ProtectedRoute: Loading auth state...');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50/30">
         <div className="text-center">
@@ -30,10 +71,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    console.log('ProtectedRoute: Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // Render protected content if authenticated
+  console.log('ProtectedRoute: Authenticated, rendering protected content');
   return <>{children}</>;
 };
 

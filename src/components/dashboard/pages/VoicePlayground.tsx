@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 
 interface VoicePlaygroundProps {
   voiceId: string;
@@ -39,22 +39,63 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
 
   // Map VoiceLab voice IDs to Azure voice names
   const mapVoiceIdToAzure = (voiceId: string): string => {
-    // If it's already an Azure voice name, return as is
+    // If it's already an Azure voice name, validate it first
     if (voiceId.includes('-') && voiceId.includes('Neural')) {
-      return voiceId;
+      // Check if it's a valid Azure voice by checking if it starts with a valid language code
+      const validAzureVoices = [
+        'en-US', 'en-GB', 'en-AU', 'en-CA', 'en-IN', 'en-IE', 'en-NZ', 'en-ZA',
+        'es-ES', 'es-MX', 'es-AR', 'es-CO', 'es-PE', 'es-VE', 'es-UY', 'es-CL', 'es-BO', 'es-CR', 'es-EC', 'es-SV', 'es-GT', 'es-HN', 'es-NI', 'es-PA', 'es-PY', 'es-PR', 'es-DO', 'es-US',
+        'fr-FR', 'fr-CA', 'fr-CH', 'fr-BE', 'fr-LU', 'fr-MC',
+        'de-DE', 'de-AT', 'de-CH', 'de-LU', 'de-LI',
+        'it-IT', 'it-CH',
+        'pt-BR', 'pt-PT',
+        'ja-JP', 'ko-KR', 'zh-CN', 'zh-TW', 'zh-HK',
+        'ar-SA', 'ar-EG', 'ar-AE', 'ar-KW', 'ar-QA', 'ar-BH', 'ar-OM', 'ar-JO', 'ar-LB', 'ar-PS', 'ar-SY', 'ar-IQ', 'ar-LY', 'ar-TN', 'ar-DZ', 'ar-MA',
+        'hi-IN', 'th-TH', 'vi-VN', 'id-ID', 'ms-MY', 'tl-PH',
+        'ru-RU', 'pl-PL', 'tr-TR', 'cs-CZ', 'sk-SK', 'hu-HU', 'ro-RO', 'bg-BG', 'hr-HR', 'sl-SI', 'et-EE', 'lv-LV', 'lt-LT', 'uk-UA',
+        'nl-NL', 'nl-BE', 'sv-SE', 'da-DK', 'no-NO', 'fi-FI', 'is-IS', 'ga-IE', 'cy-GB', 'mt-MT',
+        'he-IL', 'ur-PK', 'bn-BD', 'ta-IN', 'te-IN', 'kn-IN', 'gu-IN', 'ml-IN', 'pa-IN',
+        'sw-KE', 'sw-TZ', 'am-ET', 'rw-RW', 'so-SO', 'zu-ZA', 'xh-ZA', 'af-ZA', 'ha-NG', 'ig-NG', 'yo-NG'
+      ];
+      
+      // Check if the voice starts with a valid language code
+      const isValid = validAzureVoices.some(lang => voiceId.startsWith(lang));
+      if (isValid) {
+        // Additional validation: check if it's a known valid Azure voice
+        const knownValidVoices = [
+          'en-US-AriaNeural', 'en-US-GuyNeural', 'en-US-JennyNeural', 'en-US-BrianNeural', 'en-US-AvaNeural', 'en-US-DavisNeural', 'en-US-EmmaNeural',
+          'en-GB-SoniaNeural', 'en-GB-RyanNeural', 'en-GB-LibbyNeural', 'en-GB-MaisieNeural', 'en-GB-NoahNeural', 'en-GB-OliverNeural', 'en-GB-ThomasNeural',
+          'en-AU-NatashaNeural', 'en-AU-WilliamNeural', 'en-AU-FreyaNeural', 'en-AU-TimNeural',
+          'en-CA-ClaraNeural', 'en-CA-LiamNeural',
+          'en-IN-NeerjaNeural', 'en-IN-PrabhatNeural',
+          'en-IE-EmilyNeural', 'en-IE-ConnorNeural',
+          'en-NZ-MollyNeural', 'en-NZ-MitchellNeural',
+          'en-ZA-LeahNeural', 'en-ZA-LukeNeural'
+        ];
+        
+        if (knownValidVoices.includes(voiceId)) {
+          return voiceId;
+        } else {
+          console.warn(`Unknown Azure voice: ${voiceId}, falling back to default`);
+          return 'en-US-AriaNeural';
+        }
+      } else {
+        console.warn(`Invalid Azure voice: ${voiceId}, falling back to default`);
+        return 'en-US-AriaNeural';
+      }
     }
     
     const voiceMapping: { [key: string]: string } = {
-      'alloy': 'sw-KE-ZuriNeural',      // Female Swahili (Kenya)
-      'echo': 'sw-KE-RafikiNeural',     // Male Swahili (Kenya)
-      'shimmer': 'en-KE-AsiliaNeural',  // Female English (Kenya)
-      'sage': 'en-KE-ChilembaNeural',   // Male English (Kenya)
-      'coral': 'sw-TZ-RehemaNeural',    // Female Swahili (Tanzania)
-      'verse': 'sw-TZ-DaudiNeural',     // Male Swahili (Tanzania)
-      'ash': 'en-TZ-ElimuNeural',       // Male English (Tanzania)
+      'alloy': 'en-US-AriaNeural',      // Female English (US)
+      'echo': 'en-US-GuyNeural',        // Male English (US)
+      'shimmer': 'en-US-JennyNeural',   // Female English (US)
+      'sage': 'en-US-BrianNeural',      // Male English (US)
+      'coral': 'en-US-AvaNeural',       // Female English (US)
+      'verse': 'en-US-DavisNeural',     // Male English (US)
+      'ash': 'en-US-EmmaNeural',        // Female English (US)
     };
     
-    return voiceMapping[voiceId] || 'sw-KE-ZuriNeural'; // Default to Zuri
+    return voiceMapping[voiceId] || 'en-US-AriaNeural'; // Default to Aria
   };
 
   // Connect to the real playground backend
@@ -67,7 +108,7 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
 
     const connectToPlayground = async () => {
       try {
-        // Connect to the actual playground SocketIO server
+        // Connect to the voice playground server
         const playgroundUrl = import.meta.env.VITE_PLAYGROUND_URL || 'http://localhost:5004';
         const socket = io(playgroundUrl, {
           transports: ['polling'], // Start with polling only for stability
@@ -288,11 +329,23 @@ export const VoicePlayground = ({ voiceId, voiceName, onClose }: VoicePlayground
         title: "Recording Started",
         description: "Speak into your microphone...",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting recording:', error);
+      
+      let errorMessage = "Failed to start recording. ";
+      if (error.name === 'NotAllowedError') {
+        errorMessage += "Microphone access denied. Please allow microphone access and try again.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage += "No microphone found. Please connect a microphone and try again.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage += "Microphone is being used by another application. Please close other applications and try again.";
+      } else {
+        errorMessage += "Please check microphone permissions and try again.";
+      }
+      
       toast({
         title: "Recording Error",
-        description: "Failed to start recording. Please check microphone permissions.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

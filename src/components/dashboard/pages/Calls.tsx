@@ -33,7 +33,7 @@ export const Calls = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await callsApi.getCallsWithFilters(1, {});
+      const data = await callsApi.getCallsWithFilters();
       setCalls(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Failed to load calls.");

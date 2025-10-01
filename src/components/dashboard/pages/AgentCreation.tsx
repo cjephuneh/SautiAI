@@ -515,7 +515,10 @@ export const AgentCreation = () => {
     }
   };
 
-  const formatDuration = (seconds: number) => {
+  const formatDuration = (seconds: number | null | undefined) => {
+    if (seconds === null || seconds === undefined || isNaN(seconds)) {
+      return '--:--';
+    }
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -549,16 +552,17 @@ export const AgentCreation = () => {
       <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Agent Setup</h1>
-            <p className="text-gray-600 mt-1">Fine tune your agents</p>
+            <h1 className="text-2xl font-bold text-gray-900">AI Agents</h1>
+            <p className="text-gray-600 mt-1">Create and manage your AI agents</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-gray-600">
-              Available balance: <span className="font-semibold text-green-600">$0.18</span>
-            </div>
-            <Button variant="outline" size="sm">Add more funds</Button>
-            <Button variant="outline" size="sm">See demo</Button>
-            <Button variant="outline" size="sm">Docs</Button>
+            <Button 
+              onClick={() => setSelectedAgent(null)} 
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Agent
+            </Button>
           </div>
         </div>
       </div>
@@ -568,16 +572,10 @@ export const AgentCreation = () => {
         <div className="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto hidden lg:block">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-900">Your Agents</h2>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </Button>
               <Button size="sm" onClick={() => setSelectedAgent(null)}>
                 <Plus className="h-4 w-4 mr-2" />
-                New Agent
+              New
               </Button>
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -591,22 +589,22 @@ export const AgentCreation = () => {
               agents.map((agent) => (
                 <div
                   key={agent.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-all ${
+                  className={`p-4 rounded-lg cursor-pointer transition-all border ${
                     selectedAgent?.id === agent.id
-                      ? 'bg-blue-50 border-2 border-blue-500'
-                      : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                      ? 'bg-blue-50 border-blue-500'
+                      : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
                   }`}
                   onClick={() => setSelectedAgent(agent)}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{agent.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {agent.is_active ? 'Active' : 'Inactive'}
+                      <p className="text-sm text-gray-500 mt-1">
+                        {agent.prompt_template ? agent.prompt_template.substring(0, 50) + '...' : 'No prompt set'}
                       </p>
                     </div>
-                    <Badge variant={agent.is_active ? 'default' : 'secondary'}>
-                      {agent.is_active ? 'Live' : 'Draft'}
+                    <Badge variant={agent.is_active ? 'default' : 'secondary'} className="ml-2">
+                      {agent.is_active ? 'Active' : 'Draft'}
                     </Badge>
                   </div>
                 </div>
@@ -616,255 +614,124 @@ export const AgentCreation = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex">
-          {/* Agent Configuration */}
           <div className="flex-1 p-6 overflow-y-auto">
             {selectedAgent ? (
-              <div className="space-y-6">
+            <div className="max-w-4xl mx-auto space-y-6">
                 {/* Agent Header */}
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
                       <h2 className="text-2xl font-bold text-gray-900">{selectedAgent.name}</h2>
-                      <Button variant="ghost" size="sm">
-                        <Copy className="h-4 w-4" />
-                      </Button>
+                    <p className="text-gray-600 mt-1">Configure your AI agent settings</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <Button variant="outline" size="sm">
                         <Share2 className="h-4 w-4 mr-2" />
                         Share
                       </Button>
-                      <Button size="sm">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
                         <Phone className="h-4 w-4 mr-2" />
-                        Get call from agent
-                      </Button>
-                      <Button size="sm">
-                        <PhoneCall className="h-4 w-4 mr-2" />
-                        Set inbound agent
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Purchase phone numbers
+                      Test Call
                       </Button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="text-sm text-gray-600">
-                      Cost per min: <span className="font-semibold text-green-600">~ ${costData.total.toFixed(3)}</span>
+                {/* Simplified Configuration */}
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="agent-name-edit">Agent Name</Label>
+                      <Input
+                        id="agent-name-edit"
+                        value={selectedAgent.name}
+                        onChange={(e) => setSelectedAgent(prev => prev ? {...prev, name: e.target.value} : null)}
+                        placeholder="Customer Service Agent"
+                      />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <div className="w-3 h-3 bg-green-500 rounded-full" title="Transcriber"></div>
-                        <div className="w-3 h-3 bg-red-500 rounded-full" title="LLM"></div>
-                        <div className="w-3 h-3 bg-orange-500 rounded-full" title="Voice"></div>
-                        <div className="w-3 h-3 bg-blue-500 rounded-full" title="Telephony"></div>
-                        <div className="w-3 h-3 bg-purple-500 rounded-full" title="Platform"></div>
-                      </div>
-                      <span className="text-xs text-gray-500">Transcriber • LLM • Voice • Telephony • Platform</span>
-                    </div>
-                  </div>
-
-                  {/* Configuration Tabs */}
-                  <Tabs defaultValue="agent" className="w-full">
-                    <TabsList className="grid w-full grid-cols-8">
-                      <TabsTrigger value="agent">Agent</TabsTrigger>
-                      <TabsTrigger value="llm">LLM</TabsTrigger>
-                      <TabsTrigger value="audio">Audio</TabsTrigger>
-                      <TabsTrigger value="engine">Engine</TabsTrigger>
-                      <TabsTrigger value="call">Call</TabsTrigger>
-                      <TabsTrigger value="tools">Tools</TabsTrigger>
-                      <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                      <TabsTrigger value="inbound">Inbound</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="agent" className="space-y-6 mt-6">
-                      <div className="space-y-4">
                         <div>
-                          <Label htmlFor="welcome-message">Agent Welcome Message</Label>
+                      <Label htmlFor="welcome-message-edit">Welcome Message</Label>
                           <Input
-                            id="welcome-message"
-                            value={formData.welcome_message}
+                        id="welcome-message-edit"
+                        value={selectedAgent.welcome_message || formData.welcome_message}
                             onChange={(e) => setFormData(prev => ({ ...prev, welcome_message: e.target.value }))}
-                            placeholder="Hello {name}! Welcome to SautiAI. How can I help you today?"
+                        placeholder="Hello! How can I help you today?"
                           />
-                          <p className="text-sm text-gray-500 mt-1">
-                            This will be the initial message from the agent. You can use variables here using {"{variable_name}"}.
-                          </p>
+                    </div>
                         </div>
 
                         <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <Label htmlFor="prompt">Agent Prompt</Label>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
-                                <Sparkles className="h-4 w-4 mr-2" />
-                                AI Edit
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                GPT Builder
-                              </Button>
-                            </div>
-                          </div>
+                    <Label htmlFor="prompt-edit">Agent Prompt</Label>
                           <Textarea
-                            id="prompt"
-                            value={formData.prompt_template}
+                      id="prompt-edit"
+                      value={selectedAgent.prompt_template || formData.prompt_template}
                             onChange={(e) => setFormData(prev => ({ ...prev, prompt_template: e.target.value }))}
-                            placeholder="You are Sam, a customer service agent..."
-                            className="min-h-[200px]"
+                      placeholder="You are a professional customer service agent..."
+                      className="min-h-[150px]"
                           />
                           <p className="text-sm text-gray-500 mt-1">
-                            You can define variables in the prompt using {"{variable_name}"}.
+                      Define how your agent should behave and respond to customers.
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <Label htmlFor="test-name">Enter value for {"{name}"}</Label>
-                            <Input
-                              id="test-name"
-                              value={testVariables.name}
-                              onChange={(e) => setTestVariables(prev => ({ ...prev, name: e.target.value }))}
-                              placeholder="John Doe"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="test-order">Enter value for {"{order}"}</Label>
-                            <Input
-                              id="test-order"
-                              value={testVariables.order}
-                              onChange={(e) => setTestVariables(prev => ({ ...prev, order: e.target.value }))}
-                              placeholder="ORD-12345"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="llm" className="space-y-6 mt-6">
-                      <div className="space-y-6">
-                        <div>
-                          <Label>Choose LLM model</Label>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
-                            <Select value={formData.model} onValueChange={(value) => setFormData(prev => ({ ...prev, model: value }))}>
+                      <Label>Voice</Label>
+                      <Select value={formData.voice_id} onValueChange={(value) => setFormData(prev => ({ ...prev, voice_id: value }))}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select model" />
+                          <SelectValue placeholder="Select voice" />
                               </SelectTrigger>
                               <SelectContent>
-                                {ourModels.map((model) => (
-                                  <SelectItem key={model.id} value={model.id}>
+                          {voices.map((voice) => (
+                            <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                              <div className="flex items-center justify-between w-full">
                                     <div>
-                                      <div className="font-medium">{model.name}</div>
-                                      <div className="text-sm text-gray-500">{model.description}</div>
+                                  <div className="font-medium">{voice.name}</div>
+                                  <div className="text-sm text-gray-500">{voice.language}</div>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleVoicePreview(voice);
+                                  }}
+                                >
+                                  {voicePreviewing === voice.voice_id ? (
+                                    <Pause className="h-3 w-3" />
+                                  ) : (
+                                    <Play className="h-3 w-3" />
+                                  )}
+                                </Button>
                                     </div>
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-md bg-gray-50">
-                              <Brain className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-600">SautiAI Models</span>
                             </div>
-                          </div>
-                        </div>
-
                         <div>
-                          <Label>Tokens generated on each LLM output</Label>
-                          <div className="mt-2">
-                            <Slider
-                              value={[formData.tokens]}
-                              onValueChange={(value) => setFormData(prev => ({ ...prev, tokens: value[0] }))}
-                              max={500}
-                              min={50}
-                              step={10}
-                              className="w-full"
-                            />
-                            <div className="flex justify-between text-sm text-gray-500 mt-1">
-                              <span>50</span>
-                              <span className="font-medium">{formData.tokens}</span>
-                              <span>500</span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Increasing tokens enables longer responses to be queued for speech generation but increases latency
-                          </p>
-                        </div>
-
-                        <div>
-                          <Label>Temperature</Label>
-                          <div className="mt-2">
-                            <Slider
-                              value={[formData.temperature]}
-                              onValueChange={(value) => setFormData(prev => ({ ...prev, temperature: value[0] }))}
-                              max={1}
-                              min={0}
-                              step={0.1}
-                              className="w-full"
-                            />
-                            <div className="flex justify-between text-sm text-gray-500 mt-1">
-                              <span>0.0</span>
-                              <span className="font-medium">{formData.temperature}</span>
-                              <span>1.0</span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Increasing temperature enables heightened creativity, but increases chance of deviation from prompt
-                          </p>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <Label>Add FAQs & Guardrails</Label>
-                            <Button variant="link" size="sm">Learn more</Button>
-                          </div>
-                          <Button variant="outline" className="w-full">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add a new block for FAQs & Guardrails
-                          </Button>
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="audio" className="space-y-6 mt-6">
-                      <div className="space-y-6">
-                        <div>
-                          <Label>Select language and transcriber</Label>
-                          <div className="grid grid-cols-3 gap-4 mt-2">
+                      <Label>Language</Label>
                             <Select value={formData.language} onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Language" />
+                          <SelectValue placeholder="Select language" />
                               </SelectTrigger>
                               <SelectContent>
-                                {languages.map((lang) => (
+                          {languages.slice(0, 10).map((lang) => (
                                   <SelectItem key={lang.code} value={lang.code}>
                                     {lang.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Select value={formData.transcriber} onValueChange={(value) => setFormData(prev => ({ ...prev, transcriber: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Provider" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {transcriberProviders.map((provider) => (
-                                  <SelectItem key={provider.id} value={provider.id}>
-                                    <div>
-                                      <div className="font-medium">{provider.name}</div>
-                                      <div className="text-sm text-gray-500">{provider.description}</div>
                                     </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Select value={formData.transcriber_model} onValueChange={(value) => setFormData(prev => ({ ...prev, transcriber_model: value }))}>
+                    <div>
+                      <Label>Model</Label>
+                      <Select value={formData.model} onValueChange={(value) => setFormData(prev => ({ ...prev, model: value }))}>
                               <SelectTrigger>
-                                <SelectValue placeholder="Model" />
+                          <SelectValue placeholder="Select model" />
                               </SelectTrigger>
                               <SelectContent>
-                                {transcriberModels.map((model) => (
+                          {ourModels.map((model) => (
                                   <SelectItem key={model.id} value={model.id}>
                                     <div>
                                       <div className="font-medium">{model.name}</div>
@@ -877,142 +744,29 @@ export const AgentCreation = () => {
                           </div>
                         </div>
 
-                        <div>
-                          <Label htmlFor="keywords">Keywords</Label>
-                          <Input
-                            id="keywords"
-                            value={formData.keywords}
-                            onChange={(e) => setFormData(prev => ({ ...prev, keywords: e.target.value }))}
-                            placeholder="Bruce:100"
-                          />
-                          <p className="text-sm text-gray-500 mt-1">
-                            Enter certain keywords/proper nouns you'd want to boost while understanding user speech.
-                          </p>
-                        </div>
-
-                        <div>
-                          <Label>Select voice</Label>
-                          <div className="grid grid-cols-3 gap-4 mt-2">
-                            <Select value={formData.voice_provider} onValueChange={(value) => setFormData(prev => ({ ...prev, voice_provider: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Provider" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {voiceProviders.map((provider) => (
-                                  <SelectItem key={provider.id} value={provider.id}>
-                                    <div>
-                                      <div className="font-medium">{provider.name}</div>
-                                      <div className="text-sm text-gray-500">{provider.description}</div>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Select value={formData.voice_model} onValueChange={(value) => setFormData(prev => ({ ...prev, voice_model: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Model" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {voiceModels.map((model) => (
-                                  <SelectItem key={model.id} value={model.id}>
-                                    <div>
-                                      <div className="font-medium">{model.name}</div>
-                                      <div className="text-sm text-gray-500">{model.description}</div>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Select value={formData.voice_id} onValueChange={(value) => setFormData(prev => ({ ...prev, voice_id: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Voice" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {voices.map((voice) => (
-                                  <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                                    <div className="flex items-center justify-between w-full">
-                                      <div>
-                                        <div className="font-medium">{voice.name}</div>
-                                        <div className="text-sm text-gray-500">{voice.language}</div>
-                                      </div>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleVoicePreview(voice);
-                                        }}
-                                      >
-                                        {voicePreviewing === voice.voice_id ? (
-                                          <Pause className="h-3 w-3" />
-                                        ) : (
-                                          <Play className="h-3 w-3" />
+                  <div className="flex justify-end gap-3">
+                    <Button variant="outline" onClick={() => setSelectedAgent(null)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleUpdateAgent} disabled={loading}>
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Changes
+                        </>
                                         )}
                                       </Button>
                                     </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
                           </div>
-                          <Button variant="link" size="sm" className="mt-2">
-                            More voices
-                          </Button>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Buffer Size</Label>
-                            <div className="mt-2">
-                              <Slider
-                                value={[formData.buffer_size]}
-                                onValueChange={(value) => setFormData(prev => ({ ...prev, buffer_size: value[0] }))}
-                                max={500}
-                                min={100}
-                                step={10}
-                                className="w-full"
-                              />
-                              <div className="flex justify-between text-sm text-gray-500 mt-1">
-                                <span>100</span>
-                                <span className="font-medium">{formData.buffer_size}</span>
-                                <span>500</span>
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-500 mt-1">
-                              Increasing buffer size enables agent to speak long responses fluently, but increases latency
-                            </p>
-                          </div>
-
-                          <div>
-                            <Label>Speed rate</Label>
-                            <div className="mt-2">
-                              <Slider
-                                value={[formData.speed_rate]}
-                                onValueChange={(value) => setFormData(prev => ({ ...prev, speed_rate: value[0] }))}
-                                max={2}
-                                min={0.5}
-                                step={0.1}
-                                className="w-full"
-                              />
-                              <div className="flex justify-between text-sm text-gray-500 mt-1">
-                                <span>0.5x</span>
-                                <span className="font-medium">{formData.speed_rate}x</span>
-                                <span>2.0x</span>
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-500 mt-1">
-                              The speed control feature lets you adjust how fast or slow your agent speaks
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+            <div className="max-w-2xl mx-auto">
                 {/* Create New Agent */}
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Agent</h2>
@@ -1034,7 +788,7 @@ export const AgentCreation = () => {
                         id="welcome-message-new"
                         value={formData.welcome_message}
                         onChange={(e) => setFormData(prev => ({ ...prev, welcome_message: e.target.value }))}
-                        placeholder="Hello {name}! Welcome to SautiAI. How can I help you today?"
+                      placeholder="Hello! How can I help you today?"
                       />
                     </div>
 
@@ -1045,29 +799,14 @@ export const AgentCreation = () => {
                         value={formData.prompt_template}
                         onChange={(e) => setFormData(prev => ({ ...prev, prompt_template: e.target.value }))}
                         placeholder="You are a professional customer service agent..."
-                        className="min-h-[200px]"
+                      className="min-h-[150px]"
                       />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Define how your agent should behave and respond to customers.
+                    </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>LLM Model</Label>
-                        <Select value={formData.model} onValueChange={(value) => setFormData(prev => ({ ...prev, model: value }))}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select model" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ourModels.map((model) => (
-                              <SelectItem key={model.id} value={model.id}>
-                                <div>
-                                  <div className="font-medium">{model.name}</div>
-                                  <div className="text-sm text-gray-500">{model.description}</div>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label>Voice</Label>
                         <Select value={formData.voice_id} onValueChange={(value) => setFormData(prev => ({ ...prev, voice_id: value }))}>
@@ -1103,6 +842,21 @@ export const AgentCreation = () => {
                           </SelectContent>
                         </Select>
                       </div>
+                    <div>
+                      <Label>Language</Label>
+                      <Select value={formData.language} onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {languages.slice(0, 10).map((lang) => (
+                            <SelectItem key={lang.code} value={lang.code}>
+                              {lang.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     </div>
 
                     <Button onClick={handleCreateAgent} disabled={loading} className="w-full">
@@ -1123,112 +877,6 @@ export const AgentCreation = () => {
               </div>
             )}
           </div>
-
-          {/* Right Sidebar - Actions */}
-          <div className="w-80 bg-white border-l border-gray-200 p-6 overflow-y-auto hidden lg:block">
-            <div className="space-y-6">
-              <div>
-                <Button variant="outline" className="w-full mb-3">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  See all call logs
-                </Button>
-                <div className="flex gap-2 mb-3">
-                  <Button onClick={selectedAgent ? handleUpdateAgent : handleCreateAgent} disabled={loading} className="flex-1">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save agent
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-sm text-gray-500">Last updated a year ago</p>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Use chat to test agent & prompts</h3>
-                <Button className="w-full">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Test via chat
-                </Button>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Test via web call (beta)</h3>
-                
-                {!isWebCallActive ? (
-                  <Button onClick={startWebCall} className="w-full mb-3">
-                    <Video className="h-4 w-4 mr-2" />
-                    Test via web call
-                  </Button>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-sm font-medium text-green-800">
-                            {webCallStatus === 'connecting' ? 'Connecting...' : 
-                             webCallStatus === 'connected' ? 'Connected' : 'Ended'}
-                          </span>
-                        </div>
-                        <span className="text-sm font-mono text-green-700 bg-green-100 px-2 py-1 rounded">
-                          {formatDuration(callDuration)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        {isRecording && (
-                          <div className="flex items-center gap-1">
-                            <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse"></div>
-                            <span className="text-xs text-red-600 font-medium">Recording</span>
-                          </div>
-                        )}
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={endWebCall}
-                        >
-                          <PhoneOff className="h-4 w-4 mr-2" />
-                          End Call
-                        </Button>
-                      </div>
-                    </div>
-
-                    {transcript.length > 0 && (
-                      <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
-                        <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                          <Headphones className="h-4 w-4" />
-                          Live Transcript
-                        </h4>
-                        <div className="space-y-3">
-                          {transcript.map((message, index) => (
-                            <div key={index} className="text-sm text-gray-700 bg-white p-2 rounded border-l-2 border-blue-200">
-                              {message}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Share2 className="h-4 w-4 mr-2" />
-                        Share
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
