@@ -166,12 +166,13 @@ function useVoicePreview() {
   return { play, stop };
 }
 
-export const AgentCreation = () => {
+export const Agents = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [voices, setVoices] = useState<Voice[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingVoices, setLoadingVoices] = useState(false);
+  const [activeTab, setActiveTab] = useState<'create' | 'manage'>('create');
   const [voicePreviewing, setVoicePreviewing] = useState<string | null>(null);
   const [isWebCallActive, setIsWebCallActive] = useState(false);
   const [webCallStatus, setWebCallStatus] = useState<'idle' | 'connecting' | 'connected' | 'ended'>('idle');
@@ -555,19 +556,20 @@ export const AgentCreation = () => {
             <h1 className="text-2xl font-bold text-gray-900">AI Agents</h1>
             <p className="text-gray-600 mt-1">Create and manage your AI agents</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => setSelectedAgent(null)} 
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Agent
-            </Button>
-          </div>
+        </div>
+        
+        {/* Tabs */}
+        <div className="mt-4">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'create' | 'manage')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="create">Create Agent</TabsTrigger>
+              <TabsTrigger value="manage">Manage Agents</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-80px)]">
+      <TabsContent value="create" className="flex h-[calc(100vh-80px)]">
         {/* Left Sidebar - Your Agents */}
         <div className="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto hidden lg:block">
           <div className="flex items-center justify-between mb-6">
@@ -877,7 +879,35 @@ export const AgentCreation = () => {
               </div>
             )}
           </div>
-      </div>
+      </TabsContent>
+
+      <TabsContent value="manage" className="flex h-[calc(100vh-80px)]">
+        <div className="flex-1 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {agents.map((agent) => (
+              <Card key={agent.id} className="p-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bot className="h-5 w-5 text-blue-600" />
+                    {agent.name}
+                  </CardTitle>
+                  <CardDescription>{agent.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{agent.voice}</Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{agent.status}</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </TabsContent>
     </div>
   );
 };

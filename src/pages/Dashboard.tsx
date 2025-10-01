@@ -12,7 +12,7 @@ import { Settings } from "@/components/dashboard/pages/Settings";
 import { AdminPanel } from "@/components/dashboard/pages/AdminPanel";
 import { Collections } from "@/components/dashboard/pages/Collections";
 import { Calls } from "@/components/dashboard/pages/Calls";
-import { AgentDashboard } from "@/components/dashboard/pages/AgentDashboard";
+import { Agents } from "@/components/dashboard/pages/Agents";
 import { PaymentProcessing } from "@/components/dashboard/pages/PaymentProcessing";
 import { ComplianceCenter } from "@/components/dashboard/pages/ComplianceCenter";
 import { PredictiveAnalytics } from "@/components/dashboard/pages/PredictiveAnalytics";
@@ -22,7 +22,6 @@ import Integrations from "@/components/dashboard/pages/Integrations";
 import BatchCalling from "@/components/dashboard/pages/BatchCalling";
 import Calendar from "@/components/dashboard/pages/Calendar";
 import { Voices } from "@/components/dashboard/pages/Voices";
-import { AgentCreation } from "@/components/dashboard/pages/AgentCreation";
 import { FloatingHelpButton } from "@/components/ui/help-button";
 
 export type DashboardPage = 
@@ -78,7 +77,7 @@ const Dashboard = () => {
       case 'voices':
         return <Voices />;
       case 'agent-creation':
-        return <AgentCreation />;
+        return <Agents />;
       case 'integrations':
         return <Integrations />;
       case 'call-center':
@@ -92,7 +91,7 @@ const Dashboard = () => {
       case 'analytics':
         return <Analytics />;
       case 'agent-dashboard':
-        return <AgentDashboard />;
+        return <Agents />;
       case 'payment-processing':
         return <PaymentProcessing />;
       case 'compliance-center':
