@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export const Settings = () => {
-  const { user, refreshUser } = useAuth();
+  const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState({
     name: '',
@@ -33,6 +33,8 @@ export const Settings = () => {
   });
 
   useEffect(() => {
+    console.log('Settings: User data changed:', user);
+    console.log('Settings: Auth loading state:', isLoading);
     if (user) {
       setProfileData({
         name: user.name || '',
@@ -41,7 +43,33 @@ export const Settings = () => {
         company: user.company || ''
       });
     }
-  }, [user]);
+  }, [user, isLoading]);
+
+  // Show loading state while auth is initializing
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if no user (shouldn't happen if properly authenticated)
+  if (!user && !isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">You are not authenticated. Please log in again.</p>
+          <Button onClick={() => window.location.href = '/login'}>
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveProfile = async () => {
     setLoading(true);

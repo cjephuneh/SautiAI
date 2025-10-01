@@ -86,6 +86,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         console.log('AuthContext: Initializing authentication...');
         setIsLoading(true);
+        
+        // If user is already loaded, don't re-fetch
+        if (user) {
+          console.log('AuthContext: User already loaded, skipping profile fetch');
+          setIsLoading(false);
+          return;
+        }
+        
         if (authApi.isAuthenticated()) {
           try {
             const profile = await authApi.getProfile();
@@ -95,10 +103,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           } catch (error: any) {
             console.error('AuthContext: Failed to get profile during initialization:', error);
-            // Clear invalid auth state
-            authApi.logout();
-            if (isMounted) {
-              setUser(null);
+            // Only logout if it's a 401 error (invalid token)
+            if (error.message?.includes('Session expired') || error.response?.status === 401) {
+              console.log('AuthContext: Session expired, logging out');
+              authApi.logout();
+              if (isMounted) {
+                setUser(null);
+              }
+            } else {
+              console.log('AuthContext: Network error, keeping auth state for retry');
+              // Don't logout on network errors, just keep the current state
             }
           }
         } else {
