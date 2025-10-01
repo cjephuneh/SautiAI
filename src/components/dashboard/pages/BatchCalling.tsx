@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { apiConfig } from "@/config/api";
 import { 
   Phone,
   Play,
@@ -75,7 +76,7 @@ interface BatchCampaign {
 
 const batchCallsApi = {
   startBatchVoiceCampaign: async (campaign_name: string, agent_id: number, contact_ids: number[]) => {
-    const response = await axios.post("Call Centrelocalhost:5050/batch-calls/start", {
+    const response = await axios.post(`${apiConfig.baseUrl}/batch-calls/start`, {
       campaign_name,
       agent_id,
       contact_ids,
@@ -83,7 +84,7 @@ const batchCallsApi = {
     return response.data;
   },
   getCampaignStatus: async (campaign_id: number) => {
-    const response = await axios.get(`Call Centrelocalhost:5050/batch-calls/campaign/${campaign_id}/status`);
+    const response = await axios.get(`${apiConfig.baseUrl}/batch-calls/campaign/${campaign_id}/status`);
     return response.data;
   },
 };
