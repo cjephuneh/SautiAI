@@ -26,11 +26,19 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
-    // Redirect to dashboard if already authenticated (only once)
+    // Only redirect if user is on the login page and authenticated
+    // Don't redirect if they're already on a dashboard page
     if (isAuthenticated && !isLoading && !hasRedirectedRef.current && isMountedRef.current) {
-      hasRedirectedRef.current = true;
-      console.log('Login: Redirecting to dashboard because already authenticated');
-      navigate('/dashboard', { replace: true });
+      const currentPath = window.location.pathname;
+      const isOnLoginPage = currentPath === '/login';
+      
+      if (isOnLoginPage) {
+        hasRedirectedRef.current = true;
+        console.log('Login: Redirecting to dashboard because already authenticated');
+        navigate('/dashboard', { replace: true });
+      } else {
+        console.log('Login: User authenticated but not on login page, skipping redirect');
+      }
     }
   }, [isAuthenticated, isLoading, navigate]);
 

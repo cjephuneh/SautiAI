@@ -47,6 +47,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             navigate(savedPage, { replace: true });
           } else if (savedPage) {
             console.log('ProtectedRoute: Ignoring invalid session page:', savedPage);
+            // Clear invalid session data to prevent future loops
+            localStorage.removeItem('sautiai_session');
           }
         } catch (error) {
           console.error('ProtectedRoute: Failed to parse session data:', error);
