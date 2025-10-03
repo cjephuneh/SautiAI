@@ -761,48 +761,48 @@ export const authApi = {
     }
 
     const profilePromise = (async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
           console.error('getProfile: No access token found');
-          throw new Error('No access token found');
-        }
+        throw new Error('No access token found');
+      }
 
         console.log('getProfile: Fetching profile with token');
-        const response = await api.get('/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        console.log("getProfile: Profile data received:", response.data);
-        
-        // Store user ID from profile
-        if (response.data.id) {
-          localStorage.setItem('user_id', response.data.id.toString());
+      const response = await api.get('/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-        
-        return response.data;
-      } catch (error: any) {
+      });
+      
+        console.log("getProfile: Profile data received:", response.data);
+      
+      // Store user ID from profile
+      if (response.data.id) {
+        localStorage.setItem('user_id', response.data.id.toString());
+      }
+      
+      return response.data;
+    } catch (error: any) {
         console.error("getProfile: API error:", error);
-        
-        if (error.response?.status === 401) {
+      
+      if (error.response?.status === 401) {
           // Token is invalid, clear all auth data
           console.log('getProfile: 401 error, clearing auth data');
-          authApi.logout();
-          throw new Error("Session expired. Please login again.");
-        }
-        
-        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        authApi.logout();
+        throw new Error("Session expired. Please login again.");
+      }
+      
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
           console.error('getProfile: Network error, keeping auth state for retry');
-          throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
-        }
-        
-        throw error;
+        throw new Error(`Cannot connect to server. Please ensure the API server is running at ${API_BASE_URL}`);
+      }
+      
+      throw error;
       } finally {
         // Clear the promise after completion
         delete (authApi as any)._profilePromise;
-      }
+    }
     })();
 
     // Store the promise to prevent duplicate calls

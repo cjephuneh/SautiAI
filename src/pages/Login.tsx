@@ -39,7 +39,7 @@ const Login = () => {
       if (isOnLoginPage && !isOnDashboardPage) {
         hasRedirectedRef.current = true;
         console.log('Login: Redirecting to dashboard because already authenticated');
-        navigate('/dashboard', { replace: true });
+      navigate('/dashboard', { replace: true });
       } else {
         console.log('Login: User authenticated but not on login page, skipping redirect. Current path:', currentPath);
       }

@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [hasInitialized, setHasInitialized] = useState(false);
 
   const isAuthenticated = !!user;
-  
+
 
   const logout = useCallback(() => {
     authApi.logout();
@@ -130,9 +130,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (authApi.isAuthenticated()) {
           try {
-            const profile = await authApi.getProfile();
+          const profile = await authApi.getProfile();
             if (isMounted) {
-              setUser(profile);
+          setUser(profile);
               console.log('AuthContext: User profile loaded');
             }
           } catch (error: any) {
@@ -160,7 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } finally {
         if (isMounted) {
-          setIsLoading(false);
+        setIsLoading(false);
           console.log('AuthContext: Initialization complete');
         }
       }
