@@ -118,7 +118,7 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link to="/login">
+            <Link to="https://dashboard.sautiai.co.ke">
               <Button variant="ghost" className="text-gray-700 hover:text-blue-600 font-medium text-sm">
                 Sign In
               </Button>
@@ -207,7 +207,7 @@ const Navbar = () => {
               </div>
 
               <div className="flex flex-col gap-3 pt-6 px-4">
-                <Link to="/login">
+                <Link to="/dashboard.sautiai.co.ke">
                   <Button 
                     variant="ghost" 
                     className="text-gray-700 hover:text-blue-600 justify-start w-full"
