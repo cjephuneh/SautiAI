@@ -90,7 +90,7 @@ const Hero = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Button 
-                onClick={() => window.location.href = "/book-call"}
+                onClick={() => window.location.href = "https://dashboard.sautiai.co.ke/signup"}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2.5 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all"
               >
